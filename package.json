@@ -4,14 +4,23 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "NODE_ENV=test cypress open",
+    "test": "NODE_ENV=dev cypress open",
     "coverage": "nyc report --reporter=lcov && open coverage/lcov-report/index.html",
-    "test:coverage": "cypress run && nyc report --reporter=text"
+    "test:coverage": "cypress run && nyc report --reporter=text",
+    "test:dev": "CYPRESS_ENV=dev cypress open"
   },
   "nyc": {
-    "reporter": ["html", "text-summary", "text"],
-    "include": ["src/**/*"],
-    "exclude": ["src/**/*.test.js"],
+    "reporter": [
+      "html",
+      "text-summary",
+      "text"
+    ],
+    "include": [
+      "src/**/*"
+    ],
+    "exclude": [
+      "src/**/*.test.js"
+    ],
     "all": true
   },
   "repository": {
@@ -27,7 +36,8 @@
   "homepage": "https://github.com/oneilreyand/cashflowE2Etest#readme",
   "devDependencies": {
     "@cypress/code-coverage": "^3.13.6",
-    "cypress": "^13.15.2",
+    "cypress": "^13.16.0",
+    "cypress-mochawesome-reporter": "^3.8.2",
     "istanbul-lib-coverage": "^3.2.2",
     "nyc": "^17.1.0"
   }

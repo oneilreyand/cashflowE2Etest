@@ -1,0 +1,12 @@
+[
+  {
+    "name": "__Host-GAPS",
+    "value": "1:r7WG5cNpfZOG0dz7XlKcG0KYDQv70w:TDk0T5e3EZSIfiIK",
+    "path": "/",
+    "secure": true,
+    "hostOnly": true,
+    "httpOnly": true,
+    "expiry": 1769134328.861505,
+    "domain": "accounts.google.com"
+  }
+]

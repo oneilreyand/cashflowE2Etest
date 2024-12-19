@@ -1,0 +1,110 @@
+{
+  "stats": {
+    "suites": 1,
+    "tests": 1,
+    "passes": 1,
+    "pending": 0,
+    "failures": 0,
+    "start": "2024-12-19T02:12:07.348Z",
+    "end": "2024-12-19T02:12:19.662Z",
+    "duration": 12314,
+    "testsRegistered": 1,
+    "passPercent": 100,
+    "pendingPercent": 0,
+    "other": 0,
+    "hasOther": false,
+    "skipped": 0,
+    "hasSkipped": false
+  },
+  "results": [
+    {
+      "uuid": "1f22836b-114f-48f7-8852-6fc12c9e8960",
+      "title": "",
+      "fullFile": "cypress/e2e/AIM/AIM-Login-google.cy.js",
+      "file": "cypress/e2e/AIM/AIM-Login-google.cy.js",
+      "beforeHooks": [],
+      "afterHooks": [],
+      "tests": [],
+      "suites": [
+        {
+          "uuid": "403d8a69-d203-4766-afde-d97ba6f4c1cd",
+          "title": "AIM - LOGIN - GOOGLE",
+          "fullFile": "",
+          "file": "",
+          "beforeHooks": [],
+          "afterHooks": [],
+          "tests": [
+            {
+              "title": "should login to Google and save session",
+              "fullTitle": "AIM - LOGIN - GOOGLE should login to Google and save session",
+              "timedOut": null,
+              "duration": 10608,
+              "state": "passed",
+              "speed": "slow",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "cy.visit('https://accounts.google.com');\n// Masukkan email dan lanjutkan\ncy.get('input[type=\"email\"]').type('reyand.oneil@assist.id'); // Ganti dengan email Google Anda\ncy.get('#identifierNext').click();\n// Masukkan password dan lanjutkan\ncy.get('#password').should('be.visible').type('12345678'); // Ganti dengan password Google Anda\ncy.get('#passwordNext').click();\n// Tunggu hingga login selesai dan simpan sesi\ncy.wait(3000); // Tunggu beberapa detik hingga login selesai\ncy.getCookies().then(cookies => {\n  cy.writeFile('cypress/fixtures/google-session.json', cookies);\n});",
+              "err": {},
+              "uuid": "f7698546-4b79-45bc-a500-6c950c7c4829",
+              "parentUUID": "403d8a69-d203-4766-afde-d97ba6f4c1cd",
+              "isHook": false,
+              "skipped": false
+            }
+          ],
+          "suites": [],
+          "passes": [
+            "f7698546-4b79-45bc-a500-6c950c7c4829"
+          ],
+          "failures": [],
+          "pending": [],
+          "skipped": [],
+          "duration": 10608,
+          "root": false,
+          "rootEmpty": false,
+          "_timeout": 2000
+        }
+      ],
+      "passes": [],
+      "failures": [],
+      "pending": [],
+      "skipped": [],
+      "duration": 0,
+      "root": true,
+      "rootEmpty": true,
+      "_timeout": 2000
+    }
+  ],
+  "meta": {
+    "mocha": {
+      "version": "7.0.1"
+    },
+    "mochawesome": {
+      "options": {
+        "quiet": false,
+        "reportFilename": "mochawesome",
+        "saveHtml": false,
+        "saveJson": true,
+        "consoleReporter": "spec",
+        "useInlineDiffs": false,
+        "code": true
+      },
+      "version": "7.1.3"
+    },
+    "marge": {
+      "options": {
+        "charts": true,
+        "reportPageTitle": "custom-title",
+        "embeddedScreenshots": true,
+        "inlineAssets": true,
+        "saveAllAttempts": false,
+        "overwrite": false,
+        "html": false,
+        "json": true,
+        "reportDir": "cypress/reports/html/.jsons"
+      },
+      "version": "6.2.0"
+    }
+  }
+}
