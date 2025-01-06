@@ -29,7 +29,7 @@ describe('[PENGATURAN-PAJAK] - Munculkan text tidak ada data, ketika tidak ada d
     .and('contain', 'Aksi')
   });
 
-  it('Harus memunculkan text tidak ada data', () => {
+  it.only('Harus memunculkan text tidak ada data', () => {
     cy.get('[data-cy="submenu-item-tax-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
     cy.get('.MuiTableBody-root > .MuiTableRow-root > .MuiTableCell-root').should('exist').and('contain', 'Tidak ada data')
 

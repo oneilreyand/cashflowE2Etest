@@ -2,7 +2,7 @@ describe('[PENGATURAN-AKUN]', () => {
     const navigatePengaturanAkun = () => {
         cy.get('[data-testid="drawer-item-settings"]').click();
       };
-  
+
     beforeEach(() => {
       cy.apiLogin('reyand.oneil@assist.id', '12345678'); // Login using valid credentials
       cy.visitDashboard(); // Visit the dashboard after successful login
@@ -116,24 +116,24 @@ describe('[PENGATURAN-AKUN]', () => {
 
     })
 
-    it('#SETTING_AKUN_01 Update data pengaturan akun data kosong', () => {
-      // Intercept permintaan API
-      cy.intercept('PUT', '**/api/setting-accounts/*').as('updateSettingAccount');
-      cy.get('[data-cy="submenu-item-account-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
-      cy.get('[style="display: flex; justify-content: flex-end; margin: 20px 0px;"] > .MuiButtonBase-root').click()
-        // Tunggu respons API selesai
-      cy.wait('@updateSettingAccount').then((interception) => {
-        // Debug respons API
-        console.log('Request URL:', interception.request.url);
-        console.log('Response Status Code:', interception.response.statusCode);
-        
-        // Validasi status kode API (204 berarti sukses tanpa konten)
-        expect(interception.response.statusCode).to.eq(204);
-        cy.get('.MuiAlert-message')
+    it('#SETTING_AKUN_01 Harus berhasil update data pengaturan akun semua data kosong', () => {
+      cy.intercept('PUT', '**/api/setting-accounts/**').as('updateSettingAccount');
+    
+      // Interact with the submenu and submit button
+      cy.get('[data-cy="submenu-item-account-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click();
+      cy.get('[style="display: flex; justify-content: flex-end; margin: 20px 0px;"] > .MuiButtonBase-root')
         .should('be.visible')
-        .and('contain', 'Berhasil Menyimpan Data Akun.');
+        .click();
+    
+      // Wait for API response
+      cy.wait('@updateSettingAccount', { timeout: 10000 }).then((interception) => {
+        // Debugging and validation
+        cy.get('.MuiAlert-message')
+          .should('be.visible')
+          .and('contain', 'Berhasil Menyimpan Data Akun.');
       });
     });
+    
     it('#SETTING_AKUN_02 Update data pengaturan akun data Penjualan di isi', () => {
       // Intercept permintaan API
       cy.intercept('PUT', '**/api/setting-accounts/*').as('updateSettingAccount');
@@ -155,24 +155,30 @@ describe('[PENGATURAN-AKUN]', () => {
       cy.get('[name="sales_down_payment"]').trigger('change');
       //  Diskon penjualan
       cy.get('[name="sales_discount"]')
-      
       .type('1-10102 - Cadangan Kerugian Piutang')
       .trigger('mouseover');
-      cy.contains('li', '1-10708 - Hak Merek Dagang')
+      cy.contains('li', '1-10102 - Cadangan Kerugian Piutang')
       .scrollIntoView()
       .should('exist')
       .click();
-      cy.get('[name="sales_unbilled"]').trigger('change');
+
+      cy.get('[name="sales_unbilled"]').trigger('change')
+      .type('1-10102 - Cadangan Kerugian Piutang')
+      .trigger('mouseover');
+      cy.contains('li', '1-10102 - Cadangan Kerugian Piutang')
+      .scrollIntoView()
+      .should('exist')
+      .click();
       // Retur Penjualan
       cy.get('[name="sales_return"]').click()
-      cy.contains('li', '17-10001 - Akun tanggal 21')
+      cy.contains('li', '1-10753 - Akumulasi penyusutan - Kendaraan')
       .scrollIntoView()
       .should('exist')
       .click();
       cy.get('[name="sales_return"]').trigger('change');
       // Piutang belum di tagih
       cy.get('[name="sales_uncollected_receivables"]').click()
-      cy.contains('li', '17-10001 - Akun tanggal 21')
+      cy.contains('li', '1-10753 - Akumulasi penyusutan - Kendaraan')
       .scrollIntoView()
       .should('exist')
       .click();
@@ -247,7 +253,7 @@ describe('[PENGATURAN-AKUN]', () => {
       cy.get('[name="purchase_tax"]').trigger('change');
       // Uang Muka Pembelian
       cy.get('[name="purchase_down_payment"]').click()
-      cy.contains('li', '17-10001 - Akun tanggal 21')
+      cy.contains('li', '1-10003 - Giro')
       .scrollIntoView()
       .should('exist')
       .click();

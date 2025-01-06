@@ -192,7 +192,7 @@ describe("KONTAK - PELANGGAN ADD", () => {
         cy.get('#nama-helper-text').should('be.visible').and('contain', 'Nama Lengkap harus diisi')
     });
 
-    it.only("Add kontak pelanggan - Validasi email tidak sesuai format(setelah@ diksaih spasi)", () => {
+    it("Add kontak pelanggan - Validasi email tidak sesuai format(setelah@ diksaih spasi)", () => {
         cy.get('[data-cy="add-button"]').click()
         cy.get('#tipe_kontak').click()
         cy.contains('li', 'Pelanggan').click();
