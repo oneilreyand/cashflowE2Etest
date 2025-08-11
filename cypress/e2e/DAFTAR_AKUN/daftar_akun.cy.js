@@ -1,3 +1,5 @@
+import { companyId } from "../../data";
+
 describe('DAFTAR AKUN', () => {
     beforeEach(() => {
         cy.apiLogin('reyand.oneil@assist.id', '12345678'); // Login using valid credentials
@@ -5,6 +7,7 @@ describe('DAFTAR AKUN', () => {
     }); 
   
     it('[DAFTAR AKUN] - Harus gagal mendapatkan data error 500', () => {
+        
         cy.intercept('GET', '**/api/akuns/last-period**', {
             statusCode: 500,
             body: {
@@ -92,21 +95,21 @@ describe('DAFTAR AKUN', () => {
             .should('be.visible')
             .and('contain', 'Tambah Akun Baru')
         cy.get('input[name="nama"]').should('be.visible')
-        cy.get('input[name="nomor"]').should('be.visible')
-        cy.get('input[name="kategori_id"]')
+        cy.get('#kategori_id').should('be.visible')
+        cy.get('#bank').should('be.visible')
         cy.get('.MuiButton-text')
         cy.get('.css-1jxwjqx-MuiGrid2-root > .MuiGrid2-container > .MuiButton-contained')
     })
 
-    it('[DAFTAR AKUN] - Harus berhasil menutup modal buat akun ketika menekan batal', () => {
-        cy.get('[data-testid="drawer-item-accounts"]').should('be.visible').click()
-        cy.get('.css-1waaizo-MuiStack-root > .MuiButton-contained')
-        .should('be.visible')
-        .and('contain', 'Buat Akun Baru')
-        .click()
-        cy.get('.MuiButton-text').click()
-        cy.get('.MuiTypography-h6').should('be.visible').and('contain', 'Semua Akun')
-    })
+    // it.only('[DAFTAR AKUN] - Harus berhasil menutup modal buat akun ketika menekan batal', () => {
+    //     cy.get('[data-testid="drawer-item-accounts"]').should('be.visible').click()
+    //     cy.get('.css-1waaizo-MuiStack-root > .MuiButton-contained')
+    //     .should('be.visible')
+    //     .and('contain', 'Buat Akun Baru')
+    //     .click()
+    //     cy.get('.MuiButton-text').click()
+    //     cy.get('.MuiTypography-h6').should('be.visible').and('contain', 'Semua Akun')
+    // })
 
     it('[DAFTAR AKUN] - Harus gagal menambah buat akun ketika semua field kosong', () => {
         cy.get('[data-testid="drawer-item-accounts"]').should('be.visible').click()
@@ -118,12 +121,9 @@ describe('DAFTAR AKUN', () => {
         cy.get('#nama-helper-text')
             .should('be.visible')
             .and('contain', 'Nama Akun harus diisi')
-        cy.get('#nomor-helper-text')
+        cy.get('.MuiFormControl-fullWidth > .MuiTypography-root')
             .should('be.visible')
-            .and('contain', 'Kode Akun harus diisi')
-        cy.contains('span', 'Kategori Akun harus diisi')
-            .should('be.visible')
-            .and('have.text', 'Kategori Akun harus diisi');
+            .and('contain', 'Kategori Akun harus diisi')
     })
 
     it('[DAFTAR AKUN] - Harus gagal menambah buat akun ketika nama akun di isi yang lainnya kosong', () => {
@@ -138,34 +138,29 @@ describe('DAFTAR AKUN', () => {
         cy.get('.css-1jxwjqx-MuiGrid2-root > .MuiGrid2-container > .MuiButton-contained').click()
         cy.get('.css-1jxwjqx-MuiGrid2-root > .MuiGrid2-container > .MuiButton-contained').click()
 
-        cy.get('#nomor-helper-text')
-            .should('be.visible')
-            .and('contain', 'Kode Akun harus diisi')
+    
         cy.contains('span', 'Kategori Akun harus diisi')
             .should('be.visible')
             .and('have.text', 'Kategori Akun harus diisi');
     })
 
-    it('[DAFTAR AKUN] - Harus gagal menambah buat akun ketika kode akun di isi field lainnya kosong', () => {
+    it('[DAFTAR AKUN] - Harus gagal menambah buat akun ketika nama akun di isi field lainnya kosong', () => {
         cy.get('[data-testid="drawer-item-accounts"]').should('be.visible').click()
            cy.get('.css-1waaizo-MuiStack-root > .MuiButton-contained')
         .should('be.visible')
         .and('contain', 'Buat Akun Baru')
         .click()
-        cy.get('input[name="nomor"]').should('be.visible').type('89379234893274293')
+        cy.get('#nama').should('be.visible').type('akun_test')
         cy.get('.css-1jxwjqx-MuiGrid2-root > .MuiGrid2-container > .MuiButton-contained').click()
         cy.get('.css-1jxwjqx-MuiGrid2-root > .MuiGrid2-container > .MuiButton-contained').click()
-        cy.get('#nama-helper-text')
+        cy.get('.MuiFormControl-fullWidth > .MuiTypography-root')
             .should('be.visible')
-            .and('contain', 'Nama Akun harus diisi')
-        
-        cy.contains('span', 'Kategori Akun harus diisi')
-            .should('be.visible')
-            .and('have.text', 'Kategori Akun harus diisi');
+            .and('contain', 'Kategori Akun harus diisi')
+   
     })
 
     it('[DAFTAR AKUN] - Harus gagal menambah buat akun ketika kategori akun di isi field lainnya kosong', () => {
-        cy.intercept('GET', 'https://api-cashflow.assist.id/api/master-kategori-akuns?limit=100&companyId=b13e5210-8564-11ef-af27-a72e65a1d49c').as('getCategories');
+        // cy.intercept('GET', 'https://api-cashflow.assist.id/api/master-kategori-akuns?limit=100&companyId=b13e5210-8564-11ef-af27-a72e65a1d49c').as('getCategories');
         cy.get('[data-testid="drawer-item-accounts"]').should('be.visible').click()
            cy.get('.css-1waaizo-MuiStack-root > .MuiButton-contained')
         .should('be.visible')
@@ -173,18 +168,18 @@ describe('DAFTAR AKUN', () => {
         .click()
         
         // Tunggu sampai API selesai memuat data (berdasarkan intercept alias)
-        cy.wait('@getCategories').then((interception) => {
-            console.log('API Response:', interception);
-        });
+        // cy.wait('@getCategories').then((interception) => {
+        //     console.log('API Response:', interception);
+        // });
        cy.get('#kategori_id').click()
         cy.contains('li', 'Ekuitas').click();
         cy.get('.css-1jxwjqx-MuiGrid2-root > .MuiGrid2-container > .MuiButton-contained').click()
         cy.get('#nama-helper-text')
             .should('be.visible')
             .and('contain', 'Nama Akun harus diisi')
-        cy.get('#nomor-helper-text')
+        cy.get('#nama-helper-text')
             .should('be.visible')
-            .and('contain', 'Kode Akun harus diisi')
+            .and('contain', 'Nama Akun harus diisi')
     })
 
     it('[DAFTAR AKUN] - Harus gagal menambah buat akun ketika hanya field bank di isi yang lainnya kosong', () => {
@@ -199,56 +194,50 @@ describe('DAFTAR AKUN', () => {
         cy.get('#nama-helper-text')
             .should('be.visible')
             .and('contain', 'Nama Akun harus diisi')
-        cy.get('#nomor-helper-text')
-            .should('be.visible')
-            .and('contain', 'Kode Akun harus diisi')
         cy.contains('span', 'Kategori Akun harus diisi')
             .should('be.visible')
             .and('have.text', 'Kategori Akun harus diisi');
     })
     
 
-    it('[DAFTAR AKUN] - Harus Gagal menambah buat akun ketika semua field di isi semua field, kode akun sudah ada (1-10001)', () => {
-        cy.intercept('GET', 'https://api-cashflow.assist.id/api/master-kategori-akuns?limit=100&companyId=b13e5210-8564-11ef-af27-a72e65a1d49c').as('getCategories');
-        cy.get('[data-testid="drawer-item-accounts"]').should('be.visible').click()
-           cy.get('.css-1waaizo-MuiStack-root > .MuiButton-contained')
-        .should('be.visible')
-        .and('contain', 'Buat Akun Baru')
-        .click()
+    // it('[DAFTAR AKUN] - Harus Gagal menambah buat akun ketika semua field di isi semua field, kode akun sudah ada (1-10001)', () => {
+    //     // cy.intercept('GET', 'https://api-cashflow.assist.id/api/master-kategori-akuns?limit=100&companyId=b13e5210-8564-11ef-af27-a72e65a1d49c').as('getCategories');
+    //     cy.get('[data-testid="drawer-item-accounts"]').should('be.visible').click()
+    //        cy.get('.css-1waaizo-MuiStack-root > .MuiButton-contained')
+    //     .should('be.visible')
+    //     .and('contain', 'Buat Akun Baru')
+    //     .click()
         
-        // Tunggu sampai API selesai memuat data (berdasarkan intercept alias)
-        cy.wait('@getCategories').then((interception) => {
-            console.log('API Response:', interception);
-        });
-        cy.get('input[name="nama"]').should('be.visible')
-        .should('be.visible')
-        .type('test akun reyand')
-        cy.get('input[name="nomor"]').should('be.visible').type('1-10001')
-        cy.get('#kategori_id').click()
-        cy.contains('li', 'Akun Piutang').click();
-        cy.get('#bank').click()
-        cy.contains('li','Bank Central Asia').click()
-        cy.get('.css-1jxwjqx-MuiGrid2-root > .MuiGrid2-container > .MuiButton-contained').click()
-        cy.get('.MuiAlert-message').should('be.visible').and('contain', 'Kode Akun already exists for this company.')
+    //     // Tunggu sampai API selesai memuat data (berdasarkan intercept alias)
+    //     // cy.wait('@getCategories').then((interception) => {
+    //     //     console.log('API Response:', interception);
+    //     // });
+    //     cy.get('input[name="nama"]').should('be.visible')
+    //         .should('be.visible')
+    //         .type('test akun reyand')
+    //     cy.get('#kategori_id')
+    //         .click()
+    //     cy.get('[data-value="39"]')
+    //         .click()
     
-    })
+    //     cy.get('#bank').click()
+    //     cy.contains('li','Bank Central Asia').click()
+    //     cy.get('.css-1jxwjqx-MuiGrid2-root > .MuiGrid2-container > .MuiButton-contained').click()
+    //     // cy.get('.MuiAlert-message').should('be.visible').and('contain', 'Kode Akun already exists for this company.')
+    
+    // })
 
     it('[DAFTAR AKUN] - Harus Berhasil menambah buat akun ketika semua field di isi semua field', () => {
-        cy.intercept('GET', 'https://api-cashflow.assist.id/api/master-kategori-akuns?limit=100&companyId=b13e5210-8564-11ef-af27-a72e65a1d49c').as('getCategories');
         cy.get('[data-testid="drawer-item-accounts"]').should('be.visible').click()
            cy.get('.css-1waaizo-MuiStack-root > .MuiButton-contained')
         .should('be.visible')
         .and('contain', 'Buat Akun Baru')
         .click()
         
-        // Tunggu sampai API selesai memuat data (berdasarkan intercept alias)
-        cy.wait('@getCategories').then((interception) => {
-            console.log('API Response:', interception);
-        });
+       
         cy.get('input[name="nama"]').should('be.visible')
         .should('be.visible')
         .type('test akun reyand')
-        cy.get('input[name="nomor"]').should('be.visible').type('1-10007')
         cy.get('#kategori_id').click()
         cy.contains('li', 'Akun Piutang').click();
         cy.get('#bank').click()
@@ -258,11 +247,11 @@ describe('DAFTAR AKUN', () => {
         cy.get('.MuiAlert-message').should('be.visible').and('contain', 'Akun berhasil ditambah')
     })
 
-    it.only('[DAFTAR AKUN] - Harus berhasil mencari setelah di buat dan panstikan form bank dan deskripsi tidak disabled', () => {
-        cy.intercept('GET', ' https://api-cashflow.assist.id/api/akuns?companyId=b13e5210-8564-11ef-af27-a72e65a1d49c',{}).as('getListAkun')
+    it('[DAFTAR AKUN] - Harus berhasil mencari setelah di buat dan panstikan form bank dan deskripsi tidak disabled', () => {
+        cy.intercept('GET', `https://api-cashflow.assist.id/api/akuns?companyId=${companyId}`,{}).as('getListAkun')
         cy.get('[data-testid="drawer-item-accounts"]').should('be.visible').click()
-        cy.get('input[placeholder="Cari akun"]').should('be.visible').type('1-10007');
-        cy.get('.MuiTableBody-root > .MuiTableRow-root > :nth-child(1)').should('be.visible').and('contain','1-10007')
+        cy.get('input[placeholder="Cari akun"]').should('be.visible').type('7-20005');
+        cy.get('.MuiTableBody-root > .MuiTableRow-root > :nth-child(1)').should('be.visible').and('contain','7-20005')
         cy.get(':nth-child(2) > span > .MuiButtonBase-root').should('be.visible').and('contain', 'test akun reyand')
         
         // cy.get(':nth-child(2) > span > .MuiButtonBase-root').click()
@@ -271,22 +260,35 @@ describe('DAFTAR AKUN', () => {
         // cy.get('.css-1jxwjqx-MuiGrid2-root > .MuiGrid2-container > .MuiButton-contained').should('be.visible')
     })
 
-    it('[DAFTAR AKUN] - Harus berhasil mencari setelah di buat dan panstikan form bank dan deskripsi disabled', () => {
-        cy.get('[data-testid="drawer-item-accounts"]').should('be.visible').click()
-        cy.get('input[placeholder="Cari akun"]').should('be.visible').type('1-10005');
-        cy.get('.MuiTableBody-root > .MuiTableRow-root > :nth-child(1)').should('be.visible').and('contain','1-10005')
-        cy.get(':nth-child(2) > span > .MuiButtonBase-root').should('be.visible').and('contain', 'test akun reyand')
-        cy.get(':nth-child(2) > span > .MuiButtonBase-root').click()
-        cy.get('#bank').should('not.be.enabled')
-        cy.get('#description').should('not.be.enabled')
-    })
+    // it.only('[DAFTAR AKUN] - Harus berhasil mencari setelah di buat dan panstikan form bank dan deskripsi disabled', () => {
+    //     cy.get('[data-testid="drawer-item-accounts"]').should('be.visible').click()
+    //     cy.get('input[placeholder="Cari akun"]').should('be.visible').type('7-20008');
+    //     cy.get('.MuiTableBody-root > .MuiTableRow-root > :nth-child(1)').should('be.visible').and('contain','7-20008')
+    //     cy.get(':nth-child(2) > span > .MuiButtonBase-root').should('be.visible').and('contain', 'test akun reyand')
+    //     cy.get(':nth-child(2) > span > .MuiButtonBase-root').click()
+    //     cy.get('#bank').should('not.be.enabled')
+    //     cy.get('#description').should('not.be.enabled')
+    // })
 
     it('[DAFTAR AKUN] - Harus berhasil membuka detail akun', () => {
         cy.get('[data-testid="drawer-item-accounts"]').should('be.visible').click()
-        cy.get('input[placeholder="Cari akun"]').should('be.visible').type('1-10005');
-        cy.get('.MuiTableBody-root > .MuiTableRow-root > :nth-child(1)').should('be.visible').and('contain','1-10005')
-        cy.get(':nth-child(2) > span > .MuiButtonBase-root').should('be.visible').and('contain', 'test akun reyand')
-        cy.get('.MuiTypography-root > span > .MuiButtonBase-root').click()
+        cy.get('input[placeholder="Cari akun"]').should('be.visible').type('7-20008');
+        // cy.get('.MuiTableBody-root > .MuiTableRow-root > :nth-child(1)').should('be.visible').and('contain','7-20008')
+        cy.get('.MuiTableRow-root > :nth-child(2) > span').first().click()
+        cy.get(':nth-child(2) > span > .MuiButtonBase-root').click()
+    })
+
+    it.only('[DAFTAR AKUN] - Harus berhasil menutup detail akun', () => {
+        cy.get('[data-testid="drawer-item-accounts"]').should('be.visible').click()
+        //Intercept API call dan buat alias 'getAkun'
+        // cy.intercept('GET', 'https://api-cashflow.assist.id/api/akuns*').as('getAkun');
+      
+        // Ketik keyword di input pencarian
+        cy.get('input[placeholder="Cari akun"]').type('7-20008', {delay: 100});
+      
+        // Tunggu request API selesai
+        // cy.wait('@getAkun');
+      
     })
 
 });

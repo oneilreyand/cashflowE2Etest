@@ -1,4 +1,3 @@
-
 describe('AIM-LOGIN-EMAIL', () => {
     beforeEach(() => {
         cy.visit('/')

@@ -17,6 +17,9 @@
 import './commands'
 import "@cypress/code-coverage/support";
 import 'cypress-mochawesome-reporter/register';
+import 'wick-a11y';
+import 'cypress-diff';
+
 
 // Alternatively you can use CommonJS syntax:
 // require('./commands')

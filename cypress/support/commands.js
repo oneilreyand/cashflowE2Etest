@@ -24,7 +24,6 @@
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
 
-
 Cypress.Commands.add('handleUncaughtExceptions', () => {
     Cypress.on('uncaught:exception', (err, runnable) => {
         // Prevent Cypress from failing the test on uncaught exceptions
@@ -60,6 +59,8 @@ Cypress.Commands.add('visitDashboard', () => {
             win.localStorage.setItem('token', window.localStorage.getItem('token'));
         }
     });
+    cy.get('[data-testid="listCompany-dropdown"]').click()
+    cy.get('[data-testid="listCompany-item-e1548780-f7fb-11ef-a979-f7e12916176b"]').click()
 });
 
 Cypress.Commands.add('verifyVisibility', (selector, text = '', timeout = 10000) => {
@@ -67,13 +68,13 @@ Cypress.Commands.add('verifyVisibility', (selector, text = '', timeout = 10000) 
     if (text) {
       cy.get(selector).should('contain', text);
     }
-  });
+});
   
   Cypress.Commands.add('verifyPageContent', (selector, text, timeout) => {
     cy.get(selector, { timeout }).should('be.visible').and('contain', text);
-  });
+});
 
   Cypress.Commands.add('navigateToKontak', (selector, text, timeout) => {
     cy.get('[data-testid="drawer-item-contacts"]').click();
     cy.url().should('eq', 'https://cashflow.assist.id/admin/contacts');
-  });
+});

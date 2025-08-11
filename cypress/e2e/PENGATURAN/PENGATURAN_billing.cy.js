@@ -13,4 +13,3 @@ describe('[PENGATURAN-BILLING] - Membuka halaman Pengaturan Billing dan melihat 
         cy.get('[data-cy="submenu-item-billing-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
     });
 });
-

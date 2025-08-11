@@ -1,4 +1,5 @@
 describe("KONTAK - PELANGGAN ADD", () => {
+    const companyId = '84b460f0-ccb7-11ef-a26c-5bf96a0f193f'
     const navigateToKontak = () => {
         cy.get('[data-testid="drawer-item-contacts"]').click();
         // cy.url().should('eq', 'https://cashflow.assist.id/admin/contacts');
@@ -12,7 +13,7 @@ describe("KONTAK - PELANGGAN ADD", () => {
 
     it('harus memunculkan page kontak - pelanggan', () => {
         // Menunggu request API untuk memuat data
-        cy.intercept('GET', '/api/profile/me?companyId=b13e5210-8564-11ef-af27-a72e65a1d49c').as('getProfile');
+        cy.intercept('GET', `/api/profile/me?companyId=${companyId}`).as('getProfile');
     
         // Menggunakan baseUrl dari konfigurasi Cypress
         const url = `${Cypress.config('baseUrl')}/admin/contacts`;
@@ -699,14 +700,14 @@ describe("KONTAK - PELANGGAN ADD", () => {
         cy.get('#no_fax-helper-text').should('be.visible').and('contain','Nomor Fax harus diisi')
     });
 
-    it("Add kontak pelanggan degan mengisi semua field yang ada", () => {
+    it.only("Add kontak pelanggan degan mengisi semua field yang ada", () => {
         // Intercept API yang memuat data akun
-        cy.intercept('GET', '/api/profile/me?companyId=b13e5210-8564-11ef-af27-a72e65a1d49c').as('getProfile');
+        cy.intercept('GET', `/api/profile/me?companyId=${companyId}`).as('getProfile');
         const url = `${Cypress.config('baseUrl')}/admin/contacts`;
 
     
         // Klik tombol untuk memulai proses tambah kontak pelanggan
-        cy.get('[data-cy="add-button"]').click();
+        cy.get('.css-1waaizo-MuiStack-root > .MuiButtonBase-root').click();
         
          // Tunggu sampai data dari API `list2` terpopulate
         cy.wait('@getProfile'); // Tunggu hingga API selesai
@@ -721,7 +722,7 @@ describe("KONTAK - PELANGGAN ADD", () => {
         cy.get('#fk_grup').click();
     
         // Select the option
-        cy.get('[data-value="117d0802-a578-11ef-9665-85c3a0b6b870"]')
+        cy.get('[data-value="47fce8e0-e29b-11ef-86ad-2fd0b838b28d"]')
             .should('be.visible')
             .click();
     
@@ -789,8 +790,8 @@ describe("KONTAK - PELANGGAN ADD", () => {
 
     it("Tambah grup kontak", () => {
         // Intercept API yang memuat data akun
-        cy.intercept('GET', '/api/profile/me?companyId=b13e5210-8564-11ef-af27-a72e65a1d49c').as('getProfile');
-        cy.intercept('GET', '/api/akuns/list2?companyId=b13e5210-8564-11ef-af27-a72e65a1d49c').as('getList2'); // Intercept API list2
+        cy.intercept('GET', `/api/profile/me?companyId=${companyId}`).as('getProfile');
+        cy.intercept('GET', `/api/akuns/list2?companyId=${companyId}`).as('getList2'); // Intercept API list2
         const url = `${Cypress.config('baseUrl')}/admin/contacts`;
     
         // Klik tombol untuk memulai proses tambah kontak pelanggan
@@ -827,8 +828,8 @@ describe("KONTAK - PELANGGAN ADD", () => {
 
     it("Tambah grup kontak dengan nama yang sama", () => {
         // Intercept API yang memuat data akun
-        cy.intercept('GET', '/api/profile/me?companyId=b13e5210-8564-11ef-af27-a72e65a1d49c').as('getProfile');
-        cy.intercept('GET', '/api/akuns/list2?companyId=b13e5210-8564-11ef-af27-a72e65a1d49c').as('getList2'); // Intercept API list2
+        cy.intercept('GET', `/api/profile/me?companyId=${companyId}`).as('getProfile');
+        cy.intercept('GET', `/api/akuns/list2?companyId=${companyId}`).as('getList2'); // Intercept API list2
         const url = `${Cypress.config('baseUrl')}/admin/contacts`;
     
         // Klik tombol untuk memulai proses tambah kontak pelanggan
@@ -865,8 +866,8 @@ describe("KONTAK - PELANGGAN ADD", () => {
 
     it("Batal tambah grup kontak", () => {
         // Intercept API yang memuat data akun
-        cy.intercept('GET', '/api/profile/me?companyId=b13e5210-8564-11ef-af27-a72e65a1d49c').as('getProfile');
-        cy.intercept('GET', '/api/akuns/list2?companyId=b13e5210-8564-11ef-af27-a72e65a1d49c').as('getList2'); // Intercept API list2
+        cy.intercept('GET', `/api/profile/me?companyId=${companyId}`).as('getProfile');
+        cy.intercept('GET', `/api/akuns/list2?companyId=${companyId}`).as('getList2'); // Intercept API list2
         const url = `${Cypress.config('baseUrl')}/admin/contacts`;
     
         // Klik tombol untuk memulai proses tambah kontak pelanggan
@@ -889,7 +890,7 @@ describe("KONTAK - PELANGGAN ADD", () => {
 
     it("Add kontak pelanggan degan kondisi email lebih dari 1 (3)", () => {
             // Intercept API yang memuat data akun
-            // cy.intercept('GET', '/api/profile/me?companyId=b13e5210-8564-11ef-af27-a72e65a1d49c').as('getProfile');
+            // cy.intercept('GET', '/api/profile/me?companyId=companyId').as('getProfile');
             // const url = `${Cypress.config('baseUrl')}/admin/contacts`;
     
         

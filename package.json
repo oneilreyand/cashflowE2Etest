@@ -36,9 +36,11 @@
   "homepage": "https://github.com/oneilreyand/cashflowE2Etest#readme",
   "devDependencies": {
     "@cypress/code-coverage": "^3.13.6",
-    "cypress": "^13.16.0",
+    "cypress": "^13.17.0",
+    "cypress-diff": "^0.0.6",
     "cypress-mochawesome-reporter": "^3.8.2",
     "istanbul-lib-coverage": "^3.2.2",
-    "nyc": "^17.1.0"
+    "nyc": "^17.1.0",
+    "wick-a11y": "^1.4.0"
   }
 }
