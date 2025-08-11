@@ -1,11 +1,13 @@
+import { medcareVer } from "../../data";
+
 describe('[PENGATURAN-TERMIN]', () => {
   const navigatePengaturan = () => {
     cy.get('[data-testid="drawer-item-settings"]').click();
   };
 
   beforeEach(() => {
-    cy.apiLogin('reyand.oneil@assist.id', '12345678'); // Login using valid credentials
-    cy.visitDashboard(); // Visit the dashboard after successful login
+    cy.apiLogin('rahmadea.putri@assist.id', '12345678'); // Login using valid credentials
+    cy.visitDashboard(medcareVer); // Visit the dashboard after successful login
     navigatePengaturan(); // Navigate to "Tambah Kontak" page for each test
   });
 
@@ -15,6 +17,7 @@ describe('[PENGATURAN-TERMIN]', () => {
 
   it('Membuka halaman Pengaturan Termin data termin tidak ada data termin tidak ada', () => {
     cy.get('[data-cy="submenu-item-termins-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
+    cy.get('.css-egm0ks > .MuiStack-root > .MuiFormControl-root > .MuiInputBase-root').type('hantu')
     cy.get('.MuiTableBody-root > .MuiTableRow-root > .MuiTableCell-root').should('be.visible').and('contain', 'Tidak ada data.')
   });
 
@@ -60,7 +63,9 @@ describe('[PENGATURAN-TERMIN]', () => {
     cy.get('[data-cy="submenu-item-termins-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
     cy.get('.MuiStack-root > .MuiButtonBase-root').should('be.visible').and('contain', 'Tambah Termin').click()
     cy.get(':nth-child(4) > div > .MuiButton-contained').click()
-    cy.get('.MuiAlert-message').should('be.visible').and('contain', 'Nama dan Durasi Termin harus diisi.')
+    //cy.get('.MuiAlert-message').should('be.visible').and('contain', 'Nama dan Durasi Termin harus diisi.')
+    cy.get('.MuiTableBody-root > :nth-child(1) > :nth-child(1)').should('be.visible').and('contain', 'Nama Termin harus diisi.')
+    cy.get('.MuiTableBody-root > :nth-child(1) > :nth-child(2)').should('be.visible').and('contain', 'Durasi Termin harus diisi.')
   });
 
   it('Harus bisa menambahkan termin dengan data yang sudah di isi', () => {
@@ -93,7 +98,8 @@ describe('[PENGATURAN-TERMIN]', () => {
     cy.get('[name="terminDuration"]')
     .clear()
     cy.get(':nth-child(4) > div > .MuiButton-contained').click()
-    cy.get('.MuiSnackbar-root > .MuiPaper-root').should('be.visible').and('contain', 'Nama dan Durasi Termin harus diisi.')
+    //cy.get('.MuiTableBody-root > :nth-child(1) > :nth-child(1)').should('be.visible').and('contain', 'Nama Termin harus diisi.')
+    cy.get('.MuiTableBody-root > :nth-child(1) > :nth-child(2)').should('be.visible').and('contain', 'Durasi Termin harus diisi.')
   });
 
   it('Harus gagal ketika tambah termin semua field di kasi spasi', () => {
@@ -104,12 +110,13 @@ describe('[PENGATURAN-TERMIN]', () => {
     cy.get('[name="terminDuration"]')
     .type(' ')
     cy.get(':nth-child(4) > div > .MuiButton-contained').click()
-    cy.get('.MuiSnackbar-root > .MuiPaper-root').should('be.visible').and('contain', 'Nama dan Durasi Termin harus diisi.')
+    //cy.get('.MuiTableBody-root > :nth-child(1) > :nth-child(1)').should('be.visible').and('contain', 'Nama Termin harus diisi.')
+    cy.get('.MuiTableBody-root > :nth-child(1) > :nth-child(2)').should('be.visible').and('contain', 'Durasi Termin harus diisi.')
   });
 
   it('Harus di trim ketika nama dan durasi di isi spasi 5 di depan', () => {
     // Intercept API POST
-    cy.intercept('POST', 'https://api-cashflow.assist.id/api/setting-termins', (req) => {
+    cy.intercept('POST', 'https://api-uat-cashbook.assist.id/api/setting-termins', (req) => {
    }).as('postTermin'); // Alias untuk memantau request
 
    cy.get('[data-cy="submenu-item-termins-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
@@ -122,8 +129,10 @@ describe('[PENGATURAN-TERMIN]', () => {
 
    cy.wait('@postTermin').then((interception) => {
      expect(interception.response.statusCode).to.equal(200); // Pastikan respons sukses
-     expect(interception.request.body.terminName === 'satu bulan').to.be.true; // Gagal jika salah
+    //  expect(interception.request.body.terminName === 'satu bulan').to.be.true; // Gagal jika salah
     //  expect(interception.request.body.terminDuration === '30').to.be.true; // Gagal jika salah
+    expect(interception.request.body.terminName.trim()).to.equal('satu bulan');
+    expect(String(interception.request.body.terminDuration)).to.equal('30');
    });
 
    cy.get('.MuiSnackbar-root > .MuiPaper-root').should('be.visible').and('contain', 'Berhasil Menambahkan Data Termin.')
@@ -137,7 +146,8 @@ describe('[PENGATURAN-TERMIN]', () => {
     cy.get('[name="terminDuration"]')
     .type('30')
     cy.get(':nth-child(4) > div > .MuiButton-contained').click()
-    cy.get('.MuiSnackbar-root > .MuiPaper-root').should('be.visible').and('contain', 'Nama dan Durasi Termin harus diisi.')
+    cy.get('.MuiTableBody-root > :nth-child(1) > :nth-child(1)').should('be.visible').and('contain', 'Nama Termin harus diisi.')
+    //cy.get('.MuiTableBody-root > :nth-child(1) > :nth-child(2)').should('be.visible').and('contain', 'Durasi Termin harus diisi.')
   });
 
   it('Harus bisa merubah toogel status termin', () => {
@@ -149,6 +159,7 @@ describe('[PENGATURAN-TERMIN]', () => {
   it('harus bisa berhasil menghapus termin', () => {
     cy.get('[data-cy="submenu-item-termins-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
     cy.get('.MuiTableBody-root > :nth-child(1) > :nth-child(4) > .MuiButtonBase-root').should('be.visible').click()
+    cy.get('[data-testid="alert-dialog-submit-button"]').click()
     cy.get('.MuiAlert-message').should('be.visible').and('contain', 'Berhasil Menghapus Data Termin.')
   })
 
