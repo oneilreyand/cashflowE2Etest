@@ -60,10 +60,10 @@ describe("PENJUALAN", () => {
   // Tunggu request API asli
   cy.wait("@getPenjualan").then(({ response }) => {
     expect(response.statusCode).to.eq(200);
-    const apiData = response.body.response;
+    const apiData = response.body.results;
     console.log(apiData)
     // Pastikan jumlah row tabel sama dengan data API
-    cy.get("table tbody tr").should("have.length", apiData.body.results.length);
+    cy.get("table tbody tr").should("have.length", apiData.length);
 
     cy.get("table tbody tr").each(($row, index) => {
       const rowData = apiData[index];
