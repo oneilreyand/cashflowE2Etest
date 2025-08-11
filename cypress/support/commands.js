@@ -52,16 +52,18 @@ Cypress.Commands.add('apiLogin', (email, password) => {
     });
 });
 
-Cypress.Commands.add('visitDashboard', () => {
+Cypress.Commands.add('visitDashboard', (nameCompany) => {
     cy.visit('/admin/dashboard', {
         onBeforeLoad(win) {
-            // Inject token sebelum halaman dimuat jika aplikasi membacanya dari localStorage
-            win.localStorage.setItem('token', window.localStorage.getItem('token'));
+            const token = window.localStorage.getItem('token'); // Ambil dari Cypress context
+            win.localStorage.setItem('token', token); // Set ke browser context
         }
     });
-    cy.get('[data-testid="listCompany-dropdown"]').click()
-    cy.get('[data-testid="listCompany-item-e1548780-f7fb-11ef-a979-f7e12916176b"]').click()
+
+    cy.get('[data-testid="listCompany-dropdown"]').click();
+    cy.get(`[data-testid="listCompany-item-${nameCompany}"]`).click();
 });
+
 
 Cypress.Commands.add('verifyVisibility', (selector, text = '', timeout = 10000) => {
     cy.get(selector, { timeout }).should('be.visible');
@@ -78,3 +80,8 @@ Cypress.Commands.add('verifyVisibility', (selector, text = '', timeout = 10000) 
     cy.get('[data-testid="drawer-item-contacts"]').click();
     cy.url().should('eq', 'https://uat-cashbook.assist.id/admin/contacts');
 });
+
+  Cypress.Commands.add('navigateToPenjualan',(selector, text, timeout) => {
+    cy.get('[data-testid="drawer-item-sales"]').click();
+    cy.url().should('eq', 'https://uat-cashbook.assist.id/admin/sales')
+})
