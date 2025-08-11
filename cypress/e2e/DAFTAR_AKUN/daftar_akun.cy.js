@@ -2,7 +2,7 @@ import { companyId } from "../../data";
 
 describe('DAFTAR AKUN', () => {
     beforeEach(() => {
-        cy.apiLogin('reyand.oneil@assist.id', '12345678'); // Login using valid credentials
+        cy.apiLogin('erni.yulianti@assist.id', '12345678'); // Login using valid credentials
         cy.visitDashboard(); // Visit the dashboard after successful login
     }); 
   

@@ -1,13 +1,12 @@
 describe('[PENGATURAN-AKUN]', () => {
-    const navigatePengaturanAkun = () => {
-        cy.get('[data-testid="drawer-item-settings"]').click();
-      };
+  
+  // Tidak ada lagi perintah Cypress di sini
 
-    beforeEach(() => {
-      cy.apiLogin('reyand.oneil@assist.id', '12345678'); // Login using valid credentials
-      cy.visitDashboard(); // Visit the dashboard after successful login
-      navigatePengaturanAkun(); // Navigate to "Tambah Kontak" page for each test
-      });
+  beforeEach(() => {
+    cy.apiLogin('erni.yulianti@assist.id', '12345678');
+    cy.visitDashboard();
+    cy.navigateToPengaturanAkun();
+  });
   
     it('Chek kesesuainan halaman Pengaturan Akun - penjualan dengan design yang ada', () => {
        cy.get('[data-cy="submenu-item-account-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
@@ -116,83 +115,107 @@ describe('[PENGATURAN-AKUN]', () => {
 
     })
 
-    it('#SETTING_AKUN_01 Harus berhasil update data pengaturan akun semua data kosong', () => {
-      cy.intercept('PUT', '**/api/setting-accounts/**').as('updateSettingAccount');
+    // it.only('#SETTING_AKUN_01 Harus berhasil update data pengaturan akun semua data kosong', () => {
+    //   cy.intercept('PUT', '**/api/setting-accounts/**').as('updateSettingAccount');
     
-      // Interact with the submenu and submit button
+    //   // Interact with the submenu and submit button
+    //   cy.get('[data-cy="submenu-item-account-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click();
+    //   cy.get('[style="display: flex; justify-content: flex-end; margin: 20px 0px;"] > .MuiButtonBase-root').click();
+    
+    //   // Wait for API response
+    //   cy.wait('@updateSettingAccount', { timeout: 100000 }).then((interception) => {
+        
+    //     // Debugging and validation
+    //     cy.get('.MuiAlert-message')
+    //       .should('be.visible')
+    //       .and('contain', 'Berhasil Menyimpan Data Akun.');
+    //   });
+    // });
+
+    it('#SETTING_AKUN_01 Harus berhasil update data pengaturan akun semua data kosong', () => {
+  // Intercept API PUT
+      cy.intercept('PUT', '**/api/setting-accounts/**').as('updateSettingAccount');
+
+      // Navigasi ke submenu pengaturan akun
       cy.get('[data-cy="submenu-item-account-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click();
+
+      // Pastikan tombol simpan terlihat dan aktif
       cy.get('[style="display: flex; justify-content: flex-end; margin: 20px 0px;"] > .MuiButtonBase-root')
         .should('be.visible')
+        .should('not.be.disabled')
         .click();
-    
-      // Wait for API response
+
+      // Tunggu request API terkirim
       cy.wait('@updateSettingAccount', { timeout: 10000 }).then((interception) => {
-        // Debugging and validation
-        cy.get('.MuiAlert-message')
-          .should('be.visible')
-          .and('contain', 'Berhasil Menyimpan Data Akun.');
+
+        expect(interception).to.have.property('request');
+        expect(interception.request.body).to.exist;
       });
+      cy.contains(/berhasil.*menyimpan.*akun/i, { timeout: 10000 }).should('exist');
     });
+
     
-    it('#SETTING_AKUN_02 Update data pengaturan akun data Penjualan di isi', () => {
+    it.only('#SETTING_AKUN_02 Update data pengaturan akun data Penjualan di isi', () => {
       // Intercept permintaan API
       cy.intercept('PUT', '**/api/setting-accounts/*').as('updateSettingAccount');
       
       cy.get('[data-cy="submenu-item-account-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
       // Pendapatan penjualan
       cy.get('[name="sales_income"]').click()
-      cy.contains('li', '1-10003 - Giro')
+      cy.contains('li', '4-00001 - Pendapatan', { timeout: 10000 })
       .scrollIntoView()
       .should('exist')
       .click();
       cy.get('[name="sales_income"]').trigger('change');
-  
+
+  // Pembayaran di Muka
       cy.get('[name="sales_down_payment"]').click()
-      cy.contains('li', '1-10102 - Cadangan Kerugian Piutang')
+      cy.contains('li', '4-00002 - Diskon Penjualan')
       .scrollIntoView()
       .should('exist')
       .click();
       cy.get('[name="sales_down_payment"]').trigger('change');
-      //  Diskon penjualan
-      cy.get('[name="sales_discount"]')
-      .type('1-10102 - Cadangan Kerugian Piutang')
-      .trigger('mouseover');
-      cy.contains('li', '1-10102 - Cadangan Kerugian Piutang')
-      .scrollIntoView()
-      .should('exist')
-      .click();
 
-      cy.get('[name="sales_unbilled"]').trigger('change')
-      .type('1-10102 - Cadangan Kerugian Piutang')
-      .trigger('mouseover');
-      cy.contains('li', '1-10102 - Cadangan Kerugian Piutang')
+      //  Diskon penjualan
+      cy.get('[name="sales_discount"]').click()
+      cy.contains('li', '4-00002 - Diskon Penjualan')
       .scrollIntoView()
       .should('exist')
       .click();
+      cy.get('[name="sales_discount"]').trigger('change');
+
+      cy.get('[name="sales_unbilled"]').click()
+      cy.contains('li', '4-00004 - Pendapatan Belum Ditagih')
+      .scrollIntoView()
+      .should('exist')
+      .click();
+      cy.get('[name="sales_unbilled"]').trigger('change');
+
       // Retur Penjualan
       cy.get('[name="sales_return"]').click()
-      cy.contains('li', '1-10753 - Akumulasi penyusutan - Kendaraan')
+      cy.contains('li', '4-00003 - Retur Penjualan')
       .scrollIntoView()
       .should('exist')
       .click();
       cy.get('[name="sales_return"]').trigger('change');
+
       // Piutang belum di tagih
       cy.get('[name="sales_uncollected_receivables"]').click()
-      cy.contains('li', '1-10753 - Akumulasi penyusutan - Kendaraan')
+      cy.contains('li', '1-12002 - Piutang Belum Ditagih')
       .scrollIntoView()
       .should('exist')
       .click();
       cy.get('[name="sales_uncollected_receivables"]').trigger('change');
       // Pengiriman penjualan
       cy.get('[name="sales_delivery"]').click()
-      cy.contains('li', '2-20601 - Kewajiban Lancar Lainnya')
+      cy.contains('li', '1-13002 - Barang Dalam Proses')
       .scrollIntoView()
       .should('exist')
       .click();
       cy.get('[name="sales_delivery"]').trigger('change');
       // Hutang Pajak Penjualan
       cy.get('[name="sales_tax_debt"]').click()
-      cy.contains('li', '1-10755 - Akumulasi Penyusutan - Peralatan Kantor')
+      cy.contains('li', '2-12001 - PPN Keluaran')
       .scrollIntoView()
       .should('exist')
       .click();

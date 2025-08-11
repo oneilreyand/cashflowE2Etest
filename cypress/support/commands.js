@@ -60,7 +60,7 @@ Cypress.Commands.add('visitDashboard', () => {
         }
     });
     cy.get('[data-testid="listCompany-dropdown"]').click()
-    cy.get('[data-testid="listCompany-item-e1548780-f7fb-11ef-a979-f7e12916176b"]').click()
+    cy.get('[data-testid="listCompany-item-ab877fe0-45d5-11f0-ba0e-5d65d0a0e647"]').click();
 });
 
 Cypress.Commands.add('verifyVisibility', (selector, text = '', timeout = 10000) => {
@@ -77,4 +77,10 @@ Cypress.Commands.add('verifyVisibility', (selector, text = '', timeout = 10000) 
   Cypress.Commands.add('navigateToKontak', (selector, text, timeout) => {
     cy.get('[data-testid="drawer-item-contacts"]').click();
     cy.url().should('eq', 'https://uat-cashbook.assist.id/admin/contacts');
+});
+
+Cypress.Commands.add('navigateToPengaturanAkun', () => {
+    cy.get('[data-testid="drawer-item-settings"] > .MuiListItemText-root > .MuiTypography-root').click();
+    cy.get('[data-cy="submenu-item-account-setting"] > [data-cy="list-item-button-sub-menu-setting"] > [data-cy="list-item-text-sub-menu-setting"] > .MuiTypography-root').click();
+    cy.url().should('include', '/setting');
 });
