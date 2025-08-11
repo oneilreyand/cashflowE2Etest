@@ -34,7 +34,7 @@ Cypress.Commands.add('handleUncaughtExceptions', () => {
 Cypress.Commands.add('apiLogin', (email, password) => {
     cy.request({
         method: 'POST',
-        url: 'https://api-cashflow.assist.id/api/login', // Pastikan ini URL API login yang benar
+        url: 'https://api-uat-cashbook.assist.id/api/login', // Pastikan ini URL API login yang benar
         headers: {
             'Content-Type': 'application/json'
         },
@@ -76,5 +76,5 @@ Cypress.Commands.add('verifyVisibility', (selector, text = '', timeout = 10000) 
 
   Cypress.Commands.add('navigateToKontak', (selector, text, timeout) => {
     cy.get('[data-testid="drawer-item-contacts"]').click();
-    cy.url().should('eq', 'https://cashflow.assist.id/admin/contacts');
+    cy.url().should('eq', 'https://uat-cashbook.assist.id/admin/contacts');
 });
