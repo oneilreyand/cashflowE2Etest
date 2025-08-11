@@ -150,12 +150,13 @@ describe('[PENGATURAN-AKUN]', () => {
 
         expect(interception).to.have.property('request');
         expect(interception.request.body).to.exist;
+        expect(interception.response.statusCode).to.be.oneOf([200, 201, 204]);
       });
-      cy.contains(/berhasil.*menyimpan.*akun/i, { timeout: 10000 }).should('exist');
+      cy.contains(/berhasil.*menyimpan.*akun/i, { timeout: 10000 }).should('be.visible');
     });
 
     
-    it.only('#SETTING_AKUN_02 Update data pengaturan akun data Penjualan di isi', () => {
+    it('#SETTING_AKUN_02 Update data pengaturan akun data Penjualan di isi', () => {
       // Intercept permintaan API
       cy.intercept('PUT', '**/api/setting-accounts/*').as('updateSettingAccount');
       
@@ -248,35 +249,35 @@ describe('[PENGATURAN-AKUN]', () => {
       cy.get(':nth-child(2) > .MuiAccordion-heading > #panel2-header').click()
       // Pembelian(COGS)
       cy.get('[name="purchase_cogs"]').click()
-      cy.contains('li', '1-10003 - Giro')
+      cy.contains('li', '5-00001 - Beban Pokok Pendapatan')
       .scrollIntoView()
       .should('exist')
       .click();
       cy.get('[name="purchase_cogs"]').trigger('change');
       // Pembayaran di muka
       cy.get('[name="purchase_uncollected_debt"]').click()
-      cy.contains('li', '1-10102 - Cadangan Kerugian Piutang')
+      cy.contains('li', '1-15001 - Biaya dibayar dimuka - sewa')
       .scrollIntoView()
       .should('exist')
       .click();
       cy.get('[name="purchase_uncollected_debt"]').trigger('change');
       //  Pengiriman Pembelian
       cy.get('[name="purchase_delivery"]').click()
-      cy.contains('li', '3-30000 - Modal Saham')
+      cy.contains('li', '5-00004 - Pengiriman & Pengangkutan')
       .scrollIntoView()
       .should('exist')
       .click();
       cy.get('[name="purchase_delivery"]').trigger('change');
       // Pajak Pembelian
       cy.get('[name="purchase_tax"]').click()
-      cy.contains('li', '1-10708 - Hak Merek Dagang')
+      cy.contains('li', '1-16001 - PPN Masukan')
       .scrollIntoView()
       .should('exist')
       .click();
       cy.get('[name="purchase_tax"]').trigger('change');
       // Uang Muka Pembelian
       cy.get('[name="purchase_down_payment"]').click()
-      cy.contains('li', '1-10003 - Giro')
+      cy.contains('li', '1-14001 - Uang Muka Pembelian')
       .scrollIntoView()
       .should('exist')
       .click();
@@ -307,14 +308,14 @@ describe('[PENGATURAN-AKUN]', () => {
       cy.get(':nth-child(3) > .MuiAccordion-heading > #panel2-header > .MuiAccordionSummary-content').click()
       // Piutang usaha
       cy.get('[name="account_receivable"]').click()
-      cy.contains('li', '1-10003 - Giro')
+      cy.contains('li', '1-12001 - Piutang Usaha Dagang')
       .scrollIntoView()
       .should('exist')
       .click();
       cy.get('[name="account_receivable"]').trigger('change');
       // Hutang usaha
       cy.get('[name="account_payable"]').click()
-      cy.contains('li', '1-10102 - Cadangan Kerugian Piutang')
+      cy.contains('li', '2-11001 - Hutang Usaha')
       .scrollIntoView()
       .should('exist')
       .click();
@@ -345,32 +346,43 @@ describe('[PENGATURAN-AKUN]', () => {
       cy.get(':nth-child(4) > .MuiAccordion-heading > #panel2-header > .MuiAccordionSummary-content').click()
       // Persedian
       cy.get('[name="supply_inventory"]').click()
-      cy.contains('li', '1-10003 - Giro')
+      cy.contains('li', '1-13001 - Persediaan Barang')
       .scrollIntoView()
       .should('exist')
       .click();
       cy.get('[name="supply_inventory"]').trigger('change');
       // Persediaan Rusak 
       cy.get('[name="supply_damaged"]').click()
-      cy.contains('li', '1-10102 - Cadangan Kerugian Piutang')
+      cy.contains('li', '6-30027 - Pengeluaran Barang Rusak')
       .scrollIntoView()
       .should('exist')
       .click();
       cy.get('[name="supply_damaged"]').trigger('change');
       //  Persediaan umum
       cy.get('[name="supply_general"]').click()
-      cy.contains('li', '3-30000 - Modal Saham')
+      cy.contains('li', '7-20004 - Penyesuaian Persediaan')
       .scrollIntoView()
       .should('exist')
       .click();
       cy.get('[name="supply_general"]').trigger('change');
       // Persedian PRoduksi
       cy.get('[name="supply_production"]').click()
-      cy.contains('li', '1-10708 - Hak Merek Dagang')
+      cy.contains('li', '5-00006 - Biaya Produksi')
       .scrollIntoView()
       .should('exist')
       .click();
       cy.get('[name="supply_production"]').trigger('change');
+
+      // persediaan dalam process
+      cy.get('.MuiPaper-root.Mui-expanded > .MuiCollapse-root > .MuiCollapse-wrapper > .MuiCollapse-wrapperInner > #panel2-content > .MuiAccordionDetails-root > .MuiGrid2-spacing-xs-2 > :nth-child(5) > .MuiGrid2-grid-xs-7 > .MuiAutocomplete-root input')
+        .click({ force: true });
+      cy.contains('li', '1-13002 - Barang Dalam Proses')
+        .scrollIntoView()
+        .should('exist')
+        .click();
+      cy.get('.MuiPaper-root.Mui-expanded > .MuiCollapse-root > .MuiCollapse-wrapper > .MuiCollapse-wrapperInner > #panel2-content > .MuiAccordionDetails-root > .MuiGrid2-spacing-xs-2 > :nth-child(5) > .MuiGrid2-grid-xs-7 > .MuiAutocomplete-root input')
+        .trigger('change');
+
   
       // Simpan perubahan
       cy.get('[style="display: flex; justify-content: flex-end; margin: 20px 0px;"] > .MuiButtonBase-root').click()
@@ -397,14 +409,14 @@ describe('[PENGATURAN-AKUN]', () => {
       cy.get(':nth-child(5) > .MuiAccordion-heading > #panel2-header > .MuiAccordionSummary-content').click()
       // Ekuitas Saldo Awal
       cy.get('[name="balance_equity_beginning"]').click()
-      cy.contains('li', '1-10003 - Giro')
+      cy.contains('li', '3-30003 - Ekuitas Saldo Awal')
       .scrollIntoView()
       .should('exist')
       .click();
       cy.get('[name="balance_equity_beginning"]').trigger('change');
       // Asset Tetap
       cy.get('[name="fix_asset"]').click()
-      cy.contains('li', '1-10102 - Cadangan Kerugian Piutang')
+      cy.contains('li', '1-31006 - Aset Tetap - Perlengkapan Kantor')
       .scrollIntoView()
       .should('exist')
       .click();
