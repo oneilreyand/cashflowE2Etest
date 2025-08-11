@@ -38,6 +38,10 @@ describe('PENJUALAN', () => {
         cy.get('.MuiTableRow-root > :nth-child(6)').should('have.text', 'Sisa Tagihan')
         cy.get('.MuiTableRow-root > :nth-child(7)').should('have.text', 'Total Tagihan')
     });
+
+    it('Melihat Tabel Penjualan Saat Data Tersedia', () => {
+        
+    });
 });
 
 
