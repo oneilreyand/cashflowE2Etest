@@ -1,84 +1,40 @@
-describe('[PENGATURAN-PENGGUNA]', () => {
+describe('[PENGATURAN-PENGGUNA] - Membuka halaman Pengaturan Pengguna dan melihat kesesuaian dengan design yang ada', () => {
     const navigatePengaturan = () => {
-        cy.get('[data-testid="drawer-item-settings"]').click();
+        cy.get('[data-testid="drawer-item-settings"] > .MuiListItemText-root > .MuiTypography-root').click();
+        cy.get('[data-cy="submenu-item-users-setting"] > [data-cy="list-item-button-sub-menu-setting"] > [data-cy="list-item-text-sub-menu-setting"] > .MuiTypography-root').click(); 
       };
   
     beforeEach(() => {
-      cy.apiLogin('reyand.oneil@assist.id', '12345678'); // Login using valid credentials
+      cy.apiLogin('erni.yulianti@assist.id', '12345678'); // Login using valid credentials
       cy.visitDashboard(); // Visit the dashboard after successful login
       navigatePengaturan(); // Navigate to "Tambah Kontak" page for each test
-      cy.get('[data-cy="submenu-item-usage-setting"]').click()
       });
 
-    //   it.only('check list data pengguna, kalau ada datanya hapus semua', () => {
-    //   cy.get('[data-cy="submenu-item-usage-setting"]').click()
-
-    //     // Intercept the API call
-    //     cy.intercept('GET', '/api/setting-accesses*').as('getSettingAccesses');
-
-    //     cy.wait('@getSettingAccesses');
-    //   });
-      
-  
-    // it('[PENGATURAN-PENGGUNA] - Chek kesesuainan halaman Pengaturan Billing dengan design yang ada - data tidak ada', () => {
-      
-    //   // Memicu navigasi atau tindakan
-    //   cy.get('[data-cy="submenu-item-usage-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click();
-    //   cy.intercept(
-    //     'GET',
-    //     'https://api-cashflow.assist.id/api/setting-accesses?skip=0&limit=10&companyId=b13e5210-8564-11ef-af27-a72e65a1d49c',
-    //   ).as('getSettingAccesses');
-      
-    //   // Tunggu respons API
-    //   cy.wait('@getSettingAccesses').then((interception) => {
-    //     expect(interception.response.statusCode).to.eq(200);
-    //     console.log('Response Body:', interception.response.body);
-    //     if(interception.response.body.result === 0) {
-    //       cy.get('.MuiPaper-root > .MuiStack-root > .MuiTypography-root').should('be.visible').and('contain', 'Semua Pengguna')
-    //       cy.get('.MuiPaper-root > .MuiStack-root > .MuiTypography-root').should('be.visible')
-    //       cy.get('.MuiTableHead-root > .MuiTableRow-root > :nth-child(1)').should('be.visible').and('contain', 'Nama Peran')
-    //       cy.get('.MuiTableRow-root > :nth-child(2)').should('be.visible').and('contain', 'Keterangan')
-    //       cy.get('.MuiTableRow-root > :nth-child(3)').should('be.visible').and('contain', 'Status')
-    //       cy.get('.MuiTableRow-root > :nth-child(4)').should('be.visible').and('contain', 'Aksi')
-    //       cy.get('.MuiTableBody-root > .MuiTableRow-root > .MuiTableCell-root').should('be.visible').and('contain', 'Tidak ada data')
-    //       cy.get('[style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;"] > .MuiTypography-root').should('be.visible').and('contain', 'Menampilkan 0 dari 0 data')
-    //     }
-    //   });
-    // });
-
-    it('[PENGATURAN-PENGGUNA] - Harus bisa membuka modal tambah pengguna dan mengecek kesesuaian designnya', () => {
-      cy.get('.MuiStack-root > .MuiButtonBase-root').should('be.visible').click()
-      cy.get(':nth-child(1) > .MuiFormLabel-root').should('be.visible').and('contain', 'Nama Pengguna')
-      cy.get(':nth-child(3) > .MuiFormLabel-root').should('be.visible').and('contain', 'Keterangan')
-      cy.get('form > .MuiTable-root > .MuiTableHead-root > .MuiTableRow-root > :nth-child(1)').should('be.visible').and('contain', 'Fitur')
-      cy.get('form > .MuiTable-root > .MuiTableHead-root > .MuiTableRow-root > :nth-child(2)').should('be.visible').and('contain', 'Buat')
-      cy.get('form > .MuiTable-root > .MuiTableHead-root > .MuiTableRow-root > :nth-child(3)').should('be.visible').and('contain', 'Lihat')
-      cy.get('form > .MuiTable-root > .MuiTableHead-root > .MuiTableRow-root > :nth-child(4)').should('be.visible').and('contain', 'Ubah')
-      cy.get('form > .MuiTable-root > .MuiTableHead-root > .MuiTableRow-root > :nth-child(5)').should('be.visible').and('contain', 'Hapus')
-      cy.get('th.MuiTableCell-root span.MuiCheckbox-root input[type="checkbox"]').check();
-      cy.get('.MuiButton-containedDefault')
-        .scrollIntoView()
+    it('Menampilkan semua daftar pengguna', () => {  
+      cy.get('[data-testid="users-management-container"]')
         .should('be.visible')
-        .and('contain', 'Batalkan')
-      cy.get('form > .MuiStack-root > .MuiButton-containedPrimary')
-        .scrollIntoView()
-        .should('be.visible')
-        .and('contain', 'Buat Pengguna')
+        .and('contain', 'Daftar Pengguna','Nama','Email', 'Hak Akses','Aksi'); 
+    });
+
+    it('[PENGATURAN-PENGGUNA] - Menambah Pengguna Baru', () => {
+      cy.get('[data-testid="add-user-button"]').should('be.visible').click();
+      cy.get('input[name="name"]').type('Nanda Fitra');
+      cy.get('input[name="email"]').type('nanda@gmail.com');
+      cy.get('[data-testid="user-role-select"]').click();
+      cy.get('ul[role="listbox"]', { timeout: 10000 }).should('be.visible');
+      cy.get('[data-testid="role-option-5982b710-4b24-11f0-ac71-5396266a671d"]').should('be.visible').click();
+      cy.get('[data-testid="submit-user-button"]').click();
     })
 
     it('[PENGATURAN-PENGGUNA] - Harus bisa menutup modal dengan menekan button close pada modal', () => {
-      cy.get('.MuiStack-root > .MuiButtonBase-root').should('be.visible').click()
-      cy.get('.css-1j72te2 > .MuiButtonBase-root').click()
+      cy.get('[data-testid="add-user-button"]').should('be.visible').click();
+      cy.get('[data-testid="cancel-user-button"]').click();
+      cy.get('[data-testid="users-management-container"]')
+        .should('be.visible')
+        .and('contain', 'Daftar Pengguna','Nama','Email', 'Hak Akses','Aksi'); 
     })
 
-    it('[PENGATURAN-PENGGUNA] - Harus bisa menutup modal dengan menekan button close pada modal', () => {
-      cy.get('.MuiStack-root > .MuiButtonBase-root').should('be.visible').click()
-      cy.get('.MuiButton-containedDefault')
-      .scrollIntoView()
-      .click()
-    })
-
-    it('[PENGATURAN-PENGGUNA] - Harus memunculkan warding error pada field yang tidak di isi', () => {
+    it.only('[PENGATURAN-PENGGUNA] - Harus memunculkan warding error pada field yang tidak di isi', () => {
       cy.get('.MuiStack-root > .MuiButtonBase-root').should('be.visible').click()
       cy.get('form > .MuiStack-root > .MuiButton-containedPrimary')
         .scrollIntoView()
