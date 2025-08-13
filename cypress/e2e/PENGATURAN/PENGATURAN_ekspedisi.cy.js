@@ -250,7 +250,7 @@ describe('Membuka halaman Pengaturan Ekspedisi dan melihat kesesuaian dengan des
       // Isi form ekspedisi
       cy.get('[name="expedition_name"]')
       .should('be.visible')
-      .type('JNT Offline 3')
+      .type('JNT Offline 4')
       cy.get('[name="expedition_desc"]')
       .should('be.visible')
       .type('Offline Test Description')
@@ -262,6 +262,9 @@ describe('Membuka halaman Pengaturan Ekspedisi dan melihat kesesuaian dengan des
       // cy.wait('@createEkspedisi', { timeout: 10000 })
       // Tunggu API create dipanggil
 
+      // Klik tombol simpan
+      cy.get(':nth-child(4) > div > .MuiButton-contained').should('be.visible').click()
+
       // Pastikan muncul notifikasi jaringan terputus
       cy.get('.MuiAlert-message').contains('Aplikasi sedang offline. Beberapa fitur mungkin tidak tersedia. Silakan periksa koneksi internet Anda.').should('be.visible');
 
@@ -270,7 +273,7 @@ describe('Membuka halaman Pengaturan Ekspedisi dan melihat kesesuaian dengan des
 
       // Reload halaman lalu pastikan data tidak ada di list
       cy.get('[data-cy="submenu-item-expedition-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click();
-      cy.contains('JNT Offline 2').should('not.exist');
+      cy.contains('JNT Offline 4').should('not.exist');
     })
 
     // Fitur Search
