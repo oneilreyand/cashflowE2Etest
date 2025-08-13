@@ -5,7 +5,7 @@ describe('[PENGATURAN-PENGGUNA]', () => {
   
     beforeEach(() => {
       cy.apiLogin('reyand.oneil@assist.id', '12345678'); // Login using valid credentials
-      cy.visitDashboard(); // Visit the dashboard after successful login
+      cy.visitDashboard(Cypress.env('companyId')); // Visit the dashboard after successful login
       navigatePengaturan(); // Navigate to "Tambah Kontak" page for each test
       cy.get('[data-cy="submenu-item-usage-setting"]').click()
       });
