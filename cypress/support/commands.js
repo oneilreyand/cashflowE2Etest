@@ -78,3 +78,9 @@ Cypress.Commands.add('verifyVisibility', (selector, text = '', timeout = 10000) 
     cy.get('[data-testid="drawer-item-contacts"]').click();
     cy.url().should('eq', 'https://uat-cashbook.assist.id/admin/contacts');
 });
+
+Cypress.Commands.add('goOffline', () => {
+    cy.intercept({ url: '**', middleware: true }, (req) => {
+      req.destroy();
+    }).as('offlineAll');
+  });

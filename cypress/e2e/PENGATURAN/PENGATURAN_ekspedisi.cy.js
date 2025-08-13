@@ -236,11 +236,12 @@ describe('Membuka halaman Pengaturan Ekspedisi dan melihat kesesuaian dengan des
     //   cy.get(':nth-child(4) > div > .MuiButton-contained').should('be.visible').click()
     //  })
 
-    it('Harus gagal menambah data dalam kondisi offline', () => {
+    it.only('Harus gagal menambah data dalam kondisi offline', () => {
+      cy.goOffline();
       // Intercept API create ekspedisi dan paksa error (simulasi offline)
-      cy.intercept('POST', 'https://api-uat-cashbook.assist.id/api/setting-expedition', {
-      forceNetworkError: true
-      }).as('createEkspedisi');
+      // cy.intercept('POST', 'https://api-uat-cashbook.assist.id/api/setting-expedition', {
+      // forceNetworkError: true
+      // }).as('createEkspedisi');
 
       // Kunjungi halaman tambah ekspedisi
       cy.get('[data-cy="submenu-item-expedition-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click();
@@ -254,11 +255,12 @@ describe('Membuka halaman Pengaturan Ekspedisi dan melihat kesesuaian dengan des
       .should('be.visible')
       .type('Offline Test Description')
 
+      
       // Klik tombol simpan
       cy.get(':nth-child(4) > div > .MuiButton-contained').should('be.visible').click()
 
+      // cy.wait('@createEkspedisi', { timeout: 10000 })
       // Tunggu API create dipanggil
-      cy.wait('@createEkspedisi', { timeout: 10000 })
 
       // Pastikan muncul notifikasi jaringan terputus
       cy.get('.MuiAlert-message').contains('Aplikasi sedang offline. Beberapa fitur mungkin tidak tersedia. Silakan periksa koneksi internet Anda.').should('be.visible');
@@ -331,7 +333,7 @@ describe('Membuka halaman Pengaturan Ekspedisi dan melihat kesesuaian dengan des
       cy.get('.MuiPagination-ul > :nth-child(4) > .MuiButtonBase-root').click()
      })
 
-    it.only('[PENGATURAN-EKSPEDISI] - Harus bisa menampilkan data ekspedisi, ketika menekan tombol sebelumnya', () => {
+    it('[PENGATURAN-EKSPEDISI] - Harus bisa menampilkan data ekspedisi, ketika menekan tombol sebelumnya', () => {
       cy.get('[data-cy="submenu-item-expedition-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click();
       cy.get('.MuiPagination-ul > :nth-child(4) > .MuiButtonBase-root').click()
       cy.get('.MuiPagination-ul > :nth-child(1)').click()
