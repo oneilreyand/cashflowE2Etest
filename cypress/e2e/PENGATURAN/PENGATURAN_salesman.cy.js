@@ -1,11 +1,13 @@
+import { medcareVer } from "../../data";
+
 describe('[PENGATURAN-SALESMAN] - Membuka halaman Pengaturan Billing dan melihat kesesuaian dengan design yang ada', () => {
     const navigatePengaturan = () => {
         cy.get('[data-testid="drawer-item-settings"]').click();
       };
   
     beforeEach(() => {
-      cy.apiLogin('reyand.oneil@assist.id', '12345678'); // Login using valid credentials
-      cy.visitDashboard(); // Visit the dashboard after successful login
+      cy.apiLogin('rahmadea.putri@assist.id', '12345678'); // Login using valid credentials
+      cy.visitDashboard(medcareVer); // Visit the dashboard after successful login
       navigatePengaturan(); // Navigate to "Tambah Kontak" page for each test
       });
   

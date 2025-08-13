@@ -236,7 +236,7 @@ describe('Membuka halaman Pengaturan Ekspedisi dan melihat kesesuaian dengan des
     //   cy.get(':nth-child(4) > div > .MuiButton-contained').should('be.visible').click()
     //  })
 
-    it('Harus gagal menambah data dalam kondisi offline', () => {
+    it.only('Harus gagal menambah data dalam kondisi offline', () => {
       // Intercept API create ekspedisi dan paksa error (simulasi offline)
       cy.intercept('POST', 'https://api-uat-cashbook.assist.id/api/setting-expedition', {
       forceNetworkError: true
@@ -249,16 +249,16 @@ describe('Membuka halaman Pengaturan Ekspedisi dan melihat kesesuaian dengan des
       // Isi form ekspedisi
       cy.get('[name="expedition_name"]')
       .should('be.visible')
-      .type('JNT Offline 3')
+      .type('JNT Offline 4')
       cy.get('[name="expedition_desc"]')
       .should('be.visible')
       .type('Offline Test Description')
 
-      // Klik tombol simpan
-      cy.get(':nth-child(4) > div > .MuiButton-contained').should('be.visible').click()
-
       // Tunggu API create dipanggil
       cy.wait('@createEkspedisi', { timeout: 10000 })
+
+      // Klik tombol simpan
+      cy.get(':nth-child(4) > div > .MuiButton-contained').should('be.visible').click()
 
       // Pastikan muncul notifikasi jaringan terputus
       cy.get('.MuiAlert-message').contains('Aplikasi sedang offline. Beberapa fitur mungkin tidak tersedia. Silakan periksa koneksi internet Anda.').should('be.visible');
@@ -268,7 +268,7 @@ describe('Membuka halaman Pengaturan Ekspedisi dan melihat kesesuaian dengan des
 
       // Reload halaman lalu pastikan data tidak ada di list
       cy.get('[data-cy="submenu-item-expedition-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click();
-      cy.contains('JNT Offline 2').should('not.exist');
+      cy.contains('JNT Offline 4').should('not.exist');
     })
 
     // Fitur Search
@@ -331,7 +331,7 @@ describe('Membuka halaman Pengaturan Ekspedisi dan melihat kesesuaian dengan des
       cy.get('.MuiPagination-ul > :nth-child(4) > .MuiButtonBase-root').click()
      })
 
-    it.only('[PENGATURAN-EKSPEDISI] - Harus bisa menampilkan data ekspedisi, ketika menekan tombol sebelumnya', () => {
+    it('[PENGATURAN-EKSPEDISI] - Harus bisa menampilkan data ekspedisi, ketika menekan tombol sebelumnya', () => {
       cy.get('[data-cy="submenu-item-expedition-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click();
       cy.get('.MuiPagination-ul > :nth-child(4) > .MuiButtonBase-root').click()
       cy.get('.MuiPagination-ul > :nth-child(1)').click()
