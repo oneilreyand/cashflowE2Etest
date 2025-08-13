@@ -23,6 +23,8 @@
 //
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
+const env = 'local'
+
 
 Cypress.Commands.add('handleUncaughtExceptions', () => {
     Cypress.on('uncaught:exception', (err, runnable) => {
@@ -34,7 +36,7 @@ Cypress.Commands.add('handleUncaughtExceptions', () => {
 Cypress.Commands.add('apiLogin', (email, password) => {
     cy.request({
         method: 'POST',
-        url: 'https://api-uat-cashbook.assist.id/api/login', // Pastikan ini URL API login yang benar
+        url: env === 'local' ? 'https://api-cashbook.assist.id/api/login' : 'https://api-uat-cashbook.assist.id/api/login', // Pastikan ini URL API login yang benar
         headers: {
             'Content-Type': 'application/json'
         },
@@ -52,16 +54,15 @@ Cypress.Commands.add('apiLogin', (email, password) => {
     });
 });
 
-Cypress.Commands.add('visitDashboard', (nameCompany) => {
+Cypress.Commands.add('visitDashboard', (companyId) => {
     cy.visit('/admin/dashboard', {
         onBeforeLoad(win) {
             const token = window.localStorage.getItem('token'); // Ambil dari Cypress context
             win.localStorage.setItem('token', token); // Set ke browser context
         }
     });
-
-    cy.get('[data-testid="listCompany-dropdown"]').click();
-    cy.get(`[data-testid="listCompany-item-${nameCompany}"]`).click();
+    cy.get('[data-testid="listCompany-dropdown"]').click()
+    cy.get(`[data-testid="listCompany-item-${companyId}"]`).click()
 });
 
 
