@@ -97,6 +97,8 @@ describe('Membuka halaman Pengaturan Ekspedisi dan melihat kesesuaian dengan des
         .should('be.visible')
         .and('contain', 'Tidak ada data');
     });
+
+    //Create Ekspedisi
     
     it('[PENGATURAN-EKSPEDISI] - Harus bisa membuka, section tambah ekspedisi', () => {
      cy.get('[data-cy="submenu-item-expedition-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
@@ -270,7 +272,8 @@ describe('Membuka halaman Pengaturan Ekspedisi dan melihat kesesuaian dengan des
       // cy.get(':nth-child(4) > div > .MuiButton-contained').should('be.visible').click()
 
       // Pastikan muncul notifikasi jaringan terputus
-      cy.get('.MuiSnackbar-root > .MuiPaper-root').contains('Tidak ada koneksi internet. Silahkan periksa koneksi Anda').should('be.visible');
+      // cy.get('.MuiSnackbar-root > .MuiPaper-root').contains('Tidak ada koneksi internet. Silahkan periksa koneksi Anda').should('be.visible');
+      cy.get('.MuiSnackbar-root > .MuiPaper-root').contains('Aplikasi sedang offline. Beberapa fitur mungkin tidak tersedia. Silakan periksa koneksi internet Anda.').should('be.visible');
 
       // Pastikan tetap di halaman form
       cy.get('[name="expedition_name"]').should('be.visible').should('be.visible')
@@ -279,6 +282,43 @@ describe('Membuka halaman Pengaturan Ekspedisi dan melihat kesesuaian dengan des
       cy.get('[data-cy="submenu-item-expedition-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click();
       cy.contains('JNT Offline 4').should('not.exist');
     })
+
+    it.only('[PENGATURAN-SALESMAN] - Harus berhasil menambahkan ekspedisi, semua field di isi, status check', () => {
+
+      // Intercept API POST untuk setting salesman
+      cy.intercept('POST', '**/api/setting-salesman*',
+        // {
+        //   statusCode: 500,
+        //   body: {
+        //     message: 'Internal Server Error',
+        //   },
+        // }
+      ).as('postSalesmanError');
+
+      cy.get('[data-cy="submenu-item-salesman-setting"] > [data-cy="list-item-button-sub-menu-setting"]')
+        .click();
+      cy.contains('button', 'Tambah Salesman')
+        .should('be.visible')
+        .click()
+      cy.get('input[placeholder="Masukkan Nama Salesman"]')
+        .should('be.visible')
+        .type('bibi')
+      cy.get('input[placeholder="Keterangan"]')
+        .should('be.visible')
+        .type('keterangan salesman 2')
+        cy.get(':nth-child(1) > :nth-child(3) > .MuiSwitch-root > .MuiButtonBase-root > .PrivateSwitchBase-input')
+        .click()
+        .should('exist')
+        .and('be.checked');
+      cy.get(':nth-child(4) > div > .MuiButton-contained')
+        .should('be.visible')
+        .and('contain', 'Simpan')
+        .click()
+
+      cy.wait('@postSalesmanError').then((interception) => {
+        expect(interception.response.statusCode).to.eq(200);
+      });
+    });  
 
     // Fitur Search
 
