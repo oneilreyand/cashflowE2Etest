@@ -74,7 +74,7 @@ describe('Membuka halaman Pengaturan Ekspedisi dan melihat kesesuaian dengan des
     .and('contain', 'Error, Gagal mendapatkan data!');
     });
 
-    it('[PENGATURAN-EKSPEDISI] - Harus nerhasil menampilkan tidak ada data, ketika data kosong', () => {
+    it('[PENGATURAN-EKSPEDISI] - Harus berhasil menampilkan tidak ada data, ketika data kosong', () => {
       // Intercept the API request
       cy.intercept('GET', '**/api/setting-expedition*', {
         statusCode: 200, // Simulate a successful response with no data
