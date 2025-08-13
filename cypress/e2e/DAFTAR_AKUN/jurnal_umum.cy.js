@@ -1,7 +1,7 @@
 describe('DAFTAR AKUN - JURNAL UMUM', () => {
     beforeEach(() => {
         cy.apiLogin('reyand.oneil@assist.id', '12345678'); // Login using valid credentials
-        cy.visitDashboard(); // Visit the dashboard after successful login
+        cy.visitDashboard(Cypress.env('companyId')); // Visit the dashboard after successful login
     }); 
     it('[JURNAL UMUM] - Harus bisa membuka jurnal umum dari fitur daftar akun', () => {
         cy.get('[data-testid="drawer-item-accounts"]').click();
@@ -12,7 +12,7 @@ describe('DAFTAR AKUN - JURNAL UMUM', () => {
         cy.get('[data-testid="drawer-item-accounts"]').click();
         cy.intercept(
             'GET',
-            'https://api-cashflow.assist.id/api/jurnals?skip=0&limit=10&companyId=b13e5210-8564-11ef-af27-a72e65a1d49c',
+            `https://api-cashflow.assist.id/api/jurnals?skip=0&limit=10&companyId=${Cypress.env('companyId')}`,
             {
             statusCode: 500,
             body: {
@@ -30,7 +30,7 @@ describe('DAFTAR AKUN - JURNAL UMUM', () => {
         cy.get('[data-testid="drawer-item-accounts"]').click();
         cy.intercept(
             'GET',
-            'https://api-cashflow.assist.id/api/jurnals?skip=0&limit=10&companyId=b13e5210-8564-11ef-af27-a72e65a1d49c',
+            `https://api-cashflow.assist.id/api/jurnals?skip=0&limit=10&companyId=${Cypress.env('companyId')}`,
             {
             statusCode: 200,
             body: {

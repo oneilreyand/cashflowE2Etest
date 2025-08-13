@@ -1,9 +1,8 @@
-import { companyId } from "../../data";
 
 describe('DAFTAR AKUN', () => {
     beforeEach(() => {
         cy.apiLogin('reyand.oneil@assist.id', '12345678'); // Login using valid credentials
-        cy.visitDashboard(); // Visit the dashboard after successful login
+        cy.visitDashboard(Cypress.env('companyId')); // Visit the dashboard after successful login
     }); 
   
     it('[DAFTAR AKUN] - Harus gagal mendapatkan data error 500', () => {
@@ -248,7 +247,7 @@ describe('DAFTAR AKUN', () => {
     })
 
     it('[DAFTAR AKUN] - Harus berhasil mencari setelah di buat dan panstikan form bank dan deskripsi tidak disabled', () => {
-        cy.intercept('GET', `https://api-cashflow.assist.id/api/akuns?companyId=${companyId}`,{}).as('getListAkun')
+        cy.intercept('GET', `https://api-cashflow.assist.id/api/akuns?companyId=${Cypress.env('companyId')}`,{}).as('getListAkun')
         cy.get('[data-testid="drawer-item-accounts"]').should('be.visible').click()
         cy.get('input[placeholder="Cari akun"]').should('be.visible').type('7-20005');
         cy.get('.MuiTableBody-root > .MuiTableRow-root > :nth-child(1)').should('be.visible').and('contain','7-20005')
