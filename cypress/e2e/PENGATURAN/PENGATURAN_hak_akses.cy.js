@@ -7,7 +7,7 @@ describe('[PENGATURAN-PENGGUNA] - Membuka halaman Pengaturan Pengguna dan meliha
   
     beforeEach(() => {
       cy.apiLogin('erni.yulianti@assist.id', '12345678'); // Login using valid credentials
-      cy.visitDashboard(); // Visit the dashboard after successful login
+      cy.visitDashboard(Cypress.env('companyId')); // Visit the dashboard after successful login
       navigatePengaturan(); // Navigate to "Tambah Kontak" page for each test
       });
     it('Memastikan halaman Pengaturan Pengguna terbuka dan sesuai dengan design', () => {
