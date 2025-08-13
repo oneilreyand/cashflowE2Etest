@@ -2,6 +2,7 @@ const { defineConfig } = require("cypress");
 const addAccessibilityTasks = require('wick-a11y/accessibility-tasks');
 const codeCoverage = require('@cypress/code-coverage/task');
 const mochawesomeReporter = require('cypress-mochawesome-reporter/plugin')
+const env = 'local'
 
 module.exports = defineConfig({
   projectId: '8dmse1',
@@ -22,10 +23,11 @@ module.exports = defineConfig({
       codeCoverage(on, config);
       return config;
     },
-    baseUrl: getBaseUrlByEnv(process.env.CYPRESS_ENV || "dev"), // Ambil dari environment variable atau default
+    baseUrl: getBaseUrlByEnv(env || "dev"), // Ambil dari environment variable atau default
     env: {
-      environment: process.env.CYPRESS_ENV || "dev", // Default ke 'local' jika tidak ditentukan
+      environment: env || "dev", // Default ke 'local' jika tidak ditentukan
       enableAccessibilityVoice: true,
+      companyId: 'e1548780-f7fb-11ef-a979-f7e12916176b'
     },
     pageLoadTimeout: 120000, // tingkatkan menjadi 2 menit atau lebih
     viewportHeight: 960,

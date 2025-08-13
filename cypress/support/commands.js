@@ -23,6 +23,8 @@
 //
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
+const env = 'local'
+
 
 import 'cypress-file-upload';
 
@@ -36,7 +38,7 @@ Cypress.Commands.add('handleUncaughtExceptions', () => {
 Cypress.Commands.add('apiLogin', (email, password) => {
     cy.request({
         method: 'POST',
-        url: 'https://api-uat-cashbook.assist.id/api/login', // Pastikan ini URL API login yang benar
+        url: env === 'local' ? 'https://api-cashbook.assist.id/api/login' : 'https://api-uat-cashbook.assist.id/api/login', // Pastikan ini URL API login yang benar
         headers: {
             'Content-Type': 'application/json'
         },
@@ -54,7 +56,7 @@ Cypress.Commands.add('apiLogin', (email, password) => {
     });
 });
 
-Cypress.Commands.add('visitDashboard', () => {
+Cypress.Commands.add('visitDashboard', (companyId) => {
     cy.visit('/admin/dashboard', {
         onBeforeLoad(win) {
             // Inject token sebelum halaman dimuat jika aplikasi membacanya dari localStorage
@@ -62,7 +64,7 @@ Cypress.Commands.add('visitDashboard', () => {
         }
     });
     cy.get('[data-testid="listCompany-dropdown"]').click()
-    cy.get('[data-testid="listCompany-item-ab877fe0-45d5-11f0-ba0e-5d65d0a0e647"]').click();
+    cy.get(`[data-testid="listCompany-item-${companyId}"]`).click()
 });
 
 Cypress.Commands.add('verifyVisibility', (selector, text = '', timeout = 10000) => {
