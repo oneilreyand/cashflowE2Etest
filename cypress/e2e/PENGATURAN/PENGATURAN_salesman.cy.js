@@ -1,6 +1,6 @@
 import { medcareVer } from "../../data";
 
-describe('[PENGATURAN-SALESMAN] - Membuka halaman Pengaturan Billing dan melihat kesesuaian dengan design yang ada', () => {
+describe('[PENGATURAN-SALESMAN] - Membuka halaman Pengaturan Salesman dan melihat kesesuaian dengan design yang ada', () => {
     const navigatePengaturan = () => {
         cy.get('[data-testid="drawer-item-settings"]').click();
       };
@@ -13,44 +13,63 @@ describe('[PENGATURAN-SALESMAN] - Membuka halaman Pengaturan Billing dan melihat
   
     it('[PENGATURAN-SALESMAN] - Chek kesesuainan halaman Pengaturan Billing dengan design yang ada', () => {
       cy.get('[data-cy="submenu-item-salesman-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
+      cy.get('.MuiTypography-h5').should('be.visible').and('contain', 'Pengaturan Salesman')
+      cy.get('input[placeholder="Cari Salesman"]', { timeout: 10000 })
+      .should('be.visible')
+      .and('have.attr', 'placeholder', 'Cari Salesman');
+      cy.get('.MuiStack-root > .MuiButtonBase-root').should('be.visible').and('contain', 'Tambah Salesman')
+      cy.get('.css-1nqp4xj').should('be.visible').and('contain', 'Semua Salesman')
+      cy.get('.MuiTableHead-root > .MuiTableRow-root > :nth-child(1)').should('be.visible').and('contain', 'Nama')
+      cy.get('.MuiTableHead-root > .MuiTableRow-root > :nth-child(2)').should('be.visible').and('contain', 'Keterangan')
+      cy.get('.MuiTableHead-root > .MuiTableRow-root > :nth-child(3)').should('be.visible').and('contain', 'Status')
+      cy.get('.MuiTableHead-root > .MuiTableRow-root > :nth-child(4)').should('be.visible').and('contain', 'Aksi')
+      cy.get('[style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;"] > .MuiTypography-root')
+      .should('be.visible')
+      .invoke('text')
+      .should('match', /Menampilkan\s+\d+\s*-\s*\d+\s+dari\s+\d+\s+data/)
+      cy.get('.MuiPagination-ul > :nth-child(1)').should('be.visible')
+      cy.get('.MuiPagination-ul > :nth-child(3)').should('be.visible')
     });
+
+    it('[PENGATURAN-SALESMAN] - Breadcrumbs harus terlihat dan berfungsi dengan baik', () => {
+      cy.get('.MuiBreadcrumbs-ol > :nth-child(1) > .MuiTypography-root').should('be.visible').and('contain', 'Beranda')
+      cy.get('.MuiBreadcrumbs-ol > :nth-child(1) > .MuiTypography-root').click()
+      cy.get('.MuiTypography-root > span').should('be.visible').and('contain', 'Dashboard')
+    })
 
     it('[PENGATURAN-SALESMAN] - Harus gagal mendapatkan data, kondisi error harus muncul', () => {
       // Intercept the API request
-      cy.intercept(
-        'GET',
-        'https://api-cashflow.assist.id/api/setting-salesman?search=&skip=0&limit=10&companyId=b13e5210-8564-11ef-af27-a72e65a1d49c',
-        {
-          statusCode: 500,
-          body: {
-            message: 'Internal Server Error',
-          },
-        }
-      ).as('getSalesmanSettingsError');
+      cy.intercept('GET', '**/api/setting-salesman*',{ statusCode: 500,body: {
+          message: 'Internal Server Error',
+        },
+        }).as('getSalesmanSettingsError');
+
       // Aksi yang memicu request
-      cy.get('[data-cy="submenu-item-salesman-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click();
+      cy.get('[data-cy="submenu-item-salesman-setting"] >[data-cy="list-item-button-sub-menu-setting"]').should('be.visible').click();
+
       // Tunggu sampai request dipanggil
-      cy.wait('@getSalesmanSettingsError');
-      cy.get('.MuiAlert-message').should('be.visible').and('contain', 'Internal Server Error')
+      cy.wait('@getSalesmanSettingsError', {timeout: 10000 });
+
+      // Verifikasi bahwa pesan error muncul
+      cy.get('.MuiAlert-message').should('be.visible').and('contain', 'Kesalahan di server')
+
       cy.get('.MuiTableBody-root > .MuiTableRow-root > .MuiTableCell-root').should('be.visible').and('contain', 'Error, Gagal mendapatkan data!')
     });
 
     it('[PENGATURAN-SALESMAN] - Harus berhasil mendapatkan data, data tidak ada', () => {
       // Intercept the API request
-      cy.intercept(
-        'GET',
-        'https://api-cashflow.assist.id/api/setting-salesman?search=&skip=0&limit=10&companyId=b13e5210-8564-11ef-af27-a72e65a1d49c',
-        {
+      cy.intercept('GET', '**/api/setting-salesman*' , {
           statusCode: 200,
           body: {
-            message: 'Internal Server Error',
+            data: [],
+            message: 'No Data',
           },
-        }
-      ).as('getSalesmanSettingsError');
+        }).as('getSalesmanSettings');
+
       // Aksi yang memicu request
       cy.get('[data-cy="submenu-item-salesman-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click();
       // Tunggu sampai request dipanggil
-      cy.wait('@getSalesmanSettingsError');
+      cy.wait('@getSalesmanSettings');
       cy.get('.MuiTableBody-root > .MuiTableRow-root > .MuiTableCell-root').should('be.visible').and('contain', 'Tidak ada data')
     });
 

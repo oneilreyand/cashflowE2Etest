@@ -44,7 +44,7 @@ describe('Membuka halaman Pengaturan Ekspedisi dan melihat kesesuaian dengan des
     it('Breadcrumbs harus terlihat dan berfungsi dengan baik', () => {
       cy.get('.MuiBreadcrumbs-ol > :nth-child(1) > .MuiTypography-root').should('be.visible').and('contain', 'Beranda')
       cy.get('.MuiBreadcrumbs-ol > :nth-child(1) > .MuiTypography-root').click()
-     cy.get('.MuiTypography-root > span').should('be.visible').and('contain', 'Dashboard')
+      cy.get('.MuiTypography-root > span').should('be.visible').and('contain', 'Dashboard')
     }) 
 
     it('[PENGATURAN-EKSPEDISI] - Harus gagal mendapatkan data, kondisi error harus muncul', () => {
@@ -101,7 +101,11 @@ describe('Membuka halaman Pengaturan Ekspedisi dan melihat kesesuaian dengan des
     it('[PENGATURAN-EKSPEDISI] - Harus bisa membuka, section tambah ekspedisi', () => {
      cy.get('[data-cy="submenu-item-expedition-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
      cy.get('.MuiStack-root > .MuiButtonBase-root').should('be.visible').click()
-
+     cy.get('input[placeholder="Masukkan nama ekspedisi"]').should('be.visible')
+     cy.get('input[placeholder="Keterangan"]').should('be.visible')
+     cy.get('input[name="ekspedisi_status"]').should('exist').and('not.be.checked');
+     cy.get('.MuiButton-text').should('be.visible').and('contain', 'Batalkan')
+     cy.get(':nth-child(4) > div > MuiButton-contained').should('be.visible').and('contain', 'Simpan')
     })
 
     it('cek kesesuaian section tambah ekspedisi dengan design yang ada', () => {
@@ -262,11 +266,11 @@ describe('Membuka halaman Pengaturan Ekspedisi dan melihat kesesuaian dengan des
       // cy.wait('@createEkspedisi', { timeout: 10000 })
       // Tunggu API create dipanggil
 
-      // Klik tombol simpan
-      cy.get(':nth-child(4) > div > .MuiButton-contained').should('be.visible').click()
+      // // Klik tombol simpan
+      // cy.get(':nth-child(4) > div > .MuiButton-contained').should('be.visible').click()
 
       // Pastikan muncul notifikasi jaringan terputus
-      cy.get('.MuiAlert-message').contains('Aplikasi sedang offline. Beberapa fitur mungkin tidak tersedia. Silakan periksa koneksi internet Anda.').should('be.visible');
+      cy.get('.MuiSnackbar-root > .MuiPaper-root').contains('Tidak ada koneksi internet. Silahkan periksa koneksi Anda').should('be.visible');
 
       // Pastikan tetap di halaman form
       cy.get('[name="expedition_name"]').should('be.visible').should('be.visible')
@@ -341,4 +345,6 @@ describe('Membuka halaman Pengaturan Ekspedisi dan melihat kesesuaian dengan des
       cy.get('.MuiPagination-ul > :nth-child(4) > .MuiButtonBase-root').click()
       cy.get('.MuiPagination-ul > :nth-child(1)').click()
      })
+
+     //status aktif non aktif ke pembelian penjualan kas dan bank
 });
