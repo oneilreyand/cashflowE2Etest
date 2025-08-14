@@ -11,9 +11,8 @@ describe('TEST CASE PENGATURAN EKSPEDISI', () => {
       navigatePengaturan(); // Navigate to "Tambah Kontak" page for each test
     });
 
-    //UI Pengaturan Ekspedisi
-    
-    it.only('[PENGATURAN-EKSPEDISI] - Chek kesesuainan halaman Pengaturan Ekspedisi dengan design yang ada', () => {
+    //Kesesuaian UI
+    it('[PENGATURAN-EKSPEDISI] - Chek kesesuainan halaman Pengaturan Ekspedisi dengan design yang ada', () => {
       cy.get('[data-cy="submenu-item-expedition-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
     //Header
       cy.get('.MuiTypography-h5').should('be.visible').and('contain', 'Pengaturan Ekspedisi')
@@ -45,7 +44,8 @@ describe('TEST CASE PENGATURAN EKSPEDISI', () => {
       cy.get('.MuiPagination-ul').should('be.visible')
     });
 
-    it('Breadcrumbs harus terlihat dan berfungsi dengan baik', () => {
+    //Navigation to Beranda
+    it.only('Breadcrumbs harus terlihat dan berfungsi dengan baik', () => {
       cy.get('.MuiBreadcrumbs-ol > :nth-child(1) > .MuiTypography-root').should('be.visible').and('contain', 'Beranda')
       cy.get('.MuiBreadcrumbs-ol > :nth-child(1) > .MuiTypography-root').click()
       cy.get('.MuiTypography-root > span').should('be.visible').and('contain', 'Dashboard')

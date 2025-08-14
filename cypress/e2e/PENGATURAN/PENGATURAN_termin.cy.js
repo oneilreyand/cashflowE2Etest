@@ -11,9 +11,8 @@ describe('[PENGATURAN-TERMIN]', () => {
     navigatePengaturan(); // Navigate to "Tambah Kontak" page for each test
   });
 
-  //UI Pengaturan Termin
-
-  it.only('Cek kesesuainan halaman Pengaturan Termin dengan design yang ada', () => {
+  //Kesesuain UI
+  it('Cek kesesuainan halaman Pengaturan Termin dengan design yang ada', () => {
     cy.get('[data-cy="submenu-item-termins-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
     //Header
     cy.get('.MuiTypography-root').should('be.visible').and('contain', 'Pengaturan Termin')
@@ -37,7 +36,17 @@ describe('[PENGATURAN-TERMIN]', () => {
     cy.get('.MuiPagination-ul').should('be.visible')
   });
 
-  it('Membuka halaman Pengaturan Termin data termin tidak ada data termin tidak ada', () => {
+  //Navigation to Beranda
+  it.only('Breadcrumbs dapat berfungsi dengan baik -> membawa halaman pengaturan ke beranda', () => {
+    cy.get('[data-cy="submenu-item-reference-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
+    cy.get('.MuiBreadcrumbs-ol > :nth-child(1) > .MuiTypography-root').should('be.visible').and('contain', 'Beranda')
+    cy.get('.MuiBreadcrumbs-ol > :nth-child(1) > .MuiTypography-root').click()
+    cy.get('.MuiTypography-root > span').should('be.visible').and('contain', 'Dashboard')
+    }) 
+
+  //Empty State
+
+  it('Membuka halaman Pengaturan Termin saat data termin tidak ada - Harus ada pesan (Tidak ada data) di tabel', () => {
     cy.get('[data-cy="submenu-item-termins-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
     cy.get('.css-egm0ks > .MuiStack-root > .MuiFormControl-root > .MuiInputBase-root').type('hantu')
     cy.get('.MuiTableBody-root > .MuiTableRow-root > .MuiTableCell-root').should('be.visible').and('contain', 'Tidak ada data.')

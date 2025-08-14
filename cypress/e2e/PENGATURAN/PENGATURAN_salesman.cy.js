@@ -11,9 +11,8 @@ describe('[PENGATURAN-SALESMAN]', () => {
       navigatePengaturan(); // Navigate to "Tambah Kontak" page for each test
       });
 
-    //UI Pengaturan Salesman
-  
-    it.only('Cek kesesuainan halaman Pengaturan Salesman dengan design yang ada', () => {
+    //Kesesuaian UI
+    it('Cek kesesuainan halaman Pengaturan Salesman dengan design yang ada', () => {
       cy.get('[data-cy="submenu-item-salesman-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
       //Header
       cy.get('.MuiTypography-h5').should('be.visible').and('contain', 'Pengaturan Salesman')
@@ -38,7 +37,8 @@ describe('[PENGATURAN-SALESMAN]', () => {
       cy.get('.MuiPagination-ul').should('be.visible')
     });
 
-    it('[PENGATURAN-SALESMAN] - Breadcrumbs harus terlihat dan berfungsi dengan baik', () => {
+    //Navigation to Beranda
+    it.only('[PENGATURAN-SALESMAN] - Breadcrumbs harus terlihat dan berfungsi dengan baik', () => {
       cy.get('.MuiBreadcrumbs-ol > :nth-child(1) > .MuiTypography-root').should('be.visible').and('contain', 'Beranda')
       cy.get('.MuiBreadcrumbs-ol > :nth-child(1) > .MuiTypography-root').click()
       cy.get('.MuiTypography-root > span').should('be.visible').and('contain', 'Dashboard')

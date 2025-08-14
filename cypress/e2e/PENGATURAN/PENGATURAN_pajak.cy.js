@@ -11,7 +11,8 @@ describe('[PENGATURAN-PAJAK]', () => {
     navigatePengaturan(); // Navigate to "Tambah Kontak" page for each test
   });
 
-  it.only('Cek kesesuainan halaman Pengaturan Pajak dengan design yang ada', () => {
+  //Kesesuaian UI
+  it('Cek kesesuainan halaman Pengaturan Pajak dengan design yang ada', () => {
     cy.get('[data-cy="submenu-item-tax-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
     //Header
     cy.get('.MuiTypography-h5').should('be.visible').and('contain', 'Pengaturan Pajak')
@@ -42,6 +43,15 @@ describe('[PENGATURAN-PAJAK]', () => {
     .should('match', /Menampilkan\s+\d+\s*-\s*\d+\s+dari\s+\d+\s+data/)
     cy.get('.MuiPagination-ul').should('be.visible')
   });
+
+  //Navigation to Beranda
+  it.only('Breadcrumbs dapat berfungsi dengan baik -> membawa halaman pengaturan ke beranda', () => {
+    cy.get('[data-cy="submenu-item-tax-setting"] > [data-cy="list-item-button-sub-menu-setting"] > [data-cy="list-item-text-sub-menu-setting"] > .MuiTypography-root').click()
+    cy.get('.MuiBreadcrumbs-ol > :nth-child(1) > .MuiTypography-root').should('be.visible').and('contain', 'Beranda')
+    cy.get('.MuiBreadcrumbs-ol > :nth-child(1) > .MuiTypography-root').click()
+    cy.get('.MuiTypography-root > span').should('be.visible').and('contain', 'Dashboard')
+    })
+
 
   it('Harus memunculkan text tidak ada data', () => {
     cy.get('[data-cy="submenu-item-tax-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
