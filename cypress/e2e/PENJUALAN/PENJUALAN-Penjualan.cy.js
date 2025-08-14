@@ -7,8 +7,8 @@ describe("PENJUALAN", () => {
     cy.navigateToPenjualan();
   });
 
-    it('Validasi Penulisan Komponen UI Statis Halaman Penjualan', () => {
-    cy.get(' * > .MuiTypography-h5').should('have.text', 'Penjualan');
+    it.only('Validasi Penulisan Komponen UI Statis Halaman Penjualan', () => {
+    cy.get('.MuiTypography-h5 > span').should('have.text', 'Penjualan');
     cy.get('.MuiBreadcrumbs-ol').should('have.text', "Beranda/Penjualan");
 
     cy.get(':nth-child(1) > .MuiPaper-root > .MuiCardContent-root > * > .MuiStack-root > .MuiBadge-root > .MuiTypography-root')
