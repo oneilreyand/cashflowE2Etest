@@ -207,7 +207,6 @@ describe('[PENGATURAN-PERUSAHAAN] - Membuka halaman Pengaturan Perusahaan dan me
         .and('contain', 'Nama Perusahaan');
     });
 
-
     it('Menangani error server (500) saat menyimpan perubahan data perusahaan', () => {
         // Mock API dengan status 500
         cy.intercept('PUT', '**/api/setting-company/*', {
@@ -216,8 +215,6 @@ describe('[PENGATURAN-PERUSAHAAN] - Membuka halaman Pengaturan Perusahaan dan me
                 message: 'Terjadi kesalahan pada server'
             }
         }).as('updateSettingCompanyError');
-
-        // Akses form edit
         cy.get('[data-cy="company-name-header-setting-company"]').click();
         cy.get('[data-cy="button-edit-data-setting-company"]').click();
 
@@ -230,11 +227,7 @@ describe('[PENGATURAN-PERUSAHAAN] - Membuka halaman Pengaturan Perusahaan dan me
         cy.window().then((win) => {
             win.dispatchEvent(new win.Event('offline'));
         });
-
-        // Simpan perubahan
         cy.get('[data-cy="button-save-setting-edit-company"]').click();
-
-        // Assertion: cek bahwa pesan error tampil
         cy.get('.MuiAlert-message', { timeout: 10000 })
             .should('be.visible')
             .and('contain', 'Aplikasi sedang offline. Beberapa fitur mungkin tidak tersedia. Silakan periksa koneksi internet Anda.');
