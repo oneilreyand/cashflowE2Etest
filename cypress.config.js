@@ -27,7 +27,7 @@ module.exports = defineConfig({
     env: {
       environment: env || "dev", // Default ke 'local' jika tidak ditentukan
       enableAccessibilityVoice: true,
-      companyId: '513e54a0-7686-11f0-994e-a1416e4d365f'
+      companyId:'ef206452-7664-11f0-994e-a1416e4d365f'
     },
     pageLoadTimeout: 120000, // tingkatkan menjadi 2 menit atau lebih
     viewportHeight: 960,

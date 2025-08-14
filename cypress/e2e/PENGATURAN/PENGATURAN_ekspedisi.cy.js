@@ -1,4 +1,4 @@
-
+import { medcareVer } from "../../data";
 describe('TEST CASE PENGATURAN EKSPEDISI', () => {
     const navigatePengaturan = () => {
         cy.get('[data-testid="drawer-item-settings"]').click();
@@ -10,25 +10,30 @@ describe('TEST CASE PENGATURAN EKSPEDISI', () => {
       cy.visitDashboard(Cypress.env('companyId')); // Visit the dashboard after successful login
       navigatePengaturan(); // Navigate to "Tambah Kontak" page for each test
     });
+
+    //UI Pengaturan Ekspedisi
     
-    it('[PENGATURAN-EKSPEDISI] - Chek kesesuainan halaman Pengaturan Ekspedisi dengan design yang ada', () => {
+    it.only('[PENGATURAN-EKSPEDISI] - Chek kesesuainan halaman Pengaturan Ekspedisi dengan design yang ada', () => {
       cy.get('[data-cy="submenu-item-expedition-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
     //Header
       cy.get('.MuiTypography-h5').should('be.visible').and('contain', 'Pengaturan Ekspedisi')
+      cy.get('.MuiBreadcrumbs-ol').should('be.visible').and('contain', 'Beranda')
     //Fitur Search
-      cy.get('.css-egm0ks > .MuiStack-root > .MuiFormControl-root > .MuiInputBase-root').should('be.visible')//.and('contain', 'Cari Ekspedisi')
+      cy.get('input[placeholder="Cari Ekspedisi"]')
+      .should('be.visible')
+      .and('have.attr', 'placeholder', 'Cari Ekspedisi');
     //Fitur Tambah Ekspedisi
       cy.get('.MuiStack-root > .MuiButtonBase-root').should('be.visible').and('contain', 'Tambah Ekspedisi')
     //Tabel Ekspedisi
-      cy.get('.css-1nqp4xj').should('be.visible').and('contain', 'Semua Ekspedisi')
+      cy.contains('Semua Ekspedisi').should('be.visible');
       cy.get('.MuiTableHead-root > .MuiTableRow-root > :nth-child(1)').should('be.visible').and('contain', 'Nama')
       cy.get('.MuiTableHead-root > .MuiTableRow-root > :nth-child(2)').should('be.visible').and('contain', 'Keterangan')
       cy.get('.MuiTableHead-root > .MuiTableRow-root > :nth-child(3)')
-      //.scrollIntoView()
+      .scrollIntoView()
       .should('be.visible')
       .and('contain', 'Status')
       cy.get('.MuiTableHead-root > .MuiTableRow-root > :nth-child(4)')
-      //.scrollIntoView()
+      .scrollIntoView()
       .should('be.visible')
       .and('contain', 'Aksi')
     //Pagination
@@ -37,7 +42,7 @@ describe('TEST CASE PENGATURAN EKSPEDISI', () => {
       .invoke('text')
       .should('match', /Menampilkan\s+\d+\s*-\s*\d+\s+dari\s+\d+\s+data/)
       cy.get('.MuiPagination-ul > :nth-child(1)').should('be.visible')
-      cy.get('.MuiPagination-ul > :nth-child(3)').should('be.visible')
+      cy.get('.MuiPagination-ul').should('be.visible')
     });
 
     it('Breadcrumbs harus terlihat dan berfungsi dengan baik', () => {

@@ -1,21 +1,29 @@
 import { medcareVer } from "../../data";
 
-describe('[PENGATURAN-PAJAK] - Munculkan text tidak ada data, ketika tidak ada data pajak', () => {
+describe('[PENGATURAN-PAJAK]', () => {
   const navigatePengaturan = () => {
     cy.get('[data-testid="drawer-item-settings"]').click();
   };
 
   beforeEach(() => {
     cy.apiLogin('rahmadea.putri@assist.id', '12345678'); // Login using valid credentials
-    cy.visitDashboard(Cypress.env('companyID')); // Visit the dashboard after successful login
+    cy.visitDashboard(Cypress.env('companyId')); // Visit the dashboard after successful login
     navigatePengaturan(); // Navigate to "Tambah Kontak" page for each test
   });
 
-  it('Chek kesesuainan halaman Pengaturan Pajak dengan design yang ada', () => {
+  it.only('Cek kesesuainan halaman Pengaturan Pajak dengan design yang ada', () => {
     cy.get('[data-cy="submenu-item-tax-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
+    //Header
+    cy.get('.MuiTypography-h5').should('be.visible').and('contain', 'Pengaturan Pajak')
+    cy.get('.MuiBreadcrumbs-ol').should('be.visible').and('contain', 'Beranda')
+    //Search
     cy.get('input[placeholder="Cari Pajak"]')
+    .should('be.visible')
+    .and('have.attr', 'placeholder', 'Cari Pajak')
+    //Tambah Pajak Button
     cy.get('.MuiStack-root > .MuiButtonBase-root').should('be.visible').and('contain', 'Tambah Pajak')
-    cy.get('.css-1nqp4xj').should('be.visible').and('contain', 'Semua Pajak')
+    //Tabel
+    cy.contains('Semua Pajak').should('be.visible');
     cy.get('.MuiTableHead-root > .MuiTableRow-root > :nth-child(1)').should('be.visible').and('contain', 'Nama')
     cy.get('.MuiTableHead-root > .MuiTableRow-root > :nth-child(2)').should('be.visible').and('contain', 'Persentase Efektif %')
     cy.get('.MuiTableHead-root > .MuiTableRow-root > :nth-child(3)').should('be.visible').and('contain', 'Akun Pajak Penjualan')
@@ -28,6 +36,11 @@ describe('[PENGATURAN-PAJAK] - Munculkan text tidak ada data, ketika tidak ada d
     .scrollIntoView()
     .should('be.visible')
     .and('contain', 'Aksi')
+    //Pegination
+    cy.get('[style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;"] > .MuiTypography-root').should('be.visible')
+    .invoke('text')
+    .should('match', /Menampilkan\s+\d+\s*-\s*\d+\s+dari\s+\d+\s+data/)
+    cy.get('.MuiPagination-ul').should('be.visible')
   });
 
   it('Harus memunculkan text tidak ada data', () => {
@@ -138,7 +151,7 @@ describe('[PENGATURAN-PAJAK] - Munculkan text tidak ada data, ketika tidak ada d
   //   cy.get('.MuiAlert-message').should('exist').and('contain', 'Berhasil Mengubah Status Pajak.')
   // })
 
-  it.only('harus gagal menambah pajak, field Persentase Efektif %  di isi spasi', () => {
+  it('harus gagal menambah pajak, field Persentase Efektif %  di isi spasi', () => {
     cy.get('[data-cy="submenu-item-tax-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
     cy.get('.MuiStack-root > .MuiButtonBase-root').click()
     cy.get('[name="tax_name"]').should('exist').type('pajak')
