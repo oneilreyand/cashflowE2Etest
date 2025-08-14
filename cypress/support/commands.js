@@ -23,7 +23,8 @@
 //
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
-const env = 'local'
+import 'cypress-file-upload';
+const env = 'dev'
 
 
 

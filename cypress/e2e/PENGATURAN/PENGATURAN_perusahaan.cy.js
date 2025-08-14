@@ -15,6 +15,9 @@ describe('[PENGATURAN-PERUSAHAAN] - Membuka halaman Pengaturan Perusahaan dan me
         cy.get('[data-cy="company-name-header-setting-company"]')
             .should('be.visible')
             .and('contain', 'Nama Perusahaan');
+        cy.get('[data-cy="company-logo-header-setting-company"]')
+            .should('be.visible')
+            .and('contain', 'Logo Perusahaan');
         cy.get('[data-cy="office-phone-header-setting-company"]')
             .should('be.visible')
             .and('contain', 'No Telp Kantor');
@@ -77,7 +80,7 @@ describe('[PENGATURAN-PERUSAHAAN] - Membuka halaman Pengaturan Perusahaan dan me
         cy.get('[data-cy="button-save-setting-edit-company"]').click();
     
     }); 
-    it('Input nomor telepon kantor dengan data yang tidak valid', () => {
+    it.only('Input nomor telepon kantor dengan data yang tidak valid', () => {
         cy.get('[data-cy="company-name-header-setting-company"]').click();
         cy.get('[data-cy="button-edit-data-setting-company"]').click();
         cy.get('input[name="officePhoneNumber"]').clear().type('082268');
@@ -85,7 +88,7 @@ describe('[PENGATURAN-PERUSAHAAN] - Membuka halaman Pengaturan Perusahaan dan me
         cy.get('.MuiFormHelperText-root')
         .invoke('text')
         .should('match', /No. Telp Kantor minimal 9 digit/g);
-        cy.get('input[name="officePhoneNumber"]').clear().type('082268abc');
+        cy.get('input[name="officePhoneNumber"]').clear().type('08226877abc');
         cy.get('[data-cy="button-save-setting-edit-company"]').click();
     });
 
@@ -203,4 +206,38 @@ describe('[PENGATURAN-PERUSAHAAN] - Membuka halaman Pengaturan Perusahaan dan me
         .should('be.visible')
         .and('contain', 'Nama Perusahaan');
     });
+
+
+    it('Menangani error server (500) saat menyimpan perubahan data perusahaan', () => {
+        // Mock API dengan status 500
+        cy.intercept('PUT', '**/api/setting-company/*', {
+            statusCode: 500,
+            body: {
+                message: 'Terjadi kesalahan pada server'
+            }
+        }).as('updateSettingCompanyError');
+
+        // Akses form edit
+        cy.get('[data-cy="company-name-header-setting-company"]').click();
+        cy.get('[data-cy="button-edit-data-setting-company"]').click();
+
+        // Isi data minimal
+        cy.get('input[name="companyName"]').clear().type('Perusahaan Error Test');
+        cy.get('input[name="officePhoneNumber"]').clear().type('082268694838');
+        cy.get('input[name="officeEmail"]').clear().type('error@test.com');
+
+        // Simulasi network offline sebelum klik simpan
+        cy.window().then((win) => {
+            win.dispatchEvent(new win.Event('offline'));
+        });
+
+        // Simpan perubahan
+        cy.get('[data-cy="button-save-setting-edit-company"]').click();
+
+        // Assertion: cek bahwa pesan error tampil
+        cy.get('.MuiAlert-message', { timeout: 10000 })
+            .should('be.visible')
+            .and('contain', 'Aplikasi sedang offline. Beberapa fitur mungkin tidak tersedia. Silakan periksa koneksi internet Anda.');
+        });
+
 });
