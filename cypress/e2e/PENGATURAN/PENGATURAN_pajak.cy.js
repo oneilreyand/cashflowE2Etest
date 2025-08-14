@@ -7,7 +7,7 @@ describe('[PENGATURAN-PAJAK] - Munculkan text tidak ada data, ketika tidak ada d
 
   beforeEach(() => {
     cy.apiLogin('rahmadea.putri@assist.id', '12345678'); // Login using valid credentials
-    cy.visitDashboard(medcareVer); // Visit the dashboard after successful login
+    cy.visitDashboard(Cypress.env('companyID')); // Visit the dashboard after successful login
     navigatePengaturan(); // Navigate to "Tambah Kontak" page for each test
   });
 

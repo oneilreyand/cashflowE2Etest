@@ -377,8 +377,7 @@ describe('[PENGATURAN-SALESMAN] - Membuka halaman Pengaturan Salesman dan meliha
         'GET',
         '**/api/setting-salesman**', // Tangkap semua request ke endpoint ini
         (req) => {
-          req.reply({
-            statusCode: 500,
+          req.reply({statusCode: 500,
             body: {
               message: 'Internal Server Error', // Isi pesan error
             },
@@ -466,8 +465,6 @@ describe('[PENGATURAN-SALESMAN] - Membuka halaman Pengaturan Salesman dan meliha
     it('[PENGATURAN-SALESMAN] - Harus bisa berhasil update status data sales', () => {
       cy.get('[data-cy="submenu-item-salesman-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click();
       cy.get(':nth-child(1) > :nth-child(3) > .MuiSwitch-root > .MuiButtonBase-root > .PrivateSwitchBase-input').click()
-      cy.get('.MuiAlert-message')
-        .should('be.visible')
-        .and('contain', 'Berhasil Mengubah Status Salesman.')
+      cy.get('.MuiAlert-message').should('be.visible').and('contain', 'Berhasil Mengubah Status Salesman.')
     })
 });
