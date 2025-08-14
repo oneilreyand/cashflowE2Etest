@@ -7,7 +7,7 @@ describe('[PENGATURAN-SALESMAN] - Membuka halaman Pengaturan Salesman dan meliha
   
     beforeEach(() => {
       cy.apiLogin('rahmadea.putri@assist.id', '12345678'); // Login using valid credentials
-      cy.visitDashboard(medcareVer); // Visit the dashboard after successful login
+      cy.visitDashboard(Cypress.env('companyId')); // Visit the dashboard after successful login
       navigatePengaturan(); // Navigate to "Tambah Kontak" page for each test
       });
   
@@ -359,11 +359,17 @@ describe('[PENGATURAN-SALESMAN] - Membuka halaman Pengaturan Salesman dan meliha
       cy.get('.MuiTableBody-root > :nth-child(1) > :nth-child(1)').should('be.visible').and('contain', 'uc')
     })
 
-    it.only('[PENGATURAN-SALESMAN] - Harus berhasil mencari nama salesman dengan huruf kecil-besar(campur)', () => {
+    it('[PENGATURAN-SALESMAN] - Harus berhasil mencari nama salesman dengan huruf kecil-besar(campur)', () => {
       cy.get('[data-cy="submenu-item-salesman-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
       cy.get('input[placeholder="Cari Salesman"]').should('be.visible').type('reYaND')
       cy.get('.MuiTableBody-root > :nth-child(1) > :nth-child(1)').should('be.visible').and('contain', 'reyand')
     })
+
+    it('[PENGATURAN-SALESMAN] - Tidak ada data saat mencari nama ekspedisi yang tidak valid', () => {
+      cy.get('[data-cy="submenu-item-salesman-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
+      cy.get('input[placeholder="Cari Salesman"]').should('be.visible').type('Hantu')
+      cy.get('.MuiTableBody-root > .MuiTableRow-root > .MuiTableCell-root').should('be.visible').and('contain', 'Tidak ada data')
+    })  
 
     it('[PENGATURAN-SALESMAN] - Harus gagal mencari salesman, memanipulasi API setting salesman menjadi error 500', () => {
       // Intercept API GET dan manipulasi semua permintaan ke endpoint setting-salesman menjadi error 500
@@ -429,12 +435,14 @@ describe('[PENGATURAN-SALESMAN] - Membuka halaman Pengaturan Salesman dan meliha
 
     //Aksi
 
-    it('[PENGATURAN-SALESMAN] - Harus berhasil menghapus salesman', () => {
+    it.only('[PENGATURAN-SALESMAN] - Harus berhasil menghapus salesman', () => {
       cy.intercept('GET', '**/api/setting-salesman**').as('getSalesman');
       cy.get('[data-cy="submenu-item-salesman-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click();
       cy.wait('@getSalesman').then(() => {
         cy.get('.MuiTableBody-root > :nth-child(1) > :nth-child(4) > .MuiButtonBase-root')
           .click()
+        cy.get('[data-testid="alert-dialog-submit-button"]').click()
+        // cy.get('[data-testid="alert-dialog-submit-button"]').should('not.exist')
       })
     });
 

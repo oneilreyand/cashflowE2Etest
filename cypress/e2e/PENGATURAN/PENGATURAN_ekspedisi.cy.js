@@ -1,6 +1,6 @@
 import { medcareVer } from "../../data";
 
-describe('Membuka halaman Pengaturan Ekspedisi dan melihat kesesuaian dengan design yang ada', () => {
+describe('TEST CASE PENGATURAN EKSPEDISI', () => {
     const navigatePengaturan = () => {
         cy.get('[data-testid="drawer-item-settings"]').click();
       
@@ -8,7 +8,7 @@ describe('Membuka halaman Pengaturan Ekspedisi dan melihat kesesuaian dengan des
 
     beforeEach(() => {
       cy.apiLogin('rahmadea.putri@assist.id', '12345678'); // Login using valid credentials
-      cy.visitDashboard(medcareVer); // Visit the dashboard after successful login
+      cy.visitDashboard(Cypress.env('companyId')); // Visit the dashboard after successful login
       navigatePengaturan(); // Navigate to "Tambah Kontak" page for each test
     });
     
@@ -346,12 +346,15 @@ describe('Membuka halaman Pengaturan Ekspedisi dan melihat kesesuaian dengan des
       cy.get('.MuiTableBody-root > .MuiTableRow-root > .MuiTableCell-root').contains('Tidak ada data')
     })
 
+    //Status
+
     it('[PENGATURAN-EKSPEDISI] - Harus berhasil merubah status ekspekssisi', () => {
       cy.get('[data-cy="submenu-item-expedition-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click();
       cy.get(':nth-child(1) > :nth-child(3) > .MuiSwitch-root > .MuiButtonBase-root > .PrivateSwitchBase-input').click()
       cy.get('.MuiAlert-message').should('be.visible').and('contain', 'Berhasil Mengubah Status Ekspedisi.')
      })
 
+     //Aksi
     it('[PENGATURAN-EKSPEDISI] - Harus berhasli menghapus data ekspekssisi', () => {
       cy.get('[data-cy="submenu-item-expedition-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click();
       cy.get('.MuiTableBody-root > :nth-child(1) > :nth-child(4) > .MuiButtonBase-root').click()
@@ -374,6 +377,8 @@ describe('Membuka halaman Pengaturan Ekspedisi dan melihat kesesuaian dengan des
       cy.get('[data-testid="alert-dialog-cancel-button"]').click()
       cy.get('.css-1nqp4xj').should('be.visible').and('contain', 'Semua Ekspedisi')
      })
+
+     //pegination
 
     it('[PENGATURAN-EKSPEDISI] - Harus bisa menampilkan data ekspedisi, ketika menekan tombol next', () => {
       cy.get('[data-cy="submenu-item-expedition-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click();
