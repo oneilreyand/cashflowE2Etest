@@ -139,7 +139,7 @@ describe('[PENGATURAN-PENGGUNA] - Membuka halaman Pengaturan Pengguna dan meliha
         cy.get('.MuiPaper-elevation0 > .MuiStack-root > .MuiButton-containedPrimary').click();
 
     });
-        it.only('"Validasi nama hak akses kosong', () => {
+        it('"Validasi nama hak akses kosong', () => {
         cy.get('[data-testid="add-permission-button"]').should('be.visible').click();
         cy.get('.MuiGrid2-container > :nth-child(1) > .MuiFormControl-root > .MuiInputBase-root').click();
         cy.get('[data-value="6186af42-4a6e-11f0-97e5-496865600ce7"]').click();

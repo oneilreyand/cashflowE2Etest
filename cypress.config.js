@@ -2,7 +2,7 @@ const { defineConfig } = require("cypress");
 const addAccessibilityTasks = require('wick-a11y/accessibility-tasks');
 const codeCoverage = require('@cypress/code-coverage/task');
 const mochawesomeReporter = require('cypress-mochawesome-reporter/plugin')
-const env = 'dev'
+const env = 'local'
 
 module.exports = defineConfig({
   projectId: '8dmse1',
