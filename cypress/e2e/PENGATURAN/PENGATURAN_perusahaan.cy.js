@@ -6,7 +6,7 @@ describe('[PENGATURAN-PERUSAHAAN] - Membuka halaman Pengaturan Perusahaan dan me
   
     beforeEach(() => {
       cy.apiLogin('erni.yulianti@assist.id', '12345678'); // Login using valid credentials
-      cy.visitDashboard(); // Visit the dashboard after successful login
+      cy.visitDashboard(Cypress.env('companyId')); // Visit the dashboard after successful login
       navigatePengaturan(); // Navigate to "Tambah Kontak" page for each test
       });
   
@@ -44,7 +44,7 @@ describe('[PENGATURAN-PERUSAHAAN] - Membuka halaman Pengaturan Perusahaan dan me
             .and('contain', 'NPWP');
     });
 
-    it.only('Edit data perusahaan', () => {
+    it('Edit data perusahaan', () => {
         cy.intercept('PUT', '**/api/setting-company/*').as('updateSettingCompany');
         cy.get('[data-cy="company-name-header-setting-company"]').click();
         cy.get('[data-cy="button-edit-data-setting-company"]').click();
