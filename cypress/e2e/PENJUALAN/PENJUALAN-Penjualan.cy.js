@@ -8,22 +8,22 @@ describe("PENJUALAN", () => {
   });
 
     it('Validasi Penulisan Komponen UI Statis Halaman Penjualan', () => {
-    cy.get('.css-fyc6bt > .MuiTypography-h5').should('have.text', 'Penjualan');
+    cy.get(' * > .MuiTypography-h5').should('have.text', 'Penjualan');
     cy.get('.MuiBreadcrumbs-ol').should('have.text', "Beranda/Penjualan");
 
-    cy.get(':nth-child(1) > .MuiPaper-root > .MuiCardContent-root > .css-kdbf65 > .MuiStack-root > .MuiBadge-root > .MuiTypography-root')
+    cy.get(':nth-child(1) > .MuiPaper-root > .MuiCardContent-root > * > .MuiStack-root > .MuiBadge-root > .MuiTypography-root')
       .should('have.text', "Belum Dibayar");
-    cy.get(':nth-child(1) > .MuiPaper-root > .MuiCardContent-root > .css-kdbf65 > .MuiStack-root > .MuiTypography-body2')
+    cy.get(':nth-child(1) > .MuiPaper-root > .MuiCardContent-root > * > .MuiStack-root > .MuiTypography-body2')
       .should('have.text', 'Total Penjualan');
 
-    cy.get(':nth-child(2) > .MuiPaper-root > .MuiCardContent-root > .css-kdbf65 > .MuiStack-root > .MuiBadge-root > .MuiTypography-root')
+    cy.get(':nth-child(2) > .MuiPaper-root > .MuiCardContent-root > * > .MuiStack-root > .MuiBadge-root > .MuiTypography-root')
       .should('have.text', 'Telat Dibayar');
-    cy.get(':nth-child(2) > .MuiPaper-root > .MuiCardContent-root > .css-kdbf65 > .MuiStack-root > .MuiTypography-body2')
+    cy.get(':nth-child(2) > .MuiPaper-root > .MuiCardContent-root > * > .MuiStack-root > .MuiTypography-body2')
       .should('have.text', 'Total Penjualan');
 
-    cy.get(':nth-child(3) > .MuiPaper-root > .MuiCardContent-root > .css-kdbf65 > .MuiStack-root > .MuiBadge-root')
+    cy.get(':nth-child(3) > .MuiPaper-root > .MuiCardContent-root > * > .MuiStack-root > .MuiBadge-root')
       .should('have.text', 'Pelunasan Diterima (30 Hari Terakhir)');
-    cy.get(':nth-child(3) > .MuiPaper-root > .MuiCardContent-root > .css-kdbf65 > .MuiStack-root > .MuiTypography-body2')
+    cy.get(':nth-child(3) > .MuiPaper-root > .MuiCardContent-root > * > .MuiStack-root > .MuiTypography-body2')
       .should('have.text', 'Total Penjualan');
 
     cy.get('.MuiTabs-flexContainer > :nth-child(1)').should('have.text', 'Semua');
@@ -388,7 +388,7 @@ it('Memastikan Perubahan Summary Card Pelunasan', () => {
   cy.contains('1-11001 - Kas').click();
 
   // Ambil nilai bayar
-  cy.get('.css-1kilcr3 > :nth-child(5) > :nth-child(2)')
+  cy.get(' * > :nth-child(5) > :nth-child(2)')
     .invoke('text')
     .then((bayar) => {
       const totalBayar = parseInt(bayar.replace(/\D/g, ''), 10);
@@ -714,13 +714,13 @@ it('Filter Status Penjualan (Functional Tab Void)', () => {
   });
 });
 
-it.only('Mencari Data Berdasarkan Nama', () => {
+it('Mencari Data Berdasarkan Nama', () => {
 
   // Filter tanggal awal jadi 01/01/0001 supaya semua data keluar
   cy.get(".MuiBox-root > .MuiButtonBase-root").click();
   cy.get('[placeholder="DD/MM/YYYY"]').eq(0).clear().type("01010001");
   cy.contains("Apply").click();
-  
+
   cy.get('[placeholder="Cari"]').type('rayhan')
   cy.get(':nth-child(1) > :nth-child(3) > span > a > .MuiButtonBase-root').should('contain', 'rayhan')
 });
