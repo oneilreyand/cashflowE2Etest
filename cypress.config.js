@@ -5,6 +5,7 @@ const mochawesomeReporter = require('cypress-mochawesome-reporter/plugin')
 const env = 'dev'
 
 module.exports = defineConfig({
+  pageLoadTimeout: 60000,       // 60 detik untuk load halaman
   projectId: '8dmse1',
   reporter: 'cypress-mochawesome-reporter',
   accessibilityFolder: 'cypress/your-accessibility-reports-folder',
@@ -27,9 +28,10 @@ module.exports = defineConfig({
     env: {
       environment: env || "dev", // Default ke 'local' jika tidak ditentukan
       enableAccessibilityVoice: true,
-      companyId: 'e1548780-f7fb-11ef-a979-f7e12916176b'
+      companyId: 'c9b9b760-306f-11f0-ac00-4581423404ed'
     },
     pageLoadTimeout: 120000, // tingkatkan menjadi 2 menit atau lebih
+    defaultCommandTimeout: 5000, // tingkatkan menjadi 5 detik
     viewportHeight: 960,
     viewportWidth: 1436,
     experimentalStudio: true,

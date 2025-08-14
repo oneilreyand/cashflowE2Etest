@@ -1,9 +1,9 @@
-import { PT_ARSYA, apiDomain } from "../../data";
+const companyId = Cypress.env('companyId');
 
 describe("PENJUALAN", () => {
   beforeEach(() => {
     cy.apiLogin("rayhanrayandra.work.id@gmail.com", "12345678");
-    cy.visitDashboard(PT_ARSYA);
+    cy.visitDashboard(companyId);
     cy.navigateToPenjualan();
   });
 
@@ -48,23 +48,25 @@ describe("PENJUALAN", () => {
   it("Validasi Isi Tabel Penjualan Berdasarkan Data API Asli", () => {
   // Helper format tanggal
   const formatDate = (dateStr) => {
-    if (!dateStr) return "";
-    const dateOnly = dateStr.split("T")[0];
-    const [year, month, day] = dateOnly.split("-");
-    return `${day.padStart(2, "0")}/${month.padStart(2, "0")}/${year.slice(2)}`;
-  };
+  if (!dateStr) return "";
+  const dateObj = new Date(dateStr);
+  const day = String(dateObj.getDate()).padStart(2, "0");
+  const month = String(dateObj.getMonth() + 1).padStart(2, "0");
+  const year = String(dateObj.getFullYear()).padStart(4, "0").slice(2); // <-- ini kuncinya
+  return `${day}/${month}/${year}`;
+};
 
   // Spy API penjualan tanpa memanipulasi
   cy.intercept(
     "GET",
-    `${apiDomain}/api/penjualan?keyword=&status=&startDate=0001-01-01&endDate=2025-08-31&skip=0&limit=10&companyId=${PT_ARSYA}`
+    `**/api/penjualan?keyword=&status=&**-01-01&**&skip=0&limit=10&companyId=${companyId}`
   ).as("getPenjualan");
 
   // Filter tanggal awal jadi 01/01/0001 supaya semua data keluar
   cy.get(".MuiBox-root > .MuiButtonBase-root").click();
   cy.get('[placeholder="DD/MM/YYYY"]').eq(0).clear().type("01010001");
   cy.contains("Apply").click();
-
+  cy.wait(1000)
   // Tunggu request API asli
   cy.wait("@getPenjualan").then(({ response }) => {
     expect(response.statusCode).to.eq(200);
@@ -76,9 +78,9 @@ describe("PENJUALAN", () => {
     cy.get("table tbody tr").each(($row, index) => {
   const rowData = apiData[index];
   if (!rowData) return;
-
+  
   const clean = (el) => Cypress.$(el).text().replace(/\s+/g, " ").trim();
-
+  
   expect(clean($row.find("td").eq(0)))
     .to.eq(formatDate(rowData.tanggal_transaksi));
 
@@ -116,7 +118,7 @@ it('Skeleton Loading Saat Fetch Data', () => {
 });
 
 it('Tampilkan "Tidak Ada Data" Saat Data Kosong', () => {
-  cy.intercept('GET', `${apiDomain}/api/penjualan?**companyId=${PT_ARSYA}`,
+  cy.intercept('GET', `**/api/penjualan?**companyId=${companyId}`,
     (req) => {
     req.reply({
       statusCode: 200,
@@ -193,68 +195,27 @@ it('Breadcrumbs Halaman Detail Pembayaran', () => {
 
   });
 
-it.only('Memastikan Perubahan Summary Card', () => {
-  // Pasang intercept sekali
-  cy.intercept('GET', `${apiDomain}/api/penjualan/overview?companyId=${PT_ARSYA}`).as('waitDataCard');
-  cy.intercept('GET', `${apiDomain}/api/productList/productWithStock?companyId=${PT_ARSYA}`).as('productsData');
-  cy.intercept('GET', `${apiDomain}/api/kontak/list?jenisKontak=pelanggan&limit=999&companyId=${PT_ARSYA}`).as('waitPelanggan');
+it('Memastikan Perubahan Summary Card Belum Dibayar', () => {
+  let apiAwalBelum; // simpan nilai awal API
 
-  // ===== BELUM DIBAYAR =====
+  // Pasang intercept
+  cy.intercept('GET', `**/api/penjualan/overview?companyId=${companyId}`).as('waitDataCard');
+  cy.intercept('GET', `**/api/productList/productWithStock?companyId=${companyId}`).as('productsData');
+  cy.intercept('GET', `**/api/kontak/list?jenisKontak=pelanggan&limit=999&companyId=${companyId}`).as('waitPelanggan');
+
+  // === CEK NILAI AWAL ===
   cy.wait('@waitDataCard').then(({ response }) => {
-    const apiAwalBelum = Math.round(response.body.belumDibayar.nominal);
-
+    apiAwalBelum = Math.round(response.body.belumDibayar.nominal);
+    const formattedAwal = `Rp\u00A0${new Intl.NumberFormat('id-ID').format(apiAwalBelum)}`;
+    
     cy.contains(':nth-child(1) .MuiTypography-h5', 'Rp')
-      .invoke('text')
-      .then((text) => {
-        const uiAwalBelum = parseInt(text.replace(/[^\d]/g, ''), 10);
-        cy.log(`💰 API: ${apiAwalBelum}`);
-        cy.log(`💻 UI : ${uiAwalBelum}`);
-        expect(uiAwalBelum).to.eq(apiAwalBelum);
-      });
-
-    // Proses tambah penjualan normal
-    cy.contains('Penjualan Baru').click();
-
-    cy.wait('@waitPelanggan').then(({ response }) => {
-      const pelanggan = response.body.results[0];
-      cy.get('#idPelanggan').click();
-      cy.get(`[data-value="${pelanggan.id}"]`).click();
-    });
-
-    cy.get('#address').clear().type('Jalan Palaraya');
-
-    cy.wait('@productsData').then(({ response }) => {
-      const produk = response.body.results.find(p => p.is_sell);
-      cy.get('[id="penjualan.0.product_id"]').click();
-      cy.get(`[data-value="${produk.id}"]`).click();
-    });
-
-    cy.get('[name="penjualan.0.price"]').clear().type('10000');
-
-    cy.get(':nth-child(9) > .MuiGrid2-container > :nth-child(2)')
-      .invoke('text')
-      .then((totalText) => {
-        const totalDibayar = parseInt(totalText.replace(/[^\d]/g, ''), 10);
-
-        cy.intercept('GET', `${apiDomain}/api/penjualan/overview?companyId=${PT_ARSYA}`).as('waitDataCard2');
-        cy.get('.MuiButton-contained').click();
-        cy.get('[data-testid="alert-dialog-submit-button"]').click();
-
-        cy.wait('@waitDataCard2').then(() => {
-          cy.contains(':nth-child(1) .MuiTypography-h5', 'Rp')
-            .invoke('text')
-            .then((akhirText) => {
-              const akhirBelum = parseInt(akhirText.replace(/[^\d]/g, ''), 10);
-              expect(akhirBelum).to.eq(apiAwalBelum + totalDibayar);
-            });
-        });
-      });
+      .should('have.text', formattedAwal);
   });
 
-  // ===== TELAT DIBAYAR =====
-  // Trigger reload data lagi dengan klik "Tambah Penjualan"
+  // === TAMBAH PENJUALAN BARU ===
   cy.contains('Penjualan Baru').click();
 
+  // Pilih pelanggan
   cy.wait('@waitPelanggan').then(({ response }) => {
     const pelanggan = response.body.results[0];
     cy.get('#idPelanggan').click();
@@ -262,42 +223,506 @@ it.only('Memastikan Perubahan Summary Card', () => {
   });
 
   cy.get('#address').clear().type('Jalan Palaraya');
-  cy.get('[placeholder="DD/MM/YYYY"]').eq(0).clear().type("01010001");
 
+  // Pilih produk
   cy.wait('@productsData').then(({ response }) => {
     const produk = response.body.results.find(p => p.is_sell);
     cy.get('[id="penjualan.0.product_id"]').click();
     cy.get(`[data-value="${produk.id}"]`).click();
   });
 
+  // Isi harga
   cy.get('[name="penjualan.0.price"]').clear().type('10000');
 
+  // Ambil total dibayar
   cy.get(':nth-child(9) > .MuiGrid2-container > :nth-child(2)')
     .invoke('text')
     .then((totalText) => {
-      const totalDibayar = parseInt(totalText.replace(/[^\d]/g, ''), 10);
+      const totalDibayar = Number(totalText.replace(/[^0-9]/g, ''));
 
-      // Ambil nilai awal Telat sebelum submit
-      cy.wait('@waitDataCard').then(({ response }) => {
-        const apiAwalTelat = Math.round(response.body.telatBayar.nominal);
+      // Intercept untuk data setelah simpan
+      cy.intercept('GET', `**/api/penjualan/overview?companyId=${companyId}`).as('waitDataCard2');
 
-        cy.get('.MuiButton-contained').click();
-        cy.get('[data-testid="alert-dialog-submit-button"]').click();
+      // Submit form
+      cy.get('.MuiButton-contained').click();
+      cy.get('[data-testid="alert-dialog-submit-button"]').click();
 
-        cy.wait('@waitDataCard').then(() => {
-          cy.contains(':nth-child(2) .MuiTypography-h5', 'Rp')
-            .invoke('text')
-            .then((akhirText) => {
-              const akhirTelat = parseInt(akhirText.replace(/[^\d]/g, ''), 10);
-              expect(akhirTelat).to.eq(apiAwalTelat + totalDibayar);
-            });
-        });
+      // Tunggu data summary card terbaru
+      cy.wait('@waitDataCard2').then(({ response }) => {
+        const apiAkhirBelum = Math.round(response.body.belumDibayar.nominal);
+        const formattedAkhir = `Rp\u00A0${new Intl.NumberFormat('id-ID').format(apiAkhirBelum)}`;
+
+        // Cek nilai UI sama persis dengan API
+        cy.contains(':nth-child(1) .MuiTypography-h5', 'Rp')
+          .should('have.text', formattedAkhir);
+
+        // Cek logika perubahan
+        expect(apiAkhirBelum).to.eq(apiAwalBelum + totalDibayar);
       });
-
-      // tambahkan kondisi dimana bayar lunas dan data tersebut terlihat di pembayaran 30hari terakhir
     });
 });
 
+it('Memastikan Perubahan Summary Card Telat Dibayar', () => {
+  let apiTelatSebelum; // simpan di scope luar
+
+  // Pasang intercept
+  cy.intercept('GET', `**/api/penjualan/overview?companyId=${companyId}`).as('waitDataCard');
+  cy.intercept('GET', `**/api/productList/productWithStock?companyId=${companyId}`).as('productsData');
+  cy.intercept('GET', `**/api/kontak/list?jenisKontak=pelanggan&limit=999&companyId=${companyId}`).as('waitPelanggan');
+
+  // === CEK NILAI AWAL ===
+  cy.wait('@waitDataCard').then(({ response }) => {
+    apiTelatSebelum = Math.round(response.body.telatBayar.nominal);
+    const formattedTelatSebelum = `Rp\u00A0${new Intl.NumberFormat('id-ID').format(apiTelatSebelum)}`;
+    cy.contains(':nth-child(2) .MuiTypography-h5', 'Rp')
+      .should('have.text', formattedTelatSebelum);
+  });
+
+  // === TAMBAH PENJUALAN BARU ===
+  cy.contains('Penjualan Baru').click();
+
+  // Pilih pelanggan
+  cy.wait('@waitPelanggan').then(({ response }) => {
+    const pelanggan = response.body.results[0];
+    cy.get('#idPelanggan').click();
+    cy.get(`[data-value="${pelanggan.id}"]`).click();
+  });
+
+  // Isi alamat dan tanggal
+  cy.get('#address').clear().type('Jalan Palaraya');
+  cy.get('[placeholder="DD/MM/YYYY"]').eq(0).clear().type("01010001");
+
+  // Pilih produk
+  cy.wait('@productsData').then(({ response }) => {
+    const produk = response.body.results.find(p => p.is_sell);
+    cy.get('[id="penjualan.0.product_id"]').click();
+    cy.get(`[data-value="${produk.id}"]`).click();
+  });
+
+  // Isi harga produk
+  cy.get('[name="penjualan.0.price"]').clear().type('10000');
+
+  // Ambil total dibayar
+  cy.get(':nth-child(9) > .MuiGrid2-container > :nth-child(2)')
+    .invoke('text')
+    .then((totalText) => {
+      const totalDibayar = Number(totalText.replace(/[^0-9]/g, ''));
+
+      // Siapkan intercept untuk update summary card setelah simpan
+      cy.intercept('GET', `**/api/penjualan/overview?companyId=${companyId}`).as('waitDataCard2');
+
+      // Submit form
+      cy.get('.MuiButton-contained').click();
+      cy.get('[data-testid="alert-dialog-submit-button"]').click();
+
+      // Tunggu data summary card terbaru
+      cy.wait('@waitDataCard2').then(({ response }) => {
+        const apiTelatSesudah = Math.round(response.body.telatBayar.nominal);
+        const formattedTelatSesudah = `Rp\u00A0${new Intl.NumberFormat('id-ID').format(apiTelatSesudah)}`;
+
+        // Cek nilai UI sama persis dengan API (format Rp)
+        cy.contains(':nth-child(2) .MuiTypography-h5', 'Rp')
+          .should('have.text', formattedTelatSesudah);
+
+        // Cek logika perubahan sesuai penambahan total dibayar
+        expect(apiTelatSesudah).to.eq(apiTelatSebelum + totalDibayar);
+      });
+    });
+});
+
+it('Memastikan Perubahan Summary Card Pelunasan', () => {
+  // Pasang intercept awal
+  cy.intercept('GET', `**/api/penjualan/overview?companyId=${companyId}`).as('waitDataCard');
+  cy.intercept('GET', `**/api/productList/productWithStock?companyId=${companyId}`).as('productsData');
+  cy.intercept('GET', `**/api/kontak/list?jenisKontak=pelanggan&limit=999&companyId=${companyId}`).as('waitPelanggan');
+
+  let apiPelunasan;
+
+  // === TAMBAH PENJUALAN BARU ===
+  cy.contains('Penjualan Baru').click();
+
+  // Pilih pelanggan
+  cy.wait('@waitPelanggan').then(({ response }) => {
+    const pelanggan = response.body.results[0];
+    cy.get('#idPelanggan').click();
+    cy.get(`[data-value="${pelanggan.id}"]`).click();
+  });
+
+  // Isi alamat
+  cy.get('#address').clear().type('Jalan Palaraya');
+
+  // Pilih produk
+  cy.wait('@productsData').then(({ response }) => {
+    const produk = response.body.results.find(p => p.is_sell);
+    cy.get('[id="penjualan.0.product_id"]').click();
+    cy.get(`[data-value="${produk.id}"]`).click();
+  });
+
+  // Isi harga
+  cy.get('[name="penjualan.0.price"]').clear().type('10000');
+
+  // Submit form penjualan
+  cy.get('.MuiButton-contained').click();
+  cy.get('[data-testid="alert-dialog-submit-button"]').click();
+
+  // Ambil data awal pelunasan
+  cy.intercept('GET', `**/api/penjualan/overview?companyId=${companyId}`).as('waitDataCardAfterAdd');
+  cy.wait(1000)
+  cy.wait('@waitDataCardAfterAdd').then(({ response }) => {
+    apiPelunasan = Math.round(response.body.pelunasanDiterima.nominal);
+    const formattedPelunasan = `Rp\u00A0${new Intl.NumberFormat('id-ID').format(apiPelunasan)}`;
+
+    cy.get(':nth-child(3) > .MuiPaper-root > .MuiCardContent-root > * > .MuiStack-root > .MuiTypography-h5')
+      .should('have.text', formattedPelunasan);
+  });
+
+  // === MASUK KE DETAIL PENJUALAN DAN LAKUKAN PELUNASAN ===
+  cy.get(':nth-child(1) > :nth-child(2) > span > a > .MuiButtonBase-root').click();
+  cy.get('.MuiBox-root > .MuiInputBase-root > .MuiSelect-select').click();
+  cy.get('[data-value="payment"]').click();
+
+  cy.get('#metode').click();
+  cy.get('[data-value="Tunai"]').click();
+
+  cy.get('#nomor_akun').click();
+  cy.contains('1-11001 - Kas').click();
+
+  // Ambil nilai bayar
+  cy.get('.css-1kilcr3 > :nth-child(5) > :nth-child(2)')
+    .invoke('text')
+    .then((bayar) => {
+      const totalBayar = parseInt(bayar.replace(/\D/g, ''), 10);
+      cy.get('[name="sub_total"]').type(totalBayar);
+
+      // Intercept update summary card setelah pelunasan
+      cy.intercept('GET', `**/api/penjualan/overview?companyId=${companyId}`).as('waitDataCardAfterPay');
+
+      // Submit pelunasan
+      cy.get('.MuiButton-contained').click();
+      cy.get('[data-testid="alert-dialog-submit-button"]').click();
+
+      // // === Perbaikan pengecekan URL pakai .then() ===
+      // cy.url().then((currentUrl) => {
+      //   if (currentUrl === "https://uat-cashbook.assist.id/admin/sales/detail") {
+      //     cy.visit('https://uat-cashbook.assist.id/admin/sales');
+      //   } else {
+      //     cy.log('ganti kodingannya bg maren balikannya gak langsung visit sales');
+      //   }
+      // });
+
+      // Validasi perubahan summary card
+      cy.wait("@waitDataCardAfterPay").then(({ response }) => {
+        const apiPelunasanBaru = Math.round(response.body.pelunasanDiterima.nominal);
+        const formattedApiPelunasan = `Rp\u00A0${new Intl.NumberFormat('id-ID').format(apiPelunasanBaru)}`;
+
+        cy.get(':nth-child(3) > .MuiPaper-root > .MuiCardContent-root > * > .MuiStack-root > .MuiTypography-h5')
+          .should('have.text', formattedApiPelunasan);
+      });
+    });
+});
+  
+it('Filter Status Penjualan (Functional Tab Semua)', () => {
+    // Helper format tanggal
+  const formatDate = (dateStr) => {
+  if (!dateStr) return "";
+  const dateObj = new Date(dateStr);
+  const day = String(dateObj.getDate()).padStart(2, "0");
+  const month = String(dateObj.getMonth() + 1).padStart(2, "0");
+  const year = String(dateObj.getFullYear()).padStart(4, "0").slice(2); // <-- ini kuncinya
+  return `${day}/${month}/${year}`;
+};
+
+
+  // Spy API penjualan tanpa manipulasi
+  cy.intercept(
+    "GET",
+    `**/api/penjualan?keyword=&status=&**-01-01&**&skip=0&limit=10&companyId=${companyId}`
+  ).as("getPenjualanSemua");
+
+  // Filter tanggal awal jadi 01/01/0001 supaya semua data keluar
+  cy.get(".MuiBox-root > .MuiButtonBase-root").click();
+  cy.get('[placeholder="DD/MM/YYYY"]').eq(0).clear().type("01010001");
+  cy.contains("Apply").click();
+
+  // Tunggu request API asli
+  cy.wait(1000);
+  cy.wait("@getPenjualanSemua").then(({ response }) => {
+    expect(response.statusCode).to.eq(200);
+
+    const apiData = response.body.results;
+
+    // Pastikan jumlah row tabel sama dengan data API
+    cy.get("table tbody tr").should("have.length", apiData.length);
+
+    // Cek setiap row
+    cy.get("table tbody tr").each(($row, index) => {
+      const rowData = apiData[index];
+      if (!rowData) return;
+
+      const clean = (el) => Cypress.$(el).text().replace(/\s+/g, " ").trim();
+
+      // Validasi tampilan tanggal jatuh tempo
+      expect(clean($row.find("td").eq(3))).to.eq(formatDate(rowData.tanggal_jatuh_tempo));
+
+      // Tentukan status yang seharusnya
+      const today = new Date();
+      const dueDate = new Date(rowData.tanggal_jatuh_tempo);
+      let expectedStatus;
+
+      if (rowData.sisa_tagihan === 0 || rowData.status === "Lunas") {
+        expectedStatus = "Lunas";
+      } 
+      else if (
+        rowData.sisa_tagihan > 0 &&
+        rowData.sisa_tagihan < rowData.total_tagihan
+      ) {
+        expectedStatus = "Dibayar Sebagian";
+      } 
+      else if (dueDate <= today) {
+        expectedStatus = "Jatuh Tempo";
+      } 
+      else {
+        expectedStatus = rowData.status;
+      }
+
+      // Validasi status di UI sesuai logika
+      expect(clean($row.find("td").eq(4))).to.eq(expectedStatus);
+    });
+  });
+});
+
+
+it('Filter Status Penjualan (Functional Tab Belum Dibayar)', () => {
+  // Helper format tanggal
+  const formatDate = (dateStr) => {
+  if (!dateStr) return "";
+  const dateObj = new Date(dateStr);
+  const day = String(dateObj.getDate()).padStart(2, "0");
+  const month = String(dateObj.getMonth() + 1).padStart(2, "0");
+  const year = String(dateObj.getFullYear()).padStart(4, "0").slice(2); // <-- ini kuncinya
+  return `${day}/${month}/${year}`;
+};
+
+  // Spy API penjualan dengan filter "Belum Dibayar"
+  cy.intercept(
+    "GET",
+    `**/api/penjualan?keyword=&status=Belum+Dibayar&**-01-01&**&skip=0&limit=10&companyId=${companyId}`
+  ).as("getPenjualanBelumDibayar");
+
+  // Filter tanggal awal jadi 01/01/0001 supaya semua data keluar
+  cy.get(".MuiBox-root > .MuiButtonBase-root").click();
+  cy.get('[placeholder="DD/MM/YYYY"]').eq(0).clear().type("01010001");
+  cy.contains("Apply").click();
+
+  // Klik tab "Belum Dibayar"
+  cy.get('.MuiTabs-flexContainer > :nth-child(2)').click();
+
+  // Tunggu data API
+  cy.wait(1000);
+  cy.wait("@getPenjualanBelumDibayar").then(({ response }) => {
+    expect(response.statusCode).to.eq(200);
+    const apiData = response.body.results;
+
+    // Pastikan jumlah row tabel sama dengan data API
+    cy.get("table tbody tr").should("have.length", apiData.length);
+
+    // Loop semua row
+    cy.get("table tbody tr").each(($row, index) => {
+      const rowData = apiData[index];
+      if (!rowData) return;
+
+      const clean = (el) => Cypress.$(el).text().replace(/\s+/g, " ").trim();
+
+      // Validasi tanggal jatuh tempo di UI
+      expect(clean($row.find("td").eq(3))).to.eq(formatDate(rowData.tanggal_jatuh_tempo));
+
+      // Tentukan status seharusnya
+      const today = new Date();
+      const dueDate = new Date(rowData.tanggal_jatuh_tempo);
+
+      const expectedStatus = dueDate <= today ? "Jatuh Tempo" : "Belum Dibayar";
+
+      // Validasi status di UI
+      expect(clean($row.find("td").eq(4))).to.eq(expectedStatus);
+    });
 })  
+});
+
+it('Filter Status Penjualan (Functional Tab Lunas)', () => {
+  // Helper format tanggal
+  const formatDate = (dateStr) => {
+  if (!dateStr) return "";
+  const dateObj = new Date(dateStr);
+  const day = String(dateObj.getDate()).padStart(2, "0");
+  const month = String(dateObj.getMonth() + 1).padStart(2, "0");
+  const year = String(dateObj.getFullYear()).padStart(4, "0").slice(2); // <-- ini kuncinya
+  return `${day}/${month}/${year}`;
+};
 
 
+  // Spy API penjualan dengan filter "Lunas"
+  cy.intercept(
+    "GET",
+    `**/api/penjualan?keyword=&status=Lunas&**-01-01&**&skip=0&limit=10&companyId=${companyId}`
+  ).as("getPenjualanLunas");
+
+  // Filter tanggal awal jadi 01/01/0001 supaya semua data keluar
+  cy.get(".MuiBox-root > .MuiButtonBase-root").click();
+  cy.get('[placeholder="DD/MM/YYYY"]').eq(0).clear().type("01010001");
+  cy.contains("Apply").click();
+
+  // Klik tab "Lunas"
+  cy.get('.MuiTabs-flexContainer > :nth-child(4)').click();
+
+  // Tunggu data API
+  cy.wait(1000);
+  cy.wait("@getPenjualanLunas").then(({ response }) => {
+    expect(response.statusCode).to.eq(200);
+    const apiData = response.body.results;
+
+    // Pastikan jumlah row tabel sama dengan data API
+    cy.get("table tbody tr").should("have.length", apiData.length);
+
+    // Loop semua row
+    cy.get("table tbody tr").each(($row, index) => {
+      const rowData = apiData[index];
+      if (!rowData) return;
+
+      const clean = (el) => Cypress.$(el).text().replace(/\s+/g, " ").trim();
+
+      // Validasi tanggal jatuh tempo di UI
+      expect(clean($row.find("td").eq(3))).to.eq(formatDate(rowData.tanggal_jatuh_tempo));
+
+      // Pastikan status hanya "Lunas"
+      expect(clean($row.find("td").eq(4))).to.eq("Lunas");
+
+      // Validasi data API mendukung status "Lunas"
+      expect(rowData.sisa_tagihan).to.eq(0);
+      expect(rowData.status).to.eq("Lunas");
+    });
+  });
+});
+
+it('Filter Status Penjualan (Functional Tab Dibayar Sebagian)', () => {
+  // Helper format tanggal
+  const formatDate = (dateStr) => {
+  if (!dateStr) return "";
+  const dateObj = new Date(dateStr);
+  const day = String(dateObj.getDate()).padStart(2, "0");
+  const month = String(dateObj.getMonth() + 1).padStart(2, "0");
+  const year = String(dateObj.getFullYear()).padStart(4, "0").slice(2); // <-- ini kuncinya
+  return `${day}/${month}/${year}`;
+};
+
+  // Intercept API
+  cy.intercept(
+    "GET",
+    `**/api/penjualan?keyword=&status=Dibayar+Sebagian&**-01-01&**&skip=0&limit=10&companyId=${companyId}`
+  ).as("getPenjualanDibayarSebagian");
+
+  // Filter tanggal awal jadi 01/01/0001 supaya semua data keluar
+  cy.get(".MuiBox-root > .MuiButtonBase-root").click();
+  cy.get('[placeholder="DD/MM/YYYY"]').eq(0).clear().type("01010001");
+  cy.contains("Apply").click();
+
+  // Klik tab Dibayar Sebagian
+  cy.get('.MuiTabs-flexContainer > :nth-child(5)').click();
+
+  // Tunggu API
+  cy.wait(1000);
+  cy.wait("@getPenjualanDibayarSebagian").then(({ response }) => {
+    expect(response.statusCode).to.eq(200);
+    const apiData = response.body.results;
+
+    // Pastikan jumlah row tabel sama
+    cy.get("table tbody tr").should("have.length", apiData.length);
+
+    cy.get("table tbody tr").each(($row, index) => {
+      const rowData = apiData[index];
+      const clean = (el) => Cypress.$(el).text().replace(/\s+/g, " ").trim();
+      if (!rowData) return;
+
+      // Validasi tanggal jatuh tempo
+      expect(clean($row.find("td").eq(3))).to.eq(formatDate(rowData.tanggal_jatuh_tempo));
+
+      // Ambil status dari UI dan API
+      const statusUI = clean($row.find("td").eq(4));
+      const statusAPI = rowData.status;
+
+      // Validasi status hanya "Dibayar Sebagian"
+      expect(statusAPI).to.eq("Dibayar Sebagian");
+      expect(statusUI).to.eq("Dibayar Sebagian");
+
+      // Validasi sisa tagihan antara 0 dan total
+      expect(rowData.sisa_tagihan).to.be.greaterThan(0);
+      expect(rowData.sisa_tagihan).to.be.lessThan(rowData.total);
+    });
+  });
+});
+
+it('Filter Status Penjualan (Functional Tab Void)', () => {
+  // Helper format tanggal
+  const formatDate = (dateStr) => {
+  if (!dateStr) return "";
+  const dateObj = new Date(dateStr);
+  const day = String(dateObj.getDate()).padStart(2, "0");
+  const month = String(dateObj.getMonth() + 1).padStart(2, "0");
+  const year = String(dateObj.getFullYear()).padStart(4, "0").slice(2); // <-- ini kuncinya
+  return `${day}/${month}/${year}`;
+};
+
+
+  // Intercept API untuk status Void
+  cy.intercept(
+    "GET",
+    `**/api/penjualan?keyword=&status=Void&**-01-01&**&skip=0&limit=10&companyId=${companyId}`
+  ).as("getPenjualanVoid");
+
+  // Filter tanggal awal jadi 01/01/0001 supaya semua data keluar
+  cy.get(".MuiBox-root > .MuiButtonBase-root").click();
+  cy.get('[placeholder="DD/MM/YYYY"]').eq(0).clear().type("01010001");
+  cy.contains("Apply").click();
+  
+  // Klik tab Void (pastikan index sesuai di tab)
+  cy.get('.MuiTabs-flexContainer > :nth-child(6)').click();
+
+  // Tunggu API
+  cy.wait(1000);
+  cy.wait("@getPenjualanVoid").then(({ response }) => {
+    expect(response.statusCode).to.eq(200);
+    const apiData = response.body.results;
+
+    // Pastikan jumlah row tabel sama
+    cy.get("table tbody tr").should("have.length", apiData.length);
+
+    cy.get("table tbody tr").each(($row, index) => {
+      const rowData = apiData[index];
+      const clean = (el) => Cypress.$(el).text().replace(/\s+/g, " ").trim();
+      if (!rowData) return;
+
+      // Validasi tanggal jatuh tempo
+      expect(clean($row.find("td").eq(3))).to.eq(formatDate(rowData.tanggal_jatuh_tempo));
+
+      // Ambil status dari UI dan API
+      const statusUI = clean($row.find("td").eq(4));
+      const statusAPI = rowData.status;
+
+      // Validasi status hanya "Void"
+      expect(statusAPI).to.eq("Void");
+      expect(statusUI).to.eq("Void");
+    });
+  });
+});
+
+it.only('Mencari Data Berdasarkan Nama', () => {
+
+  // Filter tanggal awal jadi 01/01/0001 supaya semua data keluar
+  cy.get(".MuiBox-root > .MuiButtonBase-root").click();
+  cy.get('[placeholder="DD/MM/YYYY"]').eq(0).clear().type("01010001");
+  cy.contains("Apply").click();
+  
+  cy.get('[placeholder="Cari"]').type('rayhan')
+  cy.get(':nth-child(1) > :nth-child(3) > span > a > .MuiButtonBase-root').should('contain', 'rayhan')
+});
+
+})
