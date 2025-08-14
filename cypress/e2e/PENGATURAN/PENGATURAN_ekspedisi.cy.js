@@ -1,4 +1,3 @@
-import { medcareVer } from "../../data";
 
 describe('TEST CASE PENGATURAN EKSPEDISI', () => {
     const navigatePengaturan = () => {
@@ -242,7 +241,7 @@ describe('TEST CASE PENGATURAN EKSPEDISI', () => {
     //   cy.get(':nth-child(4) > div > .MuiButton-contained').should('be.visible').click()
     //  })
 
-    it.only('Harus gagal menambah data dalam kondisi offline', () => {
+    it('Harus gagal menambah data dalam kondisi offline', () => {
       cy.goOffline();
       // Intercept API create ekspedisi dan paksa error (simulasi offline)
       // cy.intercept('POST', 'https://api-uat-cashbook.assist.id/api/setting-expedition', {
@@ -283,7 +282,7 @@ describe('TEST CASE PENGATURAN EKSPEDISI', () => {
       cy.contains('JNT Offline 4').should('not.exist');
     })
 
-    it.only('[PENGATURAN-SALESMAN] - Harus berhasil menambahkan ekspedisi, semua field di isi, status check', () => {
+    it('[PENGATURAN-SALESMAN] - Harus berhasil menambahkan ekspedisi, semua field di isi, status check', () => {
 
       // Intercept API POST untuk setting salesman
       cy.intercept('POST', '**/api/setting-salesman*',

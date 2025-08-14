@@ -434,7 +434,7 @@ describe('[PENGATURAN-SALESMAN] - Membuka halaman Pengaturan Salesman dan meliha
 
     //Aksi
 
-    it.only('[PENGATURAN-SALESMAN] - Harus berhasil menghapus salesman', () => {
+    it('[PENGATURAN-SALESMAN] - Harus berhasil menghapus salesman', () => {
       cy.intercept('GET', '**/api/setting-salesman**').as('getSalesman');
       cy.get('[data-cy="submenu-item-salesman-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click();
       cy.wait('@getSalesman').then(() => {
