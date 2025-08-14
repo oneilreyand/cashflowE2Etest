@@ -4,7 +4,7 @@ describe('[PENGATURAN-AKUN]', () => {
 
   beforeEach(() => {
     cy.apiLogin('erni.yulianti@assist.id', '12345678');
-    cy.visitDashboard();
+    cy.visitDashboard(Cypress.env('companyId'));
     cy.navigateToPengaturanAkun();
   });
   

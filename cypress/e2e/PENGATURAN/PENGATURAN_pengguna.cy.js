@@ -16,7 +16,7 @@ describe('[PENGATURAN-PENGGUNA] - Membuka halaman Pengaturan Pengguna dan meliha
         .and('contain', 'Daftar Pengguna','Nama','Email', 'Hak Akses','Aksi'); 
     });
 
-    it.only('[PENGATURAN-PENGGUNA] - Menambah Pengguna Baru', () => {
+    it('[PENGATURAN-PENGGUNA] - Menambah Pengguna Baru', () => {
       cy.get('[data-testid="add-user-button"]').should('be.visible').click();
       cy.get('input[name="name"]').type('Nanda Fitra');
       cy.get('input[name="email"]').type('nanda@gmail.com');
