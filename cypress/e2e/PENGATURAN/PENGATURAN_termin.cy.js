@@ -37,7 +37,7 @@ describe('[PENGATURAN-TERMIN]', () => {
   });
 
   //Navigation to Beranda
-  it.only('Breadcrumbs dapat berfungsi dengan baik -> membawa halaman pengaturan ke beranda', () => {
+  it('Breadcrumbs dapat berfungsi dengan baik -> membawa halaman pengaturan ke beranda', () => {
     cy.get('[data-cy="submenu-item-reference-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
     cy.get('.MuiBreadcrumbs-ol > :nth-child(1) > .MuiTypography-root').should('be.visible').and('contain', 'Beranda')
     cy.get('.MuiBreadcrumbs-ol > :nth-child(1) > .MuiTypography-root').click()
@@ -45,12 +45,33 @@ describe('[PENGATURAN-TERMIN]', () => {
     }) 
 
   //Empty State
-
-  it('Membuka halaman Pengaturan Termin saat data termin tidak ada - Harus ada pesan (Tidak ada data) di tabel', () => {
+  it('Membuka halaman Pengaturan Termin dengan kondisi data termin tidak ada - Harus ada pesan (Tidak ada data) di tabel', () => {
     cy.get('[data-cy="submenu-item-termins-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
-    cy.get('.css-egm0ks > .MuiStack-root > .MuiFormControl-root > .MuiInputBase-root').type('hantu')
     cy.get('.MuiTableBody-root > .MuiTableRow-root > .MuiTableCell-root').should('be.visible').and('contain', 'Tidak ada data.')
   });
+
+  it('Manipulasi data - Harus berhasil menampilkan tidak ada data, ketika data kosong', () => {
+      // Intercept the API request
+      cy.intercept('GET', '**/api/setting-termin*', {
+        statusCode: 200, // Simulate a successful response with no data
+        body: {
+          data: [],
+          message: 'No Data',
+        },
+      }).as('getTerminNoData');
+    
+      // Perform the action to trigger the request
+      cy.get('[data-cy="submenu-item-termins-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
+    
+      // Wait for the intercepted request
+      cy.wait('@getTerminNoData', { timeout: 10000 });
+    
+      // Assert that the UI displays the correct error message
+      cy.get('.MuiTableBody-root > .MuiTableRow-root > .MuiTableCell-root')
+        .should('be.visible')
+        .and('contain', 'Tidak ada data');
+    });
+
 
  it('Chek kesesuainan modal tambah Termin dengan design yang ada', () => {
   cy.get('[data-cy="submenu-item-termins-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()

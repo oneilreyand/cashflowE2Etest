@@ -45,19 +45,40 @@ describe('[PENGATURAN-PAJAK]', () => {
   });
 
   //Navigation to Beranda
-  it.only('Breadcrumbs dapat berfungsi dengan baik -> membawa halaman pengaturan ke beranda', () => {
+  it('Breadcrumbs dapat berfungsi dengan baik -> membawa halaman pengaturan ke beranda', () => {
     cy.get('[data-cy="submenu-item-tax-setting"] > [data-cy="list-item-button-sub-menu-setting"] > [data-cy="list-item-text-sub-menu-setting"] > .MuiTypography-root').click()
     cy.get('.MuiBreadcrumbs-ol > :nth-child(1) > .MuiTypography-root').should('be.visible').and('contain', 'Beranda')
     cy.get('.MuiBreadcrumbs-ol > :nth-child(1) > .MuiTypography-root').click()
     cy.get('.MuiTypography-root > span').should('be.visible').and('contain', 'Dashboard')
     })
 
+  //Empty State
+  // it('Membuka halaman Pengaturan Pajak dengan kondisi data pajak tidak ada - Harus ada pesan (Tidak ada data) di tabel', () => {
+  //   cy.get('[data-cy="submenu-item-tax-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
+  //   cy.get('.MuiTableBody-root > .MuiTableRow-root > .MuiTableCell-root').should('exist').and('contain', 'Tidak ada data')
 
-  it('Harus memunculkan text tidak ada data', () => {
-    cy.get('[data-cy="submenu-item-tax-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
-    cy.get('.MuiTableBody-root > .MuiTableRow-root > .MuiTableCell-root').should('exist').and('contain', 'Tidak ada data')
+  it.only(' Manipulasi data - Harus berhasil menampilkan tidak ada data, ketika data kosong', () => {
+      // Intercept the API request
+      cy.intercept('GET', '**/api/setting-taxes*', {
+        statusCode: 200, // Simulate a successful response with no data
+        body: {
+          data: [],
+          message: 'No Data',
+        },
+      }).as('getTaxesNoData');
+    
+      // Perform the action to trigger the request
+      cy.get('[data-cy="submenu-item-tax-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
+    
+      // Wait for the intercepted request
+      cy.wait('@getTaxesNoData', { timeout: 10000 });
+    
+      // Assert that the UI displays the correct error message
+      cy.get('.MuiTableBody-root > .MuiTableRow-root > .MuiTableCell-root')
+        .should('be.visible')
+        .and('contain', 'Tidak ada data');
+    });
 
-  })
   it('harus memunculkan text tidak ada data, ketika pencarian', () => {
     cy.get('[data-cy="submenu-item-tax-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
     cy.get('.MuiTableBody-root > .MuiTableRow-root > .MuiTableCell-root').should('exist').and('contain', 'Tidak ada data')
