@@ -52,14 +52,14 @@ describe('TEST CASE PENGATURAN EKSPEDISI', () => {
     })
     
     //Empty State
-    it.only('Membuka halaman Pengaturan Ekspedisi dengan kondisi data ekspedisi tidak ada - Harus ada pesan (Tidak ada data) di tabel', () => {
+    it('Membuka halaman Pengaturan Ekspedisi dengan kondisi data ekspedisi tidak ada - Harus ada pesan (Tidak ada data) di tabel', () => {
       cy.get('[data-cy="submenu-item-expedition-setting"] > [data-cy="list-item-button-sub-menu-setting"]')
         .should('be.visible')
         .click();
       cy.get('.MuiTableBody-root > .MuiTableRow-root > .MuiTableCell-root').should('be.visible').and('contain', 'Tidak ada data.')
     }); 
 
-    it.only('Manipulasi data - Harus berhasil menampilkan tidak ada data, ketika data kosong', () => {
+    it('Manipulasi data - Harus berhasil menampilkan tidak ada data, ketika data kosong', () => {
       // Intercept the API request
       cy.intercept('GET', '**/api/setting-expedition*', {
         statusCode: 200, // Simulate a successful response with no data
@@ -82,6 +82,34 @@ describe('TEST CASE PENGATURAN EKSPEDISI', () => {
         .should('be.visible')
         .and('contain', 'Tidak ada data');
     });
+
+    //Create New Data Success
+    it('Kesesuaian form tambah data salesman dengan design', () => {
+     cy.get('[data-cy="submenu-item-expedition-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
+     cy.get('.MuiStack-root > .MuiButtonBase-root').should('be.visible').click()
+     cy.get('input[placeholder="Masukkan nama ekspedisi"]').should('be.visible')
+     cy.get('input[placeholder="Keterangan"]').should('be.visible')
+     cy.get('input[name="expedition_status"]').should('exist').and('not.be.checked');
+     cy.get('.MuiButton-text').should('be.visible').and('contain', 'Batalkan')
+     cy.get(':nth-child(4) > div > .MuiButton-contained').should('be.visible').and('contain', 'Simpan')
+    })
+
+    it('Berhasil merubah toggle button status menjadi aktif saat tambah data', () => {
+      cy.get('[data-cy="submenu-item-expedition-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
+      cy.get('.MuiStack-root > .MuiButtonBase-root').should('be.visible').click()
+      cy.get('input[name="expedition_status"]').should('exist').and('not.be.checked');
+      cy.get('input[name="expedition_status"]').click()
+      cy.get('input[name="expedition_status"]').should('exist').and('be.checked');
+    })
+
+    it.only('Berhasil batal tambah ekspedisi dan form tambah ekspedisi tidak ada di halaman', () => {
+      cy.get('[data-cy="submenu-item-expedition-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
+      cy.get('.MuiStack-root > .MuiButtonBase-root').should('be.visible').click()
+      cy.get('.MuiButton-text').click()
+      cy.get('input[placeholder="Masukkan nama ekspedisi"]').should('not.exist')
+    })
+
+
 
     it('[PENGATURAN-EKSPEDISI] - Harus gagal mendapatkan data, kondisi error harus muncul', () => {
     // Intercept the API request
@@ -114,15 +142,7 @@ describe('TEST CASE PENGATURAN EKSPEDISI', () => {
 
     //Create Ekspedisi
     
-    it('[PENGATURAN-EKSPEDISI] - Harus bisa membuka, section tambah ekspedisi', () => {
-     cy.get('[data-cy="submenu-item-expedition-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
-     cy.get('.MuiStack-root > .MuiButtonBase-root').should('be.visible').click()
-     cy.get('input[placeholder="Masukkan nama ekspedisi"]').should('be.visible')
-     cy.get('input[placeholder="Keterangan"]').should('be.visible')
-     cy.get('input[name="ekspedisi_status"]').should('exist').and('not.be.checked');
-     cy.get('.MuiButton-text').should('be.visible').and('contain', 'Batalkan')
-     cy.get(':nth-child(4) > div > MuiButton-contained').should('be.visible').and('contain', 'Simpan')
-    })
+ 
 
     it('cek kesesuaian section tambah ekspedisi dengan design yang ada', () => {
       cy.get('[data-cy="submenu-item-expedition-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()

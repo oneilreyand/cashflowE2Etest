@@ -72,8 +72,8 @@ describe('[PENGATURAN-TERMIN]', () => {
         .and('contain', 'Tidak ada data');
     });
 
-
- it('Chek kesesuainan modal tambah Termin dengan design yang ada', () => {
+  // Create new data success
+ it('Cek kesesuainan modal tambah Termin dengan design yang ada', () => {
   cy.get('[data-cy="submenu-item-termins-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
   cy.get('.MuiStack-root > .MuiButtonBase-root').should('be.visible').and('contain', 'Tambah Termin').click()
   cy.get('[name="terminName"]')
@@ -82,24 +82,26 @@ describe('[PENGATURAN-TERMIN]', () => {
   cy.get('[name="terminDuration"]')
   .invoke('attr', 'placeholder')
   .should('eq', 'Total hari')
-  cy.get('.MuiTableBody-root > :nth-child(1) > :nth-child(3)').should('be.visible')
+  cy.get('input[name="terminStatus"]')
+  .should('exist')
+  .and('not.be.checked')
   cy.get('.MuiButton-text').should('be.visible').and('contain', 'Batalkan')
   cy.get(':nth-child(4) > div > .MuiButton-contained').should('be.visible').and('contain', 'Simpan')
   });
 
-  it('Chek kesesuainan modal tambah Termin dengan design yang ada', () => {
-    cy.get('[data-cy="submenu-item-termins-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
-    cy.get('.MuiStack-root > .MuiButtonBase-root').should('be.visible').and('contain', 'Tambah Termin').click()
-    cy.get('[name="terminName"]')
-      .invoke('attr', 'placeholder')
-      .should('eq', 'Masukkan nama termin')
-    cy.get('[name="terminDuration"]')
-      .invoke('attr', 'placeholder')
-      .should('eq', 'Total hari')
-    cy.get('.MuiTableBody-root > :nth-child(1) > :nth-child(3)').should('be.visible')
-    cy.get('.MuiButton-text').should('be.visible').and('contain', 'Batalkan')
-    cy.get(':nth-child(4) > div > .MuiButton-contained').should('be.visible').and('contain', 'Simpan')
-  });
+ it('Berhasil batal tambah termin dan form tambah termin tidak ada di halaman', () => {
+  cy.get('[data-cy="submenu-item-termins-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
+  cy.get('.MuiStack-root > .MuiButtonBase-root').should('be.visible').and('contain', 'Tambah Termin').click()
+  cy.get('.MuiButton-text').should('be.visible').click()
+  cy.get('.MuiTableHead-root > .MuiTableRow-root > :nth-child(1)').should('be.visible').and('contain', 'Nama')
+ })
+
+ it.only('Berhasil merubah toggle button status menjadi aktif saat tambah data', () => {
+  cy.get('[data-cy="submenu-item-termins-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
+  cy.get('.MuiStack-root > .MuiButtonBase-root').should('be.visible').and('contain', 'Tambah Termin').click()
+  cy.get('input[name="terminStatus"]').should('exist').and('not.be.checked').click()
+  cy.get('input[name="terminStatus"]').should('be.checked')
+ })
 
   it('Harus bisa batal tambah termin dan form tambah termin tidak ada di halaman', () => {
     cy.get('[data-cy="submenu-item-termins-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()

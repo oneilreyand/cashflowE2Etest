@@ -71,7 +71,35 @@ describe('[PENGATURAN-SALESMAN]', () => {
         .should('be.visible')
         .and('contain', 'Tidak ada data');
     });
+
+    //Create new data success
+    it('Cek form tambah data Salesman sesuai dengan design ', () => {
+      cy.get('[data-cy="submenu-item-salesman-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
+      cy.get('.MuiStack-root > .MuiButtonBase-root').click()
+      cy.get('input[placeholder="Masukkan Nama Salesman"]').should('be.visible')
+      cy.get('input[placeholder="Keterangan"]').should('be.visible')
+      cy.get('input[name="sales_status"]')
+      .should('exist')
+      .and('not.be.checked')
+      cy.get('.MuiButton-text').should('be.visible').and('contain', 'Batalkan')
+      cy.get(':nth-child(4) > div > .MuiButton-contained').should('be.visible').and('contain', 'Simpan')
+    })
   
+    it('Berhasil merubah toggle button status menjadi aktif saat tambah data', () => {
+      cy.get('[data-cy="submenu-item-salesman-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
+      cy.get('.MuiStack-root > .MuiButtonBase-root').click()
+      cy.get('input[name="sales_status"]').should('exist').and('not.be.checked').click()
+      cy.get('input[name="sales_status"]').should('exist').and('be.checked')
+    })
+
+    it('Berhasil batal tambah salesman dan form tambah salesman tidak ada di halaman', () => {
+      cy.get('[data-cy="submenu-item-salesman-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
+      cy.get('.MuiStack-root > .MuiButtonBase-root').click()
+      cy.get('.MuiButton-text').should('be.visible').and('contain', 'Batalkan').click()
+      cy.get('input[placeholder="Masukkan Nama Salesman"]').should('not.exist')
+    })
+
+    
 
     it('[PENGATURAN-SALESMAN] - Harus gagal mendapatkan data, kondisi error harus muncul', () => {
       // Intercept the API request

@@ -41,12 +41,12 @@ describe('[PENGATURAN-REFERENSI]', () => {
     }) 
     
    //Empty State
-  it.only('Membuka halaman Pengaturan Referensi dengan kondisi data referensi tidak ada - Harus ada pesan (Tidak ada data) di tabel', () => {
+  it('Membuka halaman Pengaturan Referensi dengan kondisi data referensi tidak ada - Harus ada pesan (Tidak ada data) di tabel', () => {
     cy.get('[data-cy="submenu-item-reference-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
     cy.get('.MuiTableBody-root > .MuiTableRow-root > .MuiTableCell-root').should('be.visible').and('contain', 'Tidak ada data.')
     });
 
-  it.only(' Manipulasi data - Harus berhasil menampilkan tidak ada data, ketika data kosong', () => {
+  it(' Manipulasi data - Harus berhasil menampilkan tidak ada data, ketika data kosong', () => {
       // Intercept the API request
       cy.intercept('GET', '**api/setting-preferensis*', {
         statusCode: 200, // Simulate a successful response with no data
@@ -67,4 +67,35 @@ describe('[PENGATURAN-REFERENSI]', () => {
         .should('be.visible')
         .and('contain', 'Tidak ada data');
     });
+
+  //Create New Data Success
+  it('Cek kesesuaian form tambah referensi dengan design', () => {
+    cy.get('[data-cy="submenu-item-reference-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
+    cy.get('.MuiStack-root > .MuiButtonBase-root').click()
+    cy.get('.MuiTableBody-root > :nth-child(1) > :nth-child(1)').should('be.visible').and('contain', 'Nama Referensi');
+    cy.get('.MuiTableBody-root > :nth-child(1) > :nth-child(2)').should('be.visible').and('contain', 'Referensi');
+    cy.get('.MuiButton-contained').should('be.visible').and('contain', 'Simpan')
+    cy.get('.MuiButton-text').should('be.visible').and('contain', 'Batal')
+  })
+
+  it('Berhasil GET data opsi nama referensi', () => {
+    cy.get('[data-cy="submenu-item-reference-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
+    cy.get('.MuiStack-root > .MuiButtonBase-root').click()
+    cy.get('.MuiTableBody-root > :nth-child(1) > :nth-child(1)').click()
+    cy.get('ul[role="listbox"] > li').should('be.visible').and('contain', 'Metode Valuasi')
+  })
+
+  it('Berhasil GET data opsi referensi', () => {
+    cy.get('[data-cy="submenu-item-reference-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
+    cy.get('.MuiStack-root > .MuiButtonBase-root').click()
+    cy.get('.MuiTableBody-root > :nth-child(1) > :nth-child(2)').click()
+    cy.get('ul[role="listbox"] > li').should('contain','FIFO').and('contain', 'AVERAGE')
+  })
+
+  it.only('Berhasil membatalkan tambah referensi', () => {
+    cy.get('[data-cy="submenu-item-reference-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
+    cy.get('.MuiStack-root > .MuiButtonBase-root').click()
+    cy.get('.MuiButton-text').should('be.visible').and('contain', 'Batal').click()
+    cy.get('.MuiTableBody-root > .MuiTableRow-root > .MuiTableCell-root').should('be.visible').and('contain', 'Tidak ada data.')
+  })
 });
