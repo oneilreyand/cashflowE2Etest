@@ -19,7 +19,7 @@ describe('[PENGATURAN-PENGGUNA] - Membuka halaman Pengaturan Pengguna dan meliha
     it('Menambah Pengguna Baru', () => {
       cy.get('[data-testid="add-user-button"]').should('be.visible').click();
       cy.get('input[name="name"]').type('Nanda Fitra');
-      cy.get('input[name="email"]').type('nanda@gmail.com');
+      cy.get('input[name="email"]').type('nandaf@gmail.com');
       cy.get('[data-testid="user-role-select"]').click();
       cy.get('ul[role="listbox"]', { timeout: 10000 }).should('be.visible');
       cy.get('[data-testid="role-option-5982b710-4b24-11f0-ac71-5396266a671d"]').should('be.visible').click();
@@ -54,7 +54,7 @@ describe('[PENGATURAN-PENGGUNA] - Membuka halaman Pengaturan Pengguna dan meliha
         cy.get('input[name="name"]')
           .type(longName)
 
-        cy.get('input[name="email"]').type('nanda@gmail.com');
+        cy.get('input[name="email"]').type('nandafi@gmail.com');
         cy.get('[data-testid="user-role-select"]').click();
         cy.get('ul[role="listbox"]', { timeout: 10000 }).should('be.visible');
         cy.get('[data-testid="role-option-5982b710-4b24-11f0-ac71-5396266a671d"]').should('be.visible').click();
@@ -65,7 +65,7 @@ describe('[PENGATURAN-PENGGUNA] - Membuka halaman Pengaturan Pengguna dan meliha
     it('Harus menampilkan pesan error ketika email yang dimasukkan tidak valid', () => {
         cy.get('[data-testid="add-user-button"]').should('be.visible').click();
         cy.get('input[name="name"]').type('Muhammad Fajar');
-        cy.get('input[name="email"]').type('fajar.gmail'); // Email tanpa '@'
+        cy.get('input[name="email"]').type('fajarmuhammad.gmail'); // Email tanpa '@'
         cy.get('[data-testid="user-role-select"]').click();
         cy.get('ul[role="listbox"]', { timeout: 10000 }).should('be.visible');
         cy.get('[data-testid="role-option-5982b710-4b24-11f0-ac71-5396266a671d"]').should('be.visible').click();
@@ -114,7 +114,7 @@ describe('[PENGATURAN-PENGGUNA] - Membuka halaman Pengaturan Pengguna dan meliha
     it('Mengisi form tambah pengguna lalu refresh halaman sebelum simpan', () => {
       cy.get('[data-testid="add-user-button"]').should('be.visible').click();
       cy.get('input[name="name"]').type('Nanda Fitra');
-      cy.get('input[name="email"]').type('nanda@fitra.com');
+      cy.get('input[name="email"]').type('nandafitra@gmail.com');
       cy.get('[data-testid="user-role-select"]').click();
       cy.get('ul[role="listbox"]', { timeout: 10000 }).should('be.visible');
       cy.get('[data-testid="role-option-5982b710-4b24-11f0-ac71-5396266a671d"]').should('be.visible').click();
@@ -128,7 +128,7 @@ describe('[PENGATURAN-PENGGUNA] - Membuka halaman Pengaturan Pengguna dan meliha
     it('Menambahkan pengguna baru dengan data pengguna yang sudah dihapus sebelumnya', () => {
       cy.get('[data-testid="add-user-button"]').should('be.visible').click();
       cy.get('input[name="name"]').type('Fajar');
-      cy.get('input[name="email"]').type('fajarmuha@gmail.com');
+      cy.get('input[name="email"]').type('fajarmuhamadd@gmail.com');
       cy.get('[data-testid="user-role-select"]').click();
       cy.get('ul[role="listbox"]', { timeout: 10000 }).should('be.visible');
       cy.get('[data-testid="role-option-6186af42-4a6e-11f0-97e5-496865600ce7"]').should('be.visible').click();
@@ -143,7 +143,7 @@ describe('[PENGATURAN-PENGGUNA] - Membuka halaman Pengaturan Pengguna dan meliha
       cy.get('[data-testid="alert-dialog-submit-button"]').click();
       cy.get('[data-testid="add-user-button"]').should('be.visible').click();
       cy.get('input[name="name"]').type('Fajar');
-      cy.get('input[name="email"]').type('fajarmuha@gmail.com');
+      cy.get('input[name="email"]').type('fajarmuhamadd@gmail.com');
       cy.get('[data-testid="user-role-select"]').click();
       cy.get('ul[role="listbox"]', { timeout: 10000 }).should('be.visible');
       cy.get('[data-testid="role-option-6186af42-4a6e-11f0-97e5-496865600ce7"]').should('be.visible').click();
@@ -160,7 +160,7 @@ describe('[PENGATURAN-PENGGUNA] - Membuka halaman Pengaturan Pengguna dan meliha
       const searchTests = [
         { keyword: 'Fina', expected: 'Finance' },
         { keyword: 'Ern', expected: 'Erni' },
-        { keyword: 'Nanda Fitra', expected: null } // contoh data yang tidak ada
+        { keyword: 'Nanda Fitrah', expected: null } // contoh data yang tidak ada
       ];
 
       searchTests.forEach(({ keyword, expected }) => {
@@ -197,13 +197,75 @@ describe('[PENGATURAN-PENGGUNA] - Membuka halaman Pengaturan Pengguna dan meliha
       cy.get('.MuiAlert-message').should('be.visible').and('contain', 'Berhasil Mengubah Data Pengguna');
     });
 
-    it.only('Cek pagination ke next page lalu kembali ke previous page', () => {
+    it('Cek pagination ke next page lalu kembali ke previous page', () => {
       cy.get('.MuiPagination-ul > :nth-child(4)').click();
       cy.get('.MuiPagination-ul > :nth-child(2) > .MuiButtonBase-root').click();
       cy.get('.MuiPagination-ul > :nth-child(3) > .MuiButtonBase-root').click();
       cy.get('.MuiPagination-ul > :nth-child(1)').click();
       });
 
+    it('Menghapus Pengguna dengan menekan icon tong sampah pada baris yang sesuai', () => {
+      cy.get('table tbody tr').contains('td', 'testing2')
+        .parents('tr')
+        .find('[aria-label="Hapus Pengguna"]')
+        .click();
+      cy.get('[data-testid="alert-dialog-submit-button"]').click();
+      cy.get('.MuiAlert-message').should('be.visible').and('contain', 'Berhasil Menghapus Pengguna');
+      cy.get('table tbody tr').contains('td', 'testing2')
+        .should('not.exist');
+    });
+
+    it('Membatalkan Pengguna yang ingin dihapus dari daftar pengguna', () => {
+      cy.get('table tbody tr').contains('td', 'testing3')
+        .parents('tr')
+        .find('[aria-label="Hapus Pengguna"]')
+        .click();
+      cy.get('[data-testid="alert-dialog-cancel-button"]').click();
+      cy.get('table tbody tr').contains('td', 'testing3')
+        .should('be.visible');
+      cy.get('.MuiAlert-message').should('not.exist'); // Pastikan tidak ada pesan error
+    });
+
+    it('Membatalkan tambah pengguna pada form tambah pengguna', () => {
+      cy.get('[data-testid="add-user-button"]').should('be.visible').click();
+      cy.get('input[name="name"]').type('Nanda Fitra'); 
+      cy.get('input[name="email"]').type('fitrananda@gmail.com)');  
+      cy.get('[data-testid="user-role-select"]').click();
+      cy.get('ul[role="listbox"]', { timeout: 10000 }).should('be.visible');
+      cy.get('[data-testid="role-option-5982b710-4b24-11f0-ac71-5396266a671d"]').should('be.visible').click();
+      cy.get('[data-testid="cancel-user-button"]').click();
+      cy.get('.MuiAlert-message').should('not.exist'); // Pastikan tidak ada pesan error
+
+    });
+
+    it('Menangani error server (500) saat menyimpan perubahan data perusahaan', () => {
+        // Mock API dengan status 500
+        cy.intercept('PUT', '**/api/setting-user/*', {
+            statusCode: 500,
+            body: {
+                message: 'Terjadi kesalahan pada server'
+            }
+        }).as('updateSettingCompanyError');
+        cy.get('[data-cy="company-name-header-setting-user"]').click();
+        cy.get('[data-cy="button-edit-data-setting-user"]').click();
+
+        // Isi data minimal
+        cy.get('[data-testid="add-user-button"]').should('be.visible').click();
+        cy.get('input[name="name"]').type('Nanda Fitra'); 
+        cy.get('input[name="email"]').type('fitrananda@gmail.com)');  
+        cy.get('[data-testid="user-role-select"]').click();
+        cy.get('ul[role="listbox"]', { timeout: 10000 }).should('be.visible');
+        cy.get('[data-testid="role-option-5982b710-4b24-11f0-ac71-5396266a671d"]').should('be.visible').click();
+
+        // Simulasi network offline sebelum klik simpan
+        cy.window().then((win) => {
+            win.dispatchEvent(new win.Event('offline'));
+        });
+        cy.get('[data-testid="submit-user-button"]').click();
+        cy.get('.MuiAlert-message', { timeout: 10000 })
+            .should('be.visible')
+            .and('contain', 'Aplikasi sedang offline. Beberapa fitur mungkin tidak tersedia. Silakan periksa koneksi internet Anda.');
+        });
 
 
 });

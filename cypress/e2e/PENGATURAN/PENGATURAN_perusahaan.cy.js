@@ -48,7 +48,6 @@ describe('[PENGATURAN-PERUSAHAAN] - Membuka halaman Pengaturan Perusahaan dan me
     });
 
     it('Edit data perusahaan', () => {
-        cy.intercept('PUT', '**/api/setting-company/*').as('updateSettingCompany');
         cy.get('[data-cy="company-name-header-setting-company"]').click();
         cy.get('[data-cy="button-edit-data-setting-company"]').click();
         cy.get('input[name="companyName"]').clear().type('Perusahaan Baru');
