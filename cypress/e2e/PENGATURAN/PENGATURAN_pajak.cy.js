@@ -122,7 +122,7 @@ describe('[PENGATURAN-PAJAK]', () => {
     cy.get('.MuiTableHead-root > .MuiTableRow-root > :nth-child(1)').should('be.visible').and('contain', 'Nama')
   })
 
-  it.only('Berhasil mencari akun pajak, di field akun pajak pembelian dan penjualan', () => {
+  it('Berhasil mencari akun pajak, di field akun pajak pembelian dan penjualan', () => {
     cy.get('[data-cy="submenu-item-tax-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
     const dropdowns = [
     'input[name="tax_purchase_account"]',   // Pajak Pembelian
@@ -153,6 +153,32 @@ describe('[PENGATURAN-PAJAK]', () => {
     cy.get('.MuiButton-text').should('exist').click()
     cy.get('.MuiTableHead-root > .MuiTableRow-root > :nth-child(1)').should('be.visible').and('contain', 'Nama')
   })
+
+  it('Berhasil menambah pajak, semua field di isi dengan data yang valid', () => {
+    cy.get('[data-cy="submenu-item-tax-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
+    cy.get('.MuiStack-root > .MuiButtonBase-root').click()
+    cy.get('[name="tax_name"]').should('exist').type('Pajak Penghasilan')
+    cy.get('[name="tax_effective_percentage"]').should('exist').type('10')
+    cy.get('[name="tax_sales_account"]').click()
+    cy.contains('li', '1-11001 - Kas')
+    .scrollIntoView()
+    .should('exist')
+    .click();
+    cy.get('[name="tax_sales_account"]').trigger('change')
+    cy.get('[name="tax_purchase_account"]').click()
+    cy.contains('li', '1-11001 - Kas')
+    .scrollIntoView()
+    .should('exist')
+    .click();
+    cy.get('[name="tax_purchase_account"]').trigger('change')
+    cy.get('.css-zxbdg4 > div > .MuiButton-contained').should('exist').click()
+    cy.get('.MuiAlert-message').should('exist').and('contain', 'Berhasil Menambahkan Data Pajak.')
+    cy.get('.MuiTableRow-root > :nth-child(4)').should('exist').and('contain', 'Kas')
+  })
+
+
+
+  
 
   it('harus memunculkan text tidak ada data, ketika pencarian', () => {
     cy.get('[data-cy="submenu-item-tax-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()

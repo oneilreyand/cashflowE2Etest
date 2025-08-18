@@ -11,6 +11,8 @@ describe('TEST CASE PENGATURAN EKSPEDISI', () => {
       navigatePengaturan(); // Navigate to "Tambah Kontak" page for each test
     });
 
+  const counterFile = 'cypress/fixtures/counter.json';
+
     //Kesesuaian UI
     it('[PENGATURAN-EKSPEDISI] - Chek kesesuainan halaman Pengaturan Ekspedisi dengan design yang ada', () => {
       cy.get('[data-cy="submenu-item-expedition-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
@@ -102,15 +104,58 @@ describe('TEST CASE PENGATURAN EKSPEDISI', () => {
       cy.get('input[name="expedition_status"]').should('exist').and('be.checked');
     })
 
-    it.only('Berhasil batal tambah ekspedisi dan form tambah ekspedisi tidak ada di halaman', () => {
+    it('Berhasil batal tambah ekspedisi dan form tambah ekspedisi tidak ada di halaman', () => {
       cy.get('[data-cy="submenu-item-expedition-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
       cy.get('.MuiStack-root > .MuiButtonBase-root').should('be.visible').click()
       cy.get('.MuiButton-text').click()
       cy.get('input[placeholder="Masukkan nama ekspedisi"]').should('not.exist')
     })
 
+    it('Berhasil tambah data ekspedisi dengan status aktif', () => {
+     cy.readFile(counterFile).then((data) => {
+      const nextNumber = data.lastNumber + 1;
+      const expeditionName = `JNT ${nextNumber}`;
 
+      // Update file dengan angka baru
+      cy.writeFile(counterFile, { lastNumber: nextNumber });
 
+      // Jalankan langkah input form
+      cy.get('[data-cy="submenu-item-expedition-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click();
+      cy.get('.MuiStack-root > .MuiButtonBase-root').should('be.visible').click();
+      cy.get('[name="expedition_name"]').should('be.visible').type(expeditionName);
+      cy.get('[name="expedition_desc"]').should('be.visible').type(`JNT Cabang ${nextNumber}`);
+      cy.get('input[name="expedition_status"]').check({ force: true });
+      cy.get(':nth-child(4) > div > .MuiButton-contained').should('be.visible').click();
+      cy.get('.MuiSnackbar-root > .MuiPaper-root').should('be.visible').and('contain', 'Berhasil Menambahkan Data Ekspedisi.');
+      cy.get('.MuiTableBody-root > :nth-child(1) > :nth-child(1)').should('be.visible').and('contain', expeditionName);
+      cy.get('input[name="expedition_status"]').should('exist').and('be.checked');
+      });
+   });
+
+    it('Nama ekspedisi berhasil di Trim (spasi depan dan belakang)', () => {
+      //Intercept the API request
+      cy.intercept('POST', 'https://api-uat-cashbook.assist.id/api/setting-expedition', (req) => {
+      }).as('postExpedition'); // Alias untuk memantau request
+
+      cy.get('[data-cy="submenu-item-expedition-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click();
+      cy.get('.MuiStack-root > .MuiButtonBase-root').should('be.visible').click()
+      cy.get('[name="expedition_name"]')
+      .should('be.visible')
+      .type('   Pos 9  ')
+      cy.get('[name="expedition_desc"]')
+      .should('be.visible')
+      .type('Cabang Medan')
+      cy.get(':nth-child(4) > div > .MuiButton-contained').should('be.visible').click()
+
+      cy.wait('@postExpedition').then((interception) => {
+        expect(interception.response.statusCode).to.equal(200);
+
+        expect(interception.request.body.expedition_name.trim()).to.equal('Pos 9');
+        expect(interception.request.body.expedition_desc).to.equal('Cabang Medan');
+      });
+     })
+
+     //Create new data failed
     it('[PENGATURAN-EKSPEDISI] - Harus gagal mendapatkan data, kondisi error harus muncul', () => {
     // Intercept the API request
     cy.intercept('GET', '**/api/setting-expedition*', {
@@ -138,50 +183,73 @@ describe('TEST CASE PENGATURAN EKSPEDISI', () => {
     .and('contain', 'Error, Gagal mendapatkan data!');
     });
 
-    
-
-    //Create Ekspedisi
-    
- 
-
-    it('cek kesesuaian section tambah ekspedisi dengan design yang ada', () => {
-      cy.get('[data-cy="submenu-item-expedition-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
-      cy.get('.MuiStack-root > .MuiButtonBase-root').click()
-      cy.get('input[placeholder="Masukkan nama ekspedisi"]').should('be.visible')
-      cy.get('input[placeholder="Keterangan"]').should('be.visible')
-      cy.get('.MuiTableBody-root > :nth-child(1) > :nth-child(3)').should('be.visible')
-      cy.get('.MuiButton-text').should('be.visible').and('contain', 'Batal')
-      cy.get(':nth-child(4) > div > .MuiButton-contained').should('be.visible').and('contain', 'Simpan')
-    })
-
-    it('[PENGATURAN-EKSPEDISI] - Harus bisa menutup, section tambah ekspedisi', () => {
+     it('[PENGATURAN-EKSPEDISI] - Harus gagal menambahkan data ekspekssisi, field keterangan tidak di isi', () => {
       cy.get('[data-cy="submenu-item-expedition-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click();
       cy.get('.MuiStack-root > .MuiButtonBase-root').should('be.visible').click()
-      cy.get('.MuiButton-text').should('be.visible').click()
-      cy.get('.css-1nqp4xj').should('be.visible').and('contain', 'Semua Ekspedisi')
+      cy.get('[name="expedition_name"').should('be.visible').type('Pos Indonesia')
+      cy.get(':nth-child(4) > div > .MuiButton-contained').should('be.visible').click()
+      cy.get('.MuiTableBody-root > :nth-child(1) > :nth-child(2)').and('contain', 'Keterangan wajib diisi')
      })
 
-  const counterFile = 'cypress/fixtures/counter.json';
-
-    it('[PENGATURAN-EKSPEDISI] - Tambah data ekspedisi', () => {
-     cy.readFile(counterFile).then((data) => {
-      const nextNumber = data.lastNumber + 1;
-      const expeditionName = `JNT ${nextNumber}`;
-
-      // Update file dengan angka baru
-      cy.writeFile(counterFile, { lastNumber: nextNumber });
-
-      // Jalankan langkah input form
+    it('[PENGATURAN-EKSPEDISI] - Harus gagal menambahkan data ekspekssisi, field nama ekspedisi tidak di isi', () => {
       cy.get('[data-cy="submenu-item-expedition-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click();
-      cy.get('.MuiStack-root > .MuiButtonBase-root').should('be.visible').click();
-      cy.get('[name="expedition_name"]').should('be.visible').type(expeditionName);
-      cy.get('[name="expedition_desc"]').should('be.visible').type(`JNT Cabang ${nextNumber}`);
-      cy.get(':nth-child(4) > div > .MuiButton-contained').should('be.visible').click();
-      cy.get('.MuiSnackbar-root > .MuiPaper-root').should('be.visible').and('contain', 'Berhasil Menambahkan Data Ekspedisi.');
-      cy.get('.MuiTableBody-root > :nth-child(1) > :nth-child(1)').should('be.visible').and('contain', expeditionName);
-      });
-   });
+      cy.get('.MuiStack-root > .MuiButtonBase-root').should('be.visible').click()
+      //cy.get('[name="expedition_name"').should('be.visible').type('Pos Indonesia')
+      cy.get('[name="expedition_desc"').should('be.visible').type('Cabang Padang')
+      cy.get(':nth-child(4) > div > .MuiButton-contained').should('be.visible').click()
+      cy.get('.MuiTableBody-root > :nth-child(1) > :nth-child(1)').and('contain', 'Nama Ekspedisi wajib diisi')
+     })
 
+    it('[PENGATURAN-EKSPEDISI] - Harus gagal menambahkan data ekspekssisi, semua field tidak di isi', () => {
+      cy.get('[data-cy="submenu-item-expedition-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click();
+      cy.get('.MuiStack-root > .MuiButtonBase-root').should('be.visible').click()
+      //cy.get('[name="expedition_name"').should('be.visible').type('JNT')
+      cy.get(':nth-child(4) > div > .MuiButton-contained').should('be.visible').click()
+      cy.get('.MuiTableBody-root > :nth-child(1) > :nth-child(1)').and('contain', 'Nama Ekspedisi wajib diisi')
+       cy.get('.MuiTableBody-root > :nth-child(1) > :nth-child(2)').and('contain', 'Keterangan wajib diisi')
+     })
+
+     it('Harus gagal menambah data dalam kondisi offline', () => {
+      cy.goOffline();
+      // Intercept API create ekspedisi dan paksa error (simulasi offline)
+      // cy.intercept('POST', 'https://api-uat-cashbook.assist.id/api/setting-expedition', {
+      // forceNetworkError: true
+      // }).as('createEkspedisi');
+
+      // Kunjungi halaman tambah ekspedisi
+      cy.get('[data-cy="submenu-item-expedition-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click();
+      cy.get('.MuiStack-root > .MuiButtonBase-root').should('be.visible').click()
+
+      // Isi form ekspedisi
+      cy.get('[name="expedition_name"]')
+      .should('be.visible')
+      .type('JNT Offline 4')
+      cy.get('[name="expedition_desc"]')
+      .should('be.visible')
+      .type('Offline Test Description')
+
+      
+      // Klik tombol simpan
+      cy.get(':nth-child(4) > div > .MuiButton-contained').should('be.visible').click()
+
+      // cy.wait('@createEkspedisi', { timeout: 10000 })
+      // Tunggu API create dipanggil
+
+      // // Klik tombol simpan
+      // cy.get(':nth-child(4) > div > .MuiButton-contained').should('be.visible').click()
+
+      // Pastikan muncul notifikasi jaringan terputus
+      // cy.get('.MuiSnackbar-root > .MuiPaper-root').contains('Tidak ada koneksi internet. Silahkan periksa koneksi Anda').should('be.visible');
+      cy.get('.MuiAlert-message').should('be.visible').and('contain', 'Tidak ada koneksi internet. Silahkan periksa koneksi Anda.');
+
+      // Pastikan tetap di halaman form
+      cy.get('[name="expedition_name"]').should('be.visible').should('be.visible')
+
+      // Reload halaman lalu pastikan data tidak ada di list
+      cy.get('[data-cy="submenu-item-expedition-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click();
+      cy.contains('JNT Offline 4').should('not.exist');
+    })
+    
     // it.only('[PENGATURAN-EKSPEDISI] - Harus bisa menambahkan data ekspedisi, semua field di isi', () => {
     //   // cy.get('[data-cy="submenu-item-expedition-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click();
     //   // cy.get('.MuiStack-root > .MuiButtonBase-root').should('be.visible').click()
@@ -219,54 +287,9 @@ describe('TEST CASE PENGATURAN EKSPEDISI', () => {
 //   });
 // });
 
-     it('[PENGATURAN-EKSPEDISI] - Harus gagal menambahkan data ekspekssisi, field keterangan tidak di isi', () => {
-      cy.get('[data-cy="submenu-item-expedition-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click();
-      cy.get('.MuiStack-root > .MuiButtonBase-root').should('be.visible').click()
-      cy.get('[name="expedition_name"').should('be.visible').type('Pos Indonesia')
-      cy.get(':nth-child(4) > div > .MuiButton-contained').should('be.visible').click()
-      cy.get('.MuiTableBody-root > :nth-child(1) > :nth-child(2)').and('contain', 'Keterangan wajib diisi')
-     })
+    
 
-    it('[PENGATURAN-EKSPEDISI] - Harus gagal menambahkan data ekspekssisi, field nama ekspedisi tidak di isi', () => {
-      cy.get('[data-cy="submenu-item-expedition-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click();
-      cy.get('.MuiStack-root > .MuiButtonBase-root').should('be.visible').click()
-      //cy.get('[name="expedition_name"').should('be.visible').type('Pos Indonesia')
-      cy.get('[name="expedition_desc"').should('be.visible').type('Cabang Padang')
-      cy.get(':nth-child(4) > div > .MuiButton-contained').should('be.visible').click()
-      cy.get('.MuiTableBody-root > :nth-child(1) > :nth-child(1)').and('contain', 'Nama Ekspedisi wajib diisi')
-     })
-
-    it('[PENGATURAN-EKSPEDISI] - Harus gagal menambahkan data ekspekssisi, semua field tidak di isi', () => {
-      cy.get('[data-cy="submenu-item-expedition-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click();
-      cy.get('.MuiStack-root > .MuiButtonBase-root').should('be.visible').click()
-      //cy.get('[name="expedition_name"').should('be.visible').type('JNT')
-      cy.get(':nth-child(4) > div > .MuiButton-contained').should('be.visible').click()
-      cy.get('.MuiTableBody-root > :nth-child(1) > :nth-child(1)').and('contain', 'Nama Ekspedisi wajib diisi')
-       cy.get('.MuiTableBody-root > :nth-child(1) > :nth-child(2)').and('contain', 'Keterangan wajib diisi')
-     })
-
-    it('[PENGATURAN-EKSPEDISI] - Nama ekspedisi di Trim (spasi depan dan belakang)', () => {
-      //Intercept the API request
-      cy.intercept('POST', 'https://api-uat-cashbook.assist.id/api/setting-expedition', (req) => {
-      }).as('postExpedition'); // Alias untuk memantau request
-
-      cy.get('[data-cy="submenu-item-expedition-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click();
-      cy.get('.MuiStack-root > .MuiButtonBase-root').should('be.visible').click()
-      cy.get('[name="expedition_name"]')
-      .should('be.visible')
-      .type('   Pos 9  ')
-      cy.get('[name="expedition_desc"]')
-      .should('be.visible')
-      .type('Cabang Medan')
-      cy.get(':nth-child(4) > div > .MuiButton-contained').should('be.visible').click()
-
-      cy.wait('@postExpedition').then((interception) => {
-        expect(interception.response.statusCode).to.equal(200);
-
-        expect(interception.request.body.expedition_name.trim()).to.equal('Pos 9');
-        expect(interception.request.body.expedition_desc).to.equal('Cabang Medan');
-      });
-     })
+    
 
     // it('[PENGATURAN-EKSPEDISI] - Harus berhasil menambahkan data ekspekssisi, semua field di isi', () => {
     //   cy.get('[data-cy="submenu-item-expedition-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click();
@@ -276,46 +299,7 @@ describe('TEST CASE PENGATURAN EKSPEDISI', () => {
     //   cy.get(':nth-child(4) > div > .MuiButton-contained').should('be.visible').click()
     //  })
 
-    it('Harus gagal menambah data dalam kondisi offline', () => {
-      cy.goOffline();
-      // Intercept API create ekspedisi dan paksa error (simulasi offline)
-      // cy.intercept('POST', 'https://api-uat-cashbook.assist.id/api/setting-expedition', {
-      // forceNetworkError: true
-      // }).as('createEkspedisi');
-
-      // Kunjungi halaman tambah ekspedisi
-      cy.get('[data-cy="submenu-item-expedition-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click();
-      cy.get('.MuiStack-root > .MuiButtonBase-root').should('be.visible').click()
-
-      // Isi form ekspedisi
-      cy.get('[name="expedition_name"]')
-      .should('be.visible')
-      .type('JNT Offline 4')
-      cy.get('[name="expedition_desc"]')
-      .should('be.visible')
-      .type('Offline Test Description')
-
-      
-      // Klik tombol simpan
-      cy.get(':nth-child(4) > div > .MuiButton-contained').should('be.visible').click()
-
-      // cy.wait('@createEkspedisi', { timeout: 10000 })
-      // Tunggu API create dipanggil
-
-      // // Klik tombol simpan
-      // cy.get(':nth-child(4) > div > .MuiButton-contained').should('be.visible').click()
-
-      // Pastikan muncul notifikasi jaringan terputus
-      // cy.get('.MuiSnackbar-root > .MuiPaper-root').contains('Tidak ada koneksi internet. Silahkan periksa koneksi Anda').should('be.visible');
-      cy.get('.MuiSnackbar-root > .MuiPaper-root').contains('Aplikasi sedang offline. Beberapa fitur mungkin tidak tersedia. Silakan periksa koneksi internet Anda.').should('be.visible');
-
-      // Pastikan tetap di halaman form
-      cy.get('[name="expedition_name"]').should('be.visible').should('be.visible')
-
-      // Reload halaman lalu pastikan data tidak ada di list
-      cy.get('[data-cy="submenu-item-expedition-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click();
-      cy.contains('JNT Offline 4').should('not.exist');
-    })
+    
 
     it('[PENGATURAN-SALESMAN] - Harus berhasil menambahkan ekspedisi, semua field di isi, status check', () => {
 

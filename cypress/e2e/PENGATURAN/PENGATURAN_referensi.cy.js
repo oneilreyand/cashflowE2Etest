@@ -92,10 +92,21 @@ describe('[PENGATURAN-REFERENSI]', () => {
     cy.get('ul[role="listbox"] > li').should('contain','FIFO').and('contain', 'AVERAGE')
   })
 
-  it.only('Berhasil membatalkan tambah referensi', () => {
+  it('Berhasil membatalkan tambah referensi', () => {
     cy.get('[data-cy="submenu-item-reference-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
     cy.get('.MuiStack-root > .MuiButtonBase-root').click()
     cy.get('.MuiButton-text').should('be.visible').and('contain', 'Batal').click()
     cy.get('.MuiTableBody-root > .MuiTableRow-root > .MuiTableCell-root').should('be.visible').and('contain', 'Tidak ada data.')
+  })
+
+  it('Berhasil menambah referensi, semua field di isi dengan data yang valid', () => {
+    cy.get('[data-cy="submenu-item-reference-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
+    cy.get('.MuiStack-root > .MuiButtonBase-root').click()
+    cy.get('.MuiTableBody-root > :nth-child(1) > :nth-child(1)').click()
+    cy.get('ul[role="listbox"] > li').contains('Metode Valuasi').click()
+    cy.get('.MuiTableBody-root > :nth-child(1) > :nth-child(2)').click()
+    cy.get('ul[role="listbox"] > li').contains('FIFO').click()
+    cy.get(':nth-child(3) > div > .MuiButton-contained').click()
+    cy.get('.MuiTableBody-root > .MuiTableRow-root > :nth-child(1)').should('be.visible').and('contain', 'Metode Valuasi')
   })
 });
