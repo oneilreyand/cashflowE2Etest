@@ -2,6 +2,7 @@ const companyId = Cypress.env('companyId');
 
 describe("PENJUALAN", () => {
   beforeEach(() => {
+    cy.handleUncaughtExceptions()
 
     cy.window().then((win) => {
       const resizeObserverErr = win.onerror
@@ -227,6 +228,8 @@ describe("PENJUALAN", () => {
     cy.intercept('GET', `**/api/productList/productWithStock?companyId=${companyId}`).as('productsData');
     cy.intercept('GET', `**/api/kontak/list?jenisKontak=pelanggan&limit=999&companyId=${companyId}`).as('waitPelanggan');
 
+    cy.reload()
+
     // === CEK JUMLAH DATA BELUM DIBAYAR DI BE ===
     cy.getCookie('token').then((cookie) => {
       const token = cookie?.value;
@@ -261,7 +264,11 @@ describe("PENJUALAN", () => {
     cy.wait('@waitPelanggan').then(({ response }) => {
       const pelanggan = response.body.results[0];
       cy.get('#idPelanggan').click();
-      cy.get(`[data-value="${pelanggan.id}"]`).click();
+      cy.get(`[data-value]`)
+        .eq(1).click()
+        .scrollIntoView({ block: 'center' }) // pastikan muncul di tengah viewport
+        .should('be.visible') // pastikan visible
+        .click({ force: true }); // bypass overlay check kalau masih ketutup
     });
 
     cy.get('#address').clear().type('Jalan Palaraya');
@@ -271,6 +278,7 @@ describe("PENJUALAN", () => {
       const produk = response.body.results.find(p => p.is_sell);
       cy.get('[id="penjualan.0.product_id"]').click();
       cy.get(`[data-value="${produk.id}"]`).click();
+
     });
 
     // Isi harga
@@ -317,9 +325,150 @@ describe("PENJUALAN", () => {
     });
   });
 
-  // it.only('TC-0010 Memastikan Perubahan Summary Card Belum Dibayar Dengan Mengurangi Data', () => {
-  //   (error);
-  // });
+  it.only('TC-0010 Memastikan Perubahan Summary Card Belum Dibayar Dengan Terima Pembayaran Data', () => {
+  let countAwal;
+  let apiAwalBelum;
+  let totalDibayar;
+  let invoiceNomor;
+
+  // === PASANG INTERCEPT ===
+  cy.intercept('GET', `**/api/penjualan/overview?companyId=${companyId}`).as('waitDataCard');
+  cy.intercept('GET', `**/api/productList/productWithStock?companyId=${companyId}`).as('productsData');
+  cy.intercept('GET', `**/api/kontak/list?jenisKontak=pelanggan&limit=999&companyId=${companyId}`).as('waitPelanggan');
+  
+  cy.reload()
+
+  // === CEK JUMLAH DATA BELUM DIBAYAR DI BE ===
+  cy.getCookie('token').then((cookie) => {
+    const token = cookie?.value;
+
+    cy.request({
+      method: 'GET',
+      url: `https://api-uat-cashbook.assist.id/api/penjualan?keyword=&status=Belum%20Dibayar&startDate=0001-08-01&endDate=2025-08-31&skip=0&limit=9999&companyId=${companyId}`,
+      headers: { Authorization: `Bearer ${token}` }
+    }).then((response) => {
+      const results = response.body.results || [];
+      countAwal = results.length;
+      const displayCount = countAwal > 99 ? '99+' : countAwal;
+
+      cy.log(`Total data awal: ${countAwal}`);
+      cy.get(':nth-child(1) > .MuiPaper-root > .MuiCardContent-root > * > .MuiStack-root > .MuiBadge-root > .MuiBadge-badge')
+        .should('contain', `${displayCount}`);
+    });
+  });
+
+  // === CEK NOMINAL BELUM DIBAYAR DI SUMMARY CARD ===
+  cy.wait('@waitDataCard').then(({ response }) => {
+    apiAwalBelum = Math.round(response.body.belumDibayar.nominal);
+    const formattedAwal = `Rp\u00A0${new Intl.NumberFormat('id-ID').format(apiAwalBelum)}`;
+    cy.contains(':nth-child(1) .MuiTypography-h5', 'Rp')
+      .should('have.text', formattedAwal);
+  });
+
+  // === TAMBAH PENJUALAN BARU ===
+  cy.contains('Penjualan Baru').click();
+
+  // Pilih pelanggan
+  cy.wait('@waitPelanggan').then(({ response }) => {
+    cy.get('#idPelanggan').click();
+    cy.get(`[data-value]`)
+    .eq(1)
+    .should('be.visible')
+    .scrollIntoView()
+    .click({ force: true });
+  });
+
+  cy.get('#address').clear().type('Jalan Palaraya');
+
+  // Pilih produk
+  cy.wait('@productsData').then(({ response }) => {
+    const produk = response.body.results.find(p => p.is_sell);
+    cy.get('[id="penjualan.0.product_id"]').click();
+    cy.get(`[data-value="${produk.id}"]`).click();
+  });
+
+  // Isi harga
+  cy.get('[name="penjualan.0.price"]').clear().type('10000');
+
+  // Ambil total dibayar
+  cy.get(':nth-child(9) > .MuiGrid2-container > :nth-child(2)')
+    .invoke('text')
+    .then((totalText) => {
+      totalDibayar = Number(totalText.replace(/[^0-9]/g, ''));
+
+      // Intercept data setelah simpan
+      cy.intercept('GET', `**/api/penjualan/overview?companyId=${companyId}`).as('waitDataCard2');
+      cy.intercept('POST', '**/api/penjualan').as('postPenjualan');
+
+      // Submit form
+      cy.get('.MuiButton-contained').click();
+      cy.get('[data-testid="alert-dialog-submit-button"]').click();
+    });
+
+  // === VALIDASI 1: CEK SUMMARY CARD SETELAH TAMBAH ===
+  cy.wait('@waitDataCard2').then(({ response }) => {
+    const apiAkhirBelum = Math.round(response.body.belumDibayar.nominal);
+    const formattedAkhir = `Rp\u00A0${new Intl.NumberFormat('id-ID').format(apiAkhirBelum)}`;
+    cy.contains(':nth-child(1) .MuiTypography-h5', 'Rp')
+      .should('have.text', formattedAkhir);
+    expect(apiAkhirBelum).to.eq(apiAwalBelum + totalDibayar);
+  });
+
+  // === CEK JUMLAH DATA BELUM DIBAYAR SETELAH TAMBAH ===
+  cy.getCookie('token').then((cookie) => {
+    const token = cookie?.value;
+    cy.request({
+      method: 'GET',
+      url: `https://api-uat-cashbook.assist.id/api/penjualan?keyword=&status=Belum%20Dibayar&startDate=0001-08-01&endDate=2025-08-31&skip=0&limit=9999&companyId=${companyId}`,
+      headers: { Authorization: `Bearer ${token}` }
+    }).then((response) => {
+      const results = response.body.results || [];
+      const countAkhir = results.length;
+
+      expect(countAkhir).to.eq(countAwal + 1);
+      cy.log(`Data awal: ${countAwal}`);
+      cy.log(`Data akhir: ${countAkhir}`);
+    });
+  });
+
+  // === AMBIL NOMOR INVOICE DARI RESPONSE PENJUALAN ===
+  cy.wait('@postPenjualan').then(({ response }) => {
+    invoiceNomor = response.body.nomor;
+    cy.log(`Invoice Baru: ${invoiceNomor}`);
+
+    // buka detail invoice & lakukan pembayaran
+    cy.contains('td', invoiceNomor).click();
+    cy.get('.MuiBox-root > .MuiInputBase-root > .MuiSelect-select').click();
+    cy.get('[data-value="payment"]').click();
+
+    // isi form pembayaran
+    cy.get('#metode').click();
+    cy.get('[data-value]').eq(1).click();
+
+    cy.get('#nomor_akun').click();
+    cy.get('[data-option-index="0"]').click();
+
+    cy.get('[name="sub_total"]').clear().type(`${totalDibayar}`);
+
+    cy.intercept('GET', `**/api/penjualan/overview?companyId=${companyId}`).as('waitDataCard3');
+
+    // submit pembayaran
+    cy.get('.MuiButton-contained').click();
+    cy.get('[data-testid="alert-dialog-submit-button"]').click();
+  });
+
+  // === VALIDASI 2: CEK SUMMARY CARD SETELAH PEMBAYARAN ===
+  cy.wait('@waitDataCard3').then(({ response }) => {
+    const apiSetelahBayar = Math.round(response.body.belumDibayar.nominal);
+    const formatted = `Rp\u00A0${new Intl.NumberFormat('id-ID').format(apiSetelahBayar)}`;
+    cy.contains(':nth-child(1) .MuiTypography-h5', 'Rp')
+      .should('have.text', formatted);
+
+    // nominal harus kembali ke kondisi awal sebelum tambah
+    expect(apiSetelahBayar).to.eq(apiAwalBelum);
+  });
+});
+
 
   // it.only('TC-0011 Memastikan Perubahan Summary Card Telat Dibayar Dengan Menambah Data', () => {
   //   let apiTelatSebelum;
@@ -1484,7 +1633,7 @@ describe("PENJUALAN", () => {
 
   //   cy.get(':nth-child(1) > :nth-child(3) > [aria-label="Detail Pelanggan"] > a > .MuiButtonBase-root').click()
 
-    
+
 
   //     cy.getCookie('token').then((cookie) => {
   //       const token = cookie?.value;
