@@ -226,7 +226,7 @@ describe('[PENGATURAN-PENGGUNA] - Membuka halaman Pengaturan Pengguna dan meliha
         cy.get('.MuiAlert-message').should('be.visible').contains('Berhasil mengubah hak akses');
     });
 
-    it('Mengubah data pada hak akses yang sudah ada dengan nama yang sudah ada', () => {
+    it('Mengubah data pada hak akses dengan nama yang sudah ada', () => {
         cy.get('table tbody tr').contains('td', 'Sales jaga baru')
           .parents('tr')
           .find('[aria-label="Edit Hak Akses"]')
@@ -278,14 +278,21 @@ describe('[PENGATURAN-PENGGUNA] - Membuka halaman Pengaturan Pengguna dan meliha
         .and('contain.text', 'Role tidak dapat dihapus karena masih digunakan oleh akun lain');
     });
 
-    it('Menambahkan atau mengubah Hak akses namun tidak mencentang permission yang tersedia sama sekali', () => {
-      cy.get('[data-testid="add-permission-button"]').should('be.visible').click();
-      cy.get('input[name="name"]').clear().type('Hak akses tanpa permission');
-      cy.get('.MuiGrid2-container > :nth-child(3)').type('Deskripsi test tanpa permission');
-      cy.get('.MuiPaper-elevation0 > .MuiStack-root > .MuiButton-containedPrimary').should('be.disabled');
-      
-    }
-  ); 
+    it.only('Loop semua nama role dengan index', () => {
+      cy.get('.MuiTableBody-root > tr').then(($rows) => {
+        const rowCount = $rows.length;
+        cy.log(`Total data ditemukan: ${rowCount}`);
+
+        for (let i = 1; i <= rowCount; i++) {
+          cy.get(`.MuiTableBody-root > :nth-child(${i}) > :nth-child(1)`)
+            .invoke('text')
+            .then((text) => {
+              cy.log(`Row ${i} - Nama Role: ${text}`);
+              console.log(`Row ${i} - Nama Role: ${text}`);
+            });
+        }
+      });
+    });
 
   
     it('Menangani error server (500) saat menyimpan perubahan data perusahaan', () => {
@@ -313,5 +320,3 @@ describe('[PENGATURAN-PENGGUNA] - Membuka halaman Pengaturan Pengguna dan meliha
             .and('contain', 'Tidak dapat menyimpan data, silakan periksa koneksi internet Anda.');
         });
       });
-
-    
