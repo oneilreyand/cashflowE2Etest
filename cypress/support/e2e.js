@@ -20,6 +20,12 @@ import 'cypress-mochawesome-reporter/register';
 import 'wick-a11y';
 import 'cypress-diff';
 
+Cypress.on('uncaught:exception', (err) => {
+  if (err.message.includes('ResizeObserver loop')) {
+    return false
+  }
+})
+
 
 // Alternatively you can use CommonJS syntax:
 // require('./commands')

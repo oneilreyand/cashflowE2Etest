@@ -47,7 +47,7 @@ Cypress.Commands.add('apiLogin', (email, password) => {
 
         // Ambil token dari respons
         const token = response.body.token;
-        
+
         // Simpan token di cookie dan localStorage sesuai kebutuhan aplikasi
         cy.setCookie('token', token);
         window.localStorage.setItem('token', token); // Simpan juga di localStorage
@@ -55,34 +55,40 @@ Cypress.Commands.add('apiLogin', (email, password) => {
 });
 
 Cypress.Commands.add('visitDashboard', (companyId) => {
-    cy.visit('/admin/dashboard', {
+    cy.visit('/', {
         onBeforeLoad(win) {
             const token = window.localStorage.getItem('token'); // Ambil dari Cypress context
             win.localStorage.setItem('token', token); // Set ke browser context
         }
     });
-    cy.get('[data-testid="listCompany-dropdown"]').click()
-    cy.get(`[data-testid="listCompany-item-${companyId}"]`).click()
+    if (!companyId) {
+        cy.url().should('contain', "/admin/dashboard")
+    } else {
+        cy.url().should('contain', "/admin/dashboard")
+        cy.get('[data-testid="listCompany-dropdown"]', { timeout: 10000 }).click()
+        cy.get(`[data-testid="listCompany-item-${companyId}"]`, { timeout: 10000 }).click()
+    }
+
 });
 
 
 Cypress.Commands.add('verifyVisibility', (selector, text = '', timeout = 10000) => {
     cy.get(selector, { timeout }).should('be.visible');
     if (text) {
-      cy.get(selector).should('contain', text);
+        cy.get(selector).should('contain', text);
     }
 });
-  
-  Cypress.Commands.add('verifyPageContent', (selector, text, timeout) => {
+
+Cypress.Commands.add('verifyPageContent', (selector, text, timeout) => {
     cy.get(selector, { timeout }).should('be.visible').and('contain', text);
 });
 
-  Cypress.Commands.add('navigateToKontak', (selector, text, timeout) => {
+Cypress.Commands.add('navigateToKontak', (selector, text, timeout) => {
     cy.get('[data-testid="drawer-item-contacts"]').click();
     cy.url().should('eq', 'https://uat-cashbook.assist.id/admin/contacts');
 });
 
-  Cypress.Commands.add('navigateToPenjualan',(selector, text, timeout) => {
+Cypress.Commands.add('navigateToPenjualan', (selector, text, timeout) => {
     cy.get('[data-testid="drawer-item-sales"]').click();
-    cy.url().should('eq', 'https://uat-cashbook.assist.id/admin/sales')
+    cy.url().should('eq', env === 'local' ? 'localhost:*' : 'https://uat-cashbook.assist.id/admin/sales')
 })
