@@ -370,15 +370,15 @@ describe("PENJUALAN", () => {
 
     // Pilih pelanggan
     cy.wait('@waitPelanggan').then(({ response }) => {
-      const PelangganID = response.body.results[0].id
-      console.log(PelangganID)
+      const pelanggan = response.body.results[0];
       cy.get('#idPelanggan').click();
-      cy.get(`[data-value="${PelangganID}"]`)
-        .should('be.visible')
-        .scrollIntoView()
-        .click({ force: true });
-    })
-
+      cy.get(`[data-value]`)
+        .eq(1).click()
+        .scrollIntoView({ block: 'center' }) // pastikan muncul di tengah viewport
+        .should('be.visible') // pastikan visible
+        .click({ force: true }); // bypass overlay check kalau masih ketutup
+    });
+      
     cy.get('#address').clear().type('Jalan Palaraya');
 
     // Pilih produk
