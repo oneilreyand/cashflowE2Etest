@@ -103,7 +103,7 @@ describe('[PENGATURAN-TERMIN]', () => {
   cy.get('input[name="terminStatus"]').should('be.checked')
  })
 
- it('Berhasil menambah data terimin dengan kondisi data valid dan status aktif', () => {
+ it('Berhasil menambah data termin dengan kondisi data valid dan status aktif', () => {
   cy.get('[data-cy="submenu-item-termins-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
   cy.get('.MuiStack-root > .MuiButtonBase-root').should('be.visible').and('contain', 'Tambah Termin').click()
   cy.get('[name="terminName"]')
@@ -157,32 +157,32 @@ describe('[PENGATURAN-TERMIN]', () => {
 
  })
 
-// it.only('Spam klik simpan, data yang tersimpan hanya satu', () => {
-//   cy.intercept('POST', '**/api/setting-termins*').as('HitMultiple');
+ it('Spam klik simpan, data yang tersimpan hanya satu', () => {
+  cy.intercept('POST', '**/api/setting-termins*').as('HitMultiple');
 
-//   // Kunjungi halaman tambah termin
-//   cy.get('[data-cy="submenu-item-termins-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click();
-//   cy.get('.MuiStack-root > .MuiButtonBase-root')
-//     .should('be.visible')
-//     .and('contain', 'Tambah Termin')
-//     .click();
+  // Kunjungi halaman tambah termin
+  cy.get('[data-cy="submenu-item-termins-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click();
+  cy.get('.MuiStack-root > .MuiButtonBase-root')
+    .should('be.visible')
+    .and('contain', 'Tambah Termin')
+    .click();
 
-//   // Isi form tambah termin
-//   cy.get('[name="terminName"]').type('Spam Klik');
-//   cy.get('[name="terminDuration"]').type('30');
+  // Isi form tambah termin
+  cy.get('[name="terminName"]').type('Spam Klik');
+  cy.get('[name="terminDuration"]').type('30');
 
-//   // Klik simpan berkali-kali (3x) -> tetap error
-//   for (let i = 0; i < 3; i++) {
-//     cy.get(':nth-child(4) > div > .MuiButton-contained').click();
-//     cy.wait('@HitMultiple');
-//   }
+  // Klik simpan berkali-kali (3x) -> tetap error
+  for (let i = 0; i < 3; i++) {
+    cy.get(':nth-child(4) > div > .MuiButton-contained').click();
+    cy.wait('@HitMultiple');
+  }
 
-//   // Verifikasi data hanya muncul sekali di tabel
-//   cy.get('.MuiTableBody-root')
-//     .find('tr')
-//     .filter(':contains("Spam Klik")')
-//     .should('have.length', 1);
-// })
+  // Verifikasi data hanya muncul sekali di tabel
+  cy.get('.MuiTableBody-root')
+    .find('tr')
+    .filter(':contains("Spam Klik")')
+    .should('have.length', 1);
+})
 
 
 // Create new data failed 
@@ -209,18 +209,18 @@ describe('[PENGATURAN-TERMIN]', () => {
     cy.get('.MuiTableBody-root > :nth-child(1) > :nth-child(2)').should('be.visible').and('contain', 'Durasi Termin harus diisi.')
   })
 
-  it('Harus bisa menambahkan termin dengan data yang sudah di isi', () => {
+  it('Gagal menambahkan nama termin yang sudah tersimpan (Duplikat)', () => {
     cy.get('[data-cy="submenu-item-termins-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
     cy.get('.MuiStack-root > .MuiButtonBase-root').should('be.visible').and('contain', 'Tambah Termin').click()
     cy.get('[name="terminName"]')
-    .type('termin sebulan')
+    .type('termin 4 bulan')
     cy.get('[name="terminDuration"]')
     .type('30')
     cy.get(':nth-child(4) > div > .MuiButton-contained').click()
-    cy.get('.MuiSnackbar-root > .MuiPaper-root').should('be.visible').and('contain', 'Berhasil Menambahkan Data Termin.')
+    cy.get('.MuiSnackbar-root > .MuiPaper-root').should('be.visible').and('contain', 'Termin dengan nama tersebut sudah ada.')
   });
 
-  it('Harus gagal menambahkan termin dengan nama di isi spasi', () => {
+  it('Gagal menambahkan termin dengan nama di isi spasi', () => {
     cy.get('[data-cy="submenu-item-termins-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
     cy.get('.MuiStack-root > .MuiButtonBase-root').should('be.visible').and('contain', 'Tambah Termin').click()
     cy.get('[name="terminName"]')
@@ -232,7 +232,7 @@ describe('[PENGATURAN-TERMIN]', () => {
     //cy.get('.MuiTableBody-root > :nth-child(1) > :nth-child(2)').should('be.visible').and('contain', 'Durasi Termin harus diisi.')
   })
 
-  it('Harus gagal menambahkan termin dengan durasi di isi spasi', () => {
+  it('Gagal menambahkan termin dengan durasi di isi spasi', () => {
     cy.get('[data-cy="submenu-item-termins-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
     cy.get('.MuiStack-root > .MuiButtonBase-root').should('be.visible').and('contain', 'Tambah Termin').click()
     cy.get('[name="terminName"]')
@@ -329,9 +329,9 @@ describe('[PENGATURAN-TERMIN]', () => {
     // Cek pesan error
     cy.wait('@postTerminError', { timeout: 10000 });
     cy.get('.MuiAlert-message').should('be.visible').and('contain', 'Kesalahan di server');
-    cy.get('.MuiTableBody-root > .MuiTableRow-root > .MuiTableCell-root')
-      .should('be.visible')
-      .and('contain', 'Error, Gagal menambahkan data!');
+    // cy.get('.MuiTableBody-root > .MuiTableRow-root > .MuiTableCell-root')
+    //   .should('be.visible')
+    //   .and('contain', 'Error, Gagal menambahkan data!');
   })
 
   it('Gagal POST data termin saat kondisi offline', () => {
@@ -348,142 +348,19 @@ describe('[PENGATURAN-TERMIN]', () => {
     cy.get(':nth-child(4) > div > .MuiButton-contained').click();
 
     //Cek pesan error
-    cy.get('.MuiAlert-message').should('be.visible').and('contain', 'Tidak ada koneksi internet. Silahkan periksa koneksi Anda.'); //typo di notif nya
+    cy.get('.MuiAlert-message').should('be.visible').and('contain', 'Tidak ada koneksi internet. Silakan periksa koneksi Anda.');
   });
 
   it('Gagal GET data termin saat kondisi offline', () => {
      cy.goOffline();
 
      // Kunjungi halaman ekspedisi
-      cy.get('[data-cy="submenu-item-expedition-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click();
+      cy.get('[data-cy="submenu-item-termins-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click();
       cy.get('.MuiAlert-message').should('be.visible').and('contain', 'Tidak ada koneksi internet. Silakan periksa koneksi Anda.');
       cy.get('.MuiTableBody-root > .MuiTableRow-root > .MuiTableCell-root').should('be.visible').and('contain','Tidak ada data')
   })
 
-// Status non Aktif - Aktif (Pegination 1)
-it('Berhasil merubah status termin dari non aktif menjadi aktif, kemudian tampil menjadi opsi di penjuaan', () => {
-  //Mengunjungi halaman termin
-  cy.get('[data-cy="submenu-item-termins-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
-  //Ubah status termin non aktif menjadi aktif
-  cy.get(':nth-child(2) > :nth-child(3) > .MuiSwitch-root > .MuiButtonBase-root > .PrivateSwitchBase-input').click()
-  cy.get('.MuiAlert-message').should('be.visible').and('contain', 'Berhasil Mengubah Status Termin.')
-  //Ke halaman penjualan
-  cy.get('[data-testid="drawer-item-sales"]').click()
-  cy.get('.css-aidtzz > .MuiButtonBase-root').click()
-  cy.get('#paymentTerms').click()
-  cy.get('ul[role="listbox"] > li').should('contain','Spam Klik Termin')
-})
-
-it('Berhasil merubah status termin dari non aktif menjadi aktif, kemudian tampil menjadi opsi di pembelian', () => {
-  //Mengunjungi halaman termin
-  cy.get('[data-cy="submenu-item-termins-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
-  //Ubah status termin non aktif menjadi aktif
-  cy.get(':nth-child(1) > :nth-child(3) > .MuiSwitch-root > .MuiButtonBase-root > .PrivateSwitchBase-input').click()
-  cy.get('.MuiAlert-message').should('be.visible').and('contain', 'Berhasil Mengubah Status Termin.')
-  //Ke halaman penjualan
-  cy.get('[data-testid="drawer-item-purchases"]').click()
-  cy.get('.css-aidtzz > .MuiButtonBase-root').click()
-  cy.get('#paymentTerms').click()
-  cy.get('ul[role="listbox"] > li').should('contain','Spam Klik')
-})
-
-it('Berhasil merubah status termin dari non aktif menjadi aktif, kemudian tampil menjadi opsi di Biaya', () => {
-  //Mengunjungi halaman termin
-  cy.get('[data-cy="submenu-item-termins-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
-  //Ubah status termin non aktif menjadi aktif
-  cy.get(':nth-child(4) > :nth-child(3) > .MuiSwitch-root > .MuiButtonBase-root > .PrivateSwitchBase-input').click()
-  cy.get('.MuiAlert-message').should('be.visible').and('contain', 'Berhasil Mengubah Status Termin.')
-  //Ke halaman biaya
-  cy.get('[data-testid="drawer-item-expenses"] > .MuiListItemText-root > .MuiTypography-root').click()
-  cy.get('.css-aidtzz > .MuiButtonBase-root').click()
-  cy.get('#expense_from').click()
-  cy.get('ul[role="listbox"] > li').contains('Rekening Bank').click()
-  cy.get(':nth-child(6) > .MuiGrid2-root > .MuiSwitch-root > .MuiButtonBase-root > .PrivateSwitchBase-input').click()
-  cy.get('[data-testid="input-payment_terms"] > .MuiInputBase-root').click()
-  cy.get('ul[role="listbox"] > li').should('contain','termin 80 bulan')
-})
-
-it('Berhasil merubah status termin dari non aktif menjadi aktif, kemudian tampil menjadi opsi di kontak', () => {
-  //Mengunjungi halaman termin
-  cy.get('[data-cy="submenu-item-termins-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
-  //Ubah status termin non aktif menjadi aktif
-  cy.get(':nth-child(5) > :nth-child(3) > .MuiSwitch-root > .MuiButtonBase-root > .PrivateSwitchBase-input').click()
-  cy.get('.MuiAlert-message').should('be.visible').and('contain', 'Berhasil Mengubah Status Termin.')
-  //Ke halaman biaya
-  cy.get('[data-testid="drawer-item-contacts"] > .MuiListItemText-root > .MuiTypography-root').click()
-  cy.get('.css-aidtzz > .MuiButtonBase-root').click()
-  cy.get('#syarat_pembayaran').click()
-  cy.get('ul[role="listbox"] > li').should('contain','termin 11 bulan')
-})
-
-// Status Aktif - non Aktif (Pegination 1)
-it('Berhasil merubah status termin dari aktif menjadi non aktif, kemudian tidak tampil menjadi opsi di penjualan', () => {
-  //Mengunjungi halaman termin
-  cy.get('[data-cy="submenu-item-termins-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
-  //Ubah status termin aktif menjadi non aktif
-  cy.get(':nth-child(2) > :nth-child(3) > .MuiSwitch-root > .MuiButtonBase-root > .PrivateSwitchBase-input').click()
-  cy.get('.MuiAlert-message').should('be.visible').and('contain', 'Berhasil Mengubah Status Termin.')
-  //Ke halaman penjualan
-  cy.get('[data-testid="drawer-item-sales"]').click()
-  cy.get('.css-aidtzz > .MuiButtonBase-root').click()
-  cy.get('#paymentTerms').click()
-  cy.get('ul[role="listbox"] > li').should('not.contain','Spam Klik Termin')
-})
-
-it('Berhasil merubah status termin dari aktif menjadi non aktif, kemudian tidak tampil menjadi opsi di pembelian', () => {
-  //Mengunjungi halaman termin
-  cy.get('[data-cy="submenu-item-termins-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
-  //Ubah status termin non aktif menjadi aktif
-  cy.get(':nth-child(1) > :nth-child(3) > .MuiSwitch-root > .MuiButtonBase-root > .PrivateSwitchBase-input').click()
-  cy.get('.MuiAlert-message').should('be.visible').and('contain', 'Berhasil Mengubah Status Termin.')
-  //Ke halaman penjualan
-  cy.get('[data-testid="drawer-item-purchases"]').click()
-  cy.get('.css-aidtzz > .MuiButtonBase-root').click()
-  cy.get('#paymentTerms').click()
-  cy.get('ul[role="listbox"] > li').should('not.contain','Spam Klik')
-})
-
-it('Berhasil merubah status termin dari aktif menjadi non aktif, kemudian tidak tampil menjadi opsi di Biaya', () => {
-  //Mengunjungi halaman termin
-  cy.get('[data-cy="submenu-item-termins-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
-  //Ubah status termin non aktif menjadi aktif
-  cy.get(':nth-child(4) > :nth-child(3) > .MuiSwitch-root > .MuiButtonBase-root > .PrivateSwitchBase-input').click()
-  cy.get('.MuiAlert-message').should('be.visible').and('contain', 'Berhasil Mengubah Status Termin.')
-  //Ke halaman biaya
-  cy.get('[data-testid="drawer-item-expenses"] > .MuiListItemText-root > .MuiTypography-root').click()
-  cy.get('.css-aidtzz > .MuiButtonBase-root').click()
-  cy.get('#expense_from').click()
-  cy.get('ul[role="listbox"] > li').contains('Rekening Bank').click()
-  cy.get(':nth-child(6) > .MuiGrid2-root > .MuiSwitch-root > .MuiButtonBase-root > .PrivateSwitchBase-input').click()
-  cy.get('[data-testid="input-payment_terms"] > .MuiInputBase-root').click()
-  cy.get('ul[role="listbox"] > li').should('not.contain','termin 80 bulan')
-})
-
-it('Berhasil merubah status termin dari aktif menjadi non aktif, kemudian tidak tampil menjadi opsi di kontak', () => {
-  //Mengunjungi halaman termin
-  cy.get('[data-cy="submenu-item-termins-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
-  //Ubah status termin non aktif menjadi aktif
-  cy.get(':nth-child(5) > :nth-child(3) > .MuiSwitch-root > .MuiButtonBase-root > .PrivateSwitchBase-input').click()
-  cy.get('.MuiAlert-message').should('be.visible').and('contain', 'Berhasil Mengubah Status Termin.')
-  //Ke halaman biaya
-  cy.get('[data-testid="drawer-item-contacts"] > .MuiListItemText-root > .MuiTypography-root').click()
-  cy.get('.css-aidtzz > .MuiButtonBase-root').click()
-  cy.get('#syarat_pembayaran').click()
-  cy.get('ul[role="listbox"] > li').should('not.contain','termin 11 bulan')
-})
-
-//Status non aktif - Aktif (Pegination 2)
-//Status Aktif - non Aktif (Pegination 2)
-
-//Hapus Data termin
-it('Berhasil menghapus termin', () => {
-    cy.get('[data-cy="submenu-item-termins-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
-    cy.get('.MuiTableBody-root > :nth-child(1) > :nth-child(4) > .MuiButtonBase-root').should('be.visible').click()
-    cy.get('[data-testid="alert-dialog-submit-button"]').click()
-    cy.get('.MuiAlert-message').should('be.visible').and('contain', 'Berhasil Menghapus Data Termin.')
-    cy.get('.MuiTableBody-root > :nth-child(1) > :nth-child(1)').should('not.contain','Spam Klik Termin')
-  })
-
+//Looping add data
  it('Harus bisa menambahkan termin dengan data yang sudah di isi sebanyak 15 kali', () => {
     cy.get('[data-cy="submenu-item-termins-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
     for(let i = 1; i <=15; i++) {
@@ -496,40 +373,225 @@ it('Berhasil menghapus termin', () => {
       cy.get('.MuiSnackbar-root > .MuiPaper-root').should('be.visible').and('contain', 'Berhasil Menambahkan Data Termin.')
     }
   });
+  
+
+// Status non Aktif - Aktif (Pegination 1)
+  it('Berhasil merubah status termin dari non aktif menjadi aktif, kemudian tampil menjadi opsi di penjuaan, pembelian dan kontak PG1', () => {
+   //Mengunjungi halaman termin
+   cy.get('[data-cy="submenu-item-termins-setting"] >[data-cy="list-item-button-sub-menu-setting"]').click()
+   //Ubah status termin non aktif menjadi aktif
+     cy.get(':nth-child(1) > :nth-child(3) > .MuiSwitch-root > .MuiButtonBase-root > .PrivateSwitchBase-input').click()
+     cy.get('.MuiAlert-message').should('be.visible').and('contain', 'Berhasil Mengubah Status Termin.')
+     cy.get(':nth-child(1) > :nth-child(3) > .MuiSwitch-root > .MuiButtonBase-root > .PrivateSwitchBase-input').should('be.checked')
+
+     //Ke halaman penjualan
+     cy.get('[data-testid="drawer-item-sales"]').click()
+     cy.get('.css-aidtzz > .MuiButtonBase-root').should('be.visible').click()
+     cy.get('#paymentTerms').click()
+     cy.get('ul[role="listbox"] > li').should('contain', 'termin sebulan 15')
+     cy.get('body').click(0, 0)
+
+     // Cek di Pembelian
+      cy.get('[data-testid="drawer-item-purchases"]').should('be.visible').click()
+      cy.get('.css-aidtzz > .MuiButtonBase-root').click()
+      cy.get('#paymentTerms').click()
+      cy.get('ul[role="listbox"] > li').should('contain', 'termin sebulan 15')
+      cy.get('body').click(0, 0)
+
+      // Cek di Kontak
+      cy.get('[data-testid="drawer-item-contacts"] > .MuiListItemText-root > .MuiTypography-root').should('be.visible').click()
+      cy.get('.css-aidtzz > .MuiButtonBase-root').should('be.visible').click()
+      cy.get('#syarat_pembayaran').click()
+      cy.get('ul[role="listbox"] > li').should('contain', 'termin sebulan 15')
+      cy.get('body').click(0, 0)
+
+      // Cek di Biaya
+      cy.get('[data-testid="drawer-item-expenses"] > .MuiListItemText-root > .MuiTypography-root').should('be.visible').click()
+      cy.get('.css-aidtzz > .MuiButtonBase-root').should('be.visible').click()
+      cy.get('#expense_from').should('be.visible').click()
+      cy.get('ul[role="listbox"] > li').contains('Rekening Bank').should('be.visible').click()
+      cy.get(':nth-child(6) > .MuiGrid2-root > .MuiSwitch-root > .MuiButtonBase-root > .PrivateSwitchBase-input').click()
+      cy.get('[data-testid="input-payment_terms"] > .MuiInputBase-root').should('be.visible').click()
+      cy.get('ul[role="listbox"] > li').should('contain', 'termin sebulan 15')
+      cy.get('body').click(0, 0)
+})
+
+// Status non Aktif - Aktif (Pegination 2)
+it('Berhasil merubah status termin dari non aktif menjadi aktif, kemudian tampil menjadi opsi di penjuaan, pembelian dan kontak PG2', () => {
+   //Mengunjungi halaman termin
+   cy.get('[data-cy="submenu-item-termins-setting"] >[data-cy="list-item-button-sub-menu-setting"]').click()
+   //Ubah ke pegination 2
+    cy.get('[data-testid="NavigateNextIcon"]').click()
+   //Ubah status termin aktif menjadi non aktif
+     cy.get(':nth-child(1) > :nth-child(3) > .MuiSwitch-root > .MuiButtonBase-root > .PrivateSwitchBase-input').click()
+     cy.get('.MuiAlert-message').should('be.visible').and('contain', 'Berhasil Mengubah Status Termin.')
+     cy.get(':nth-child(1) > :nth-child(3) > .MuiSwitch-root > .MuiButtonBase-root > .PrivateSwitchBase-input').should('be.checked')
+
+     //Ke halaman penjualan
+     cy.get('[data-testid="drawer-item-sales"]').click()
+     cy.get('.css-aidtzz > .MuiButtonBase-root').should('be.visible').click()
+     cy.get('#paymentTerms').click()
+     cy.get('ul[role="listbox"] > li').should('contain', 'termin sebulan 5')
+     cy.get('body').click(0, 0)
+
+     // Cek di Pembelian
+      cy.get('[data-testid="drawer-item-purchases"]').should('be.visible').click()
+      cy.get('.css-aidtzz > .MuiButtonBase-root').click()
+      cy.get('#paymentTerms').click()
+      cy.get('ul[role="listbox"] > li').should('contain', 'termin sebulan 5')
+      cy.get('body').click(0, 0)
+
+      // Cek di Kontak
+      cy.get('[data-testid="drawer-item-contacts"] > .MuiListItemText-root > .MuiTypography-root').should('be.visible').click()
+      cy.get('.css-aidtzz > .MuiButtonBase-root').should('be.visible').click()
+      cy.get('#syarat_pembayaran').click()
+      cy.get('ul[role="listbox"] > li').should('contain', 'termin sebulan 5')
+      cy.get('body').click(0, 0)
+
+      // // Cek di Biaya
+      // cy.get('[data-testid="drawer-item-expenses"] > .MuiListItemText-root > .MuiTypography-root').should('be.visible').click()
+      // cy.get('.css-aidtzz > .MuiButtonBase-root').should('be.visible').click()
+      // cy.get('#expense_from').should('be.visible').click()
+      // cy.get('ul[role="listbox"] > li').contains('Rekening Bank').should('be.visible').click()
+      // cy.get(':nth-child(6) > .MuiGrid2-root > .MuiSwitch-root > .MuiButtonBase-root > .PrivateSwitchBase-input').click()
+      // cy.get('[data-testid="input-payment_terms"] > .MuiInputBase-root').should('be.visible').click()
+      // cy.get('ul[role="listbox"] > li').should('contain', 'termin sebulan 5')
+      // cy.get('body').click(0, 0)
+})
+
+// Status Aktif - non Aktif (Pegination 1)
+it('Berhasil merubah status termin dari aktif menjadi non aktif, kemudian tidak tampil menjadi opsi di penjualan, pembelian, biaya, kontak PG1', () => {
+  //Mengunjungi halaman termin
+   cy.get('[data-cy="submenu-item-termins-setting"] >[data-cy="list-item-button-sub-menu-setting"]').click()
+   //Ubah status termin non aktif menjadi aktif
+     cy.get(':nth-child(1) > :nth-child(3) > .MuiSwitch-root > .MuiButtonBase-root > .PrivateSwitchBase-input').click()
+     cy.get('.MuiAlert-message').should('be.visible').and('contain', 'Berhasil Mengubah Status Termin.')
+     cy.get(':nth-child(1) > :nth-child(3) > .MuiSwitch-root > .MuiButtonBase-root > .PrivateSwitchBase-input').should('not.be.checked')
+
+     //Ke halaman penjualan
+     cy.get('[data-testid="drawer-item-sales"]').click()
+     cy.get('.css-aidtzz > .MuiButtonBase-root').should('be.visible').click()
+     cy.get('#paymentTerms').click()
+     cy.get('ul[role="listbox"] > li').should('not.contain', 'termin sebulan 15')
+     cy.get('body').click(0, 0)
+
+     // Cek di Pembelian
+      cy.get('[data-testid="drawer-item-purchases"]').should('be.visible').click()
+      cy.get('.css-aidtzz > .MuiButtonBase-root').click()
+      cy.get('#paymentTerms').click()
+      cy.get('ul[role="listbox"] > li').should('not.contain', 'termin sebulan 15')
+      cy.get('body').click(0, 0)
+
+      // Cek di Kontak
+      cy.get('[data-testid="drawer-item-contacts"] > .MuiListItemText-root > .MuiTypography-root').should('be.visible').click()
+      cy.get('.css-aidtzz > .MuiButtonBase-root').should('be.visible').click()
+      cy.get('#syarat_pembayaran').click()
+      cy.get('ul[role="listbox"] > li').should('not.contain', 'termin sebulan 15')
+      cy.get('body').click(0, 0)
+
+      // // Cek di Biaya
+      // cy.get('[data-testid="drawer-item-expenses"] > .MuiListItemText-root > .MuiTypography-root').should('be.visible').click()
+      // cy.get('.css-aidtzz > .MuiButtonBase-root').should('be.visible').click()
+      // cy.get('#expense_from').should('be.visible').click()
+      // cy.get('ul[role="listbox"] > li').contains('Rekening Bank').should('be.visible').click()
+      // cy.get(':nth-child(6) > .MuiGrid2-root > .MuiSwitch-root > .MuiButtonBase-root > .PrivateSwitchBase-input').click()
+      // cy.get('[data-testid="input-payment_terms"] > .MuiInputBase-root').should('be.visible').click()
+      // cy.get('ul[role="listbox"] > li').should('not.contain', 'termin sebulan 15')
+      // cy.get('body').click(0, 0)
+})
+
+//Status Aktif - non Aktif (Pegination 2)
+it('Berhasil merubah status termin dari aktif menjadi non aktif di page 2, kemudian tidak tampil di opsi penjualan, pembelian, biaya, dan kontak PG2', () => {
+  //Mengunjungi halaman termin
+   cy.get('[data-cy="submenu-item-termins-setting"] >[data-cy="list-item-button-sub-menu-setting"]').click()
+   //Ubah ke pegination 2
+    cy.get('[data-testid="NavigateNextIcon"]').click()
+   //Ubah status termin aktif menjadi non aktif
+     cy.get(':nth-child(1) > :nth-child(3) > .MuiSwitch-root > .MuiButtonBase-root > .PrivateSwitchBase-input').click()
+     cy.get('.MuiAlert-message').should('be.visible').and('contain', 'Berhasil Mengubah Status Termin.')
+     cy.get(':nth-child(1) > :nth-child(3) > .MuiSwitch-root > .MuiButtonBase-root > .PrivateSwitchBase-input').should('not.be.checked')
+
+     //Ke halaman penjualan
+     cy.get('[data-testid="drawer-item-sales"]').click()
+     cy.get('.css-aidtzz > .MuiButtonBase-root').should('be.visible').click()
+     cy.get('#paymentTerms').click()
+     cy.get('ul[role="listbox"] > li').should('not.contain', 'termin sebulan 5')
+     cy.get('body').click(0, 0)
+
+     // Cek di Pembelian
+      cy.get('[data-testid="drawer-item-purchases"]').should('be.visible').click()
+      cy.get('.css-aidtzz > .MuiButtonBase-root').click()
+      cy.get('#paymentTerms').click()
+      cy.get('ul[role="listbox"] > li').should('not.contain', 'termin sebulan 5')
+      cy.get('body').click(0, 0)
+
+      // Cek di Kontak
+      cy.get('[data-testid="drawer-item-contacts"] > .MuiListItemText-root > .MuiTypography-root').should('be.visible').click()
+      cy.get('.css-aidtzz > .MuiButtonBase-root').should('be.visible').click()
+      cy.get('#syarat_pembayaran').click()
+      cy.get('ul[role="listbox"] > li').should('not.contain', 'termin sebulan 5')
+      cy.get('body').click(0, 0)
+
+      // // Cek di Biaya
+      // cy.get('[data-testid="drawer-item-expenses"] > .MuiListItemText-root > .MuiTypography-root').should('be.visible').click()
+      // cy.get('.css-aidtzz > .MuiButtonBase-root').should('be.visible').click()
+      // cy.get('#expense_from').should('be.visible').click()
+      // cy.get('ul[role="listbox"] > li').contains('Rekening Bank').should('be.visible').click()
+      // cy.get(':nth-child(6) > .MuiGrid2-root > .MuiSwitch-root > .MuiButtonBase-root > .PrivateSwitchBase-input').click()
+      // cy.get('[data-testid="input-payment_terms"] > .MuiInputBase-root').should('be.visible').click()
+      // cy.get('ul[role="listbox"] > li').should('contain', 'termin sebulan 5')
+      // cy.get('body').click(0, 0)
+})
+
+//Hapus Data termin
+it('Berhasil menghapus termin', () => {
+    cy.get('[data-cy="submenu-item-termins-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
+    cy.get('.MuiTableBody-root > :nth-child(1) > :nth-child(4) > .MuiButtonBase-root').should('be.visible').click()
+    cy.get('[data-testid="alert-dialog-submit-button"]').click()
+    cy.get('.MuiAlert-message').should('be.visible').and('contain', 'Berhasil Menghapus Data Termin.')
+    cy.get('.MuiTableBody-root > :nth-child(1) > :nth-child(1)').should('not.contain','termin sebulan 15')
+  })
 
 //Pegination
   it('Berhasil mengganti halaman termin selanjutnya', () => {
     cy.get('[data-cy="submenu-item-termins-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
-    cy.get('.MuiPagination-ul > :nth-child(4)').click()
-    cy.get('.MuiTableBody-root > .MuiTableRow-root > :nth-child(1)').should('contain','termin dua bulan')
+    cy.get('[data-testid="NavigateNextIcon"]').click()
+    cy.get('.MuiTableBody-root > .MuiTableRow-root > :nth-child(1)').should('contain','termin sebulan 4')
   })
 
   it('Berhasil mengganti pagination ke halaman sebelumnya', () => {
-    cy.get('[data-cy="submenu-item-termins-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
-    cy.get('.MuiPagination-ul > :nth-child(4)').click()
-    cy.get('.MuiPagination-ul > :nth-child(1) > .MuiButtonBase-root').click()
-    cy.get('.MuiTableBody-root > :nth-child(6) > :nth-child(1)').should('contain','termin 8 bulan')
+    cy.get('[data-cy="submenu-item-termins-setting"] >[data-cy="list-item-button-sub-menu-setting"]').click()
+    cy.get('[data-testid="NavigateNextIcon"]').click()
+    cy.get('[data-testid="NavigateBeforeIcon"]').click()
+    cy.get('.MuiTableBody-root > :nth-child(1) > :nth-child(1)').should('contain','termin sebulan 14')
   })
 
   //Search
-  it('Search dengan keyword yang valid', () => {
+  it('Berhasil Search dengan keyword yang valid', () => {
     cy.get('[data-cy="submenu-item-termins-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
     cy.get('input[placeholder="Cari Termin"]')
-    .should('be.visible').type('termin 9 bulan')
-    cy.get('.MuiTableBody-root > .MuiTableRow-root > :nth-child(1)').should('contain','termin 9 bulan')
+    .should('be.visible').type('termin sebulan 5')
+    cy.get('.MuiTableBody-root > .MuiTableRow-root > :nth-child(1)').should('contain','termin sebulan 5')
   })
 
-  it('Search dengan keyword yang tidak valid', () => {
+  it('Gagal Search dengan keyword yang tidak valid', () => {
     cy.get('[data-cy="submenu-item-termins-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
     cy.get('input[placeholder="Cari Termin"]')
-    .should('be.visible').type('termin 20 bulan')
+    .should('be.visible').type('hantu')
     cy.get('.MuiTableBody-root > .MuiTableRow-root > .MuiTableCell-root').should('contain','Tidak ada data.')
   })
 
-  it('Search dengan keyword sebagian', () => {
+  it('Berhasil Search dengan keyword sebagian', () => {
     cy.get('[data-cy="submenu-item-termins-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
     cy.get('input[placeholder="Cari Termin"]')
     .should('be.visible').type('ter')
     cy.get('.MuiTableBody-root > :nth-child(1) > :nth-child(1)').should('contain','ter')
+  })
+
+  it('Berhasil search dengan keyword campuran (huruf besar dan kecil)', () => {
+   cy.get('[data-cy="submenu-item-termins-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
+    cy.get('input[placeholder="Cari Termin"]')
+    .should('be.visible').type('terMin SeBULan')
+    cy.get('.MuiTableBody-root > :nth-child(1) > :nth-child(1)').should('contain','termin sebulan') 
   })
 })

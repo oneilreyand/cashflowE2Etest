@@ -38,14 +38,14 @@ describe('[PENGATURAN-SALESMAN]', () => {
     });
 
     //Navigation to Beranda
-    it('[PENGATURAN-SALESMAN] - Breadcrumbs harus terlihat dan berfungsi dengan baik', () => {
+    it('Breadcrumbs harus terlihat dan berfungsi dengan baik', () => {
       cy.get('.MuiBreadcrumbs-ol > :nth-child(1) > .MuiTypography-root').should('be.visible').and('contain', 'Beranda')
       cy.get('.MuiBreadcrumbs-ol > :nth-child(1) > .MuiTypography-root').click()
       cy.get('.MuiTypography-root > span').should('be.visible').and('contain', 'Dashboard')
     })
 
     //Empty State
-    it('Membuka halaman Pengaturan Termin dengan kondisi data termin tidak ada - Harus ada pesan (Tidak ada data) di tabel', () => {
+    it('Membuka halaman Pengaturan salesman dengan kondisi data termin tidak ada - Harus ada pesan (Tidak ada data) di tabel', () => {
       cy.get('[data-cy="submenu-item-salesman-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
       cy.get('.MuiTableBody-root > .MuiTableRow-root > .MuiTableCell-root').should('be.visible').and('contain', 'Tidak ada data.')
       });
@@ -164,6 +164,36 @@ describe('[PENGATURAN-SALESMAN]', () => {
       });
     })
 
+    it('Spam klik simpan, data yang tersimpan hanya satu', () => {
+      cy.intercept('POST', '**/api/setting-salesman*').as('HitMultiple');
+
+      // Kunjungi halaman tambah termin
+     cy.get('[data-cy="submenu-item-salesman-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click();
+      cy.get('.MuiStack-root > .MuiButtonBase-root')
+        .should('be.visible')
+        .click();
+
+      // Isi form tambah termin
+       cy.get('input[placeholder="Masukkan Nama Salesman"]')
+        .should('be.visible')
+        .type('Salesman 2')
+      cy.get('input[placeholder="Keterangan"]')
+        .should('be.visible')
+        .type('keterangan salesman')
+
+      // Klik simpan berkali-kali (3x) -> tetap error
+      for (let i = 0; i < 3; i++) {
+      cy.get(':nth-child(4) > div > .MuiButton-contained').click();
+      cy.wait('@HitMultiple');
+      }
+
+      // Verifikasi data hanya muncul sekali di tabel
+      cy.get('.MuiTableBody-root')
+      .find('tr')
+      .filter(':contains("Salesman 2")')
+      .should('have.length', 1);
+})
+
     //Create new data failed
     it('Gagal tambah sales, nama dan keterangan kosong', () => {
       cy.get('[data-cy="submenu-item-salesman-setting"] > [data-cy="list-item-button-sub-menu-setting"]')
@@ -213,7 +243,7 @@ describe('[PENGATURAN-SALESMAN]', () => {
       .and('contain', 'Nama dan Keterangan Salesman harus diisi.')
     })
 
-    it('Gagal mendapatkan data, kondisi error harus muncul', () => {
+    it('Gagal GET data, kondisi error harus muncul', () => {
       // Intercept the API request
       cy.intercept('GET', '**/api/setting-salesman*',{ statusCode: 500,body: {
           message: 'Internal Server Error',
@@ -232,7 +262,7 @@ describe('[PENGATURAN-SALESMAN]', () => {
       cy.get('.MuiTableBody-root > .MuiTableRow-root > .MuiTableCell-root').should('be.visible').and('contain', 'Error, Gagal mendapatkan data!')
     });
 
-    it.only('Gagal menambahkan salesman, error server', () => {
+    it('Gagal POST data salesman, error server', () => {
 
       // Intercept API POST untuk setting salesman
       cy.intercept('POST','**/api/setting-salesman*',
@@ -266,116 +296,44 @@ describe('[PENGATURAN-SALESMAN]', () => {
       });
     });
 
-  
-    //Search
+    it('Gagal GET data saat offline', () => {
+      cy.goOffline();
 
-    it('[PENGATURAN-SALESMAN] - Harus bisa mencari data sales, list daata tidak ada', () => {
+     // Kunjungi halaman ekspedisi
       cy.get('[data-cy="submenu-item-salesman-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click();
-      cy.get('input[placeholder="Cari Salesman"]').should('be.visible').type('reyand oneil')
+      cy.get('.MuiAlert-message').should('be.visible').and('contain', 'Tidak ada koneksi internet. Silakan periksa koneksi Anda.');
+      cy.get('.MuiTableBody-root > .MuiTableRow-root > .MuiTableCell-root').should('be.visible').and('contain','Tidak ada data')
+    })
+
+    it('Gagal POST data saat offline', () =>{
+    //Kunjungi halaman tambah termin
+    cy.get('[data-cy="submenu-item-salesman-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click();
+    cy.get('.MuiStack-root > .MuiButtonBase-root').should('be.visible').click();
+
+    //Isi form tambah termin
+     cy.get('input[placeholder="Masukkan Nama Salesman"]')
+        .should('be.visible')
+        .type('ucok 10')
+      cy.get('input[placeholder="Keterangan"]')
+        .should('be.visible')
+        .type('keterangan salesman')
+      cy.goOffline();
+      cy.get(':nth-child(4) > div > .MuiButton-contained')
+        .should('be.visible')
+        .and('contain', 'Simpan')
+        .click()
+    //Cek pesan error
+    cy.get('.MuiAlert-message').should('be.visible').and('contain', 'Tidak ada koneksi internet. Silakan periksa koneksi Anda.');
+    })
+
+    //Search
+    it('Gagal mencari data sales, list daata tidak ada', () => {
+      cy.get('[data-cy="submenu-item-salesman-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click();
+      cy.get('input[placeholder="Cari Salesman"]').should('be.visible').type('hantu')
       cy.get('.MuiTableBody-root > .MuiTableRow-root > .MuiTableCell-root').should('be.visible').and('contain', 'Tidak ada data.')
     });
 
-    it.only('Berhasil menambahkan salesman, semua field di isi, status uncheck sebanyak 10 kali', () => {
-
-      // Intercept API POST untuk setting salesman
-      cy.intercept('POST','**/api/setting-salesman*',
-        // {
-        //   statusCode: 500,
-        //   body: {
-        //     message: 'Internal Server Error',
-        //   },
-        // }
-        ).as('postSalesmanError');
-
-      for(let i = 0; i < 15; i++) {
-        cy.get('[data-cy="submenu-item-salesman-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click();
-        cy.contains('button', 'Tambah Salesman').should('be.visible').click()
-        cy.get('input[placeholder="Masukkan Nama Salesman"]').should('be.visible').type(`ucok ${i}`)
-        cy.get('input[placeholder="Keterangan"]').should('be.visible').type(`keterangan salesman ${i}`)
-        cy.get(':nth-child(4) > div > .MuiButton-contained').should('be.visible').and('contain', 'Simpan').click()
-  
-        cy.wait('@postSalesmanError').then((interception) => {expect(interception.response.statusCode).to.eq(200);
-        });
-      }
-    });
-
-    it('[PENGATURAN-SALESMAN] - harus gagal menambahkan salesman, error server', () => {
-
-      // Intercept API POST untuk setting salesman
-      cy.intercept('POST','**/api/setting-salesman*',
-        {
-          statusCode: 500,
-          body: {
-            message: 'Internal Server Error',
-          },
-        }
-      ).as('postSalesmanError');
-
-      cy.get('[data-cy="submenu-item-salesman-setting"] > [data-cy="list-item-button-sub-menu-setting"]')
-        .click();
-      cy.contains('button', 'Tambah Salesman')
-        .should('be.visible')
-        .click()
-      cy.get('input[placeholder="Masukkan Nama Salesman"]')
-        .should('be.visible')
-        .type('ucok')
-      cy.get('input[placeholder="Keterangan"]')
-        .should('be.visible')
-        .type('keterangan salesman')
-      cy.get('input[name="sales_status"]')
-        .should('exist')
-        .and('not.be.checked');
-      cy.get(':nth-child(4) > div > .MuiButton-contained')
-        .should('be.visible')
-        .and('contain', 'Simpan')
-        .click()
-
-      cy.wait('@postSalesmanError').then((interception) => {
-        expect(interception.response.statusCode).to.eq(500);
-        expect(interception.response.body.message).to.eq('Internal Server Error');
-      });
-    });
-
-    it('[PENGATURAN-SALESMAN] - Harus berhasil menambahkan salesman, semua field di isi, status check', () => {
-
-      // Intercept API POST untuk setting salesman
-      cy.intercept('POST', '**/api/setting-salesman*',
-        // {
-        //   statusCode: 500,
-        //   body: {
-        //     message: 'Internal Server Error',
-        //   },
-        // }
-      ).as('postSalesmanError');
-
-      cy.get('[data-cy="submenu-item-salesman-setting"] > [data-cy="list-item-button-sub-menu-setting"]')
-        .click();
-      cy.contains('button', 'Tambah Salesman')
-        .should('be.visible')
-        .click()
-      cy.get('input[placeholder="Masukkan Nama Salesman"]')
-        .should('be.visible')
-        .type('bibi')
-      cy.get('input[placeholder="Keterangan"]')
-        .should('be.visible')
-        .type('keterangan salesman 2')
-        cy.get(':nth-child(1) > :nth-child(3) > .MuiSwitch-root > .MuiButtonBase-root > .PrivateSwitchBase-input')
-        .click()
-        .should('exist')
-        .and('be.checked');
-      cy.get(':nth-child(4) > div > .MuiButton-contained')
-        .should('be.visible')
-        .and('contain', 'Simpan')
-        .click()
-
-      cy.wait('@postSalesmanError').then((interception) => {
-        expect(interception.response.statusCode).to.eq(200);
-      });
-    });
-
-    //Search 
-
-    it('[PENGATURAN-SALESMAN] - Harus bisa mencari salesman dengan keyword yang valid', () => {
+    it('Berhasil Harus bisa mencari salesman dengan keyword yang valid', () => {
      cy.get('[data-cy="submenu-item-salesman-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
       
       cy.get('input[placeholder="Cari Salesman"]') // Seleksi elemen input berdasarkan placeholder
@@ -392,25 +350,19 @@ describe('[PENGATURAN-SALESMAN]', () => {
         });
     })
 
-    it('[PENGATURAN-SALESMAN] - Harus berhasil mencari nama salesman dengan sebagian keyword', () => {
+    it('Berhasil mencari nama salesman dengan sebagian keyword', () => {
       cy.get('[data-cy="submenu-item-salesman-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
       cy.get('input[placeholder="Cari Salesman"]').should('be.visible').type('uc')
       cy.get('.MuiTableBody-root > :nth-child(1) > :nth-child(1)').should('be.visible').and('contain', 'uc')
     })
 
-    it('[PENGATURAN-SALESMAN] - Harus berhasil mencari nama salesman dengan huruf kecil-besar(campur)', () => {
+    it('Berhasil mencari nama salesman dengan huruf kecil-besar(campur)', () => {
       cy.get('[data-cy="submenu-item-salesman-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
-      cy.get('input[placeholder="Cari Salesman"]').should('be.visible').type('reYaND')
-      cy.get('.MuiTableBody-root > :nth-child(1) > :nth-child(1)').should('be.visible').and('contain', 'reyand')
+      cy.get('input[placeholder="Cari Salesman"]').should('be.visible').type('uCoK')
+      cy.get('.MuiTableBody-root > :nth-child(1) > :nth-child(1)').should('be.visible').and('contain', 'ucok')
     })
 
-    it('[PENGATURAN-SALESMAN] - Tidak ada data saat mencari nama ekspedisi yang tidak valid', () => {
-      cy.get('[data-cy="submenu-item-salesman-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
-      cy.get('input[placeholder="Cari Salesman"]').should('be.visible').type('Hantu')
-      cy.get('.MuiTableBody-root > .MuiTableRow-root > .MuiTableCell-root').should('be.visible').and('contain', 'Tidak ada data')
-    })  
-
-    it('[PENGATURAN-SALESMAN] - Harus gagal mencari salesman, memanipulasi API setting salesman menjadi error 500', () => {
+    it('Gagal mencari salesman, memanipulasi API setting salesman menjadi error 500', () => {
       // Intercept API GET dan manipulasi semua permintaan ke endpoint setting-salesman menjadi error 500
       cy.intercept(
         'GET',
@@ -437,8 +389,8 @@ describe('[PENGATURAN-SALESMAN]', () => {
     
       // Ketikkan teks ke dalam input
       cy.get('input[placeholder="Cari Salesman"]')
-        .type('reyand 1') // Ketikkan teks 'reyand 1'
-        .should('have.value', 'reyand 1'); // Verifikasi nilai input sesuai
+        .type('ucok') // Ketikkan teks 'reyand 1'
+        .should('have.value', 'ucok'); // Verifikasi nilai input sesuai
     
       // Tunggu intercept pertama untuk API request tanpa pencarian
       cy.wait('@casiSalesman').then((interception) => {
@@ -471,9 +423,19 @@ describe('[PENGATURAN-SALESMAN]', () => {
         .and('contain', 'Error, Gagal mendapatkan data!'); // Pastikan pesan error sesuai
     });
 
-    //Aksi
 
-    it('[PENGATURAN-SALESMAN] - Harus berhasil menghapus salesman', () => {
+    //Looping add data
+    it('Berhasil menambahkan salesman, semua field di isi, status uncheck sebanyak 15 kali', () => {
+      cy.get('[data-cy="submenu-item-salesman-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click();
+      for(let i = 0; i < 15; i++) {
+        cy.contains('button', 'Tambah Salesman').should('be.visible').click()
+        cy.get('input[placeholder="Masukkan Nama Salesman"]').should('be.visible').type(`ucok ${i}`)
+        cy.get('input[placeholder="Keterangan"]').should('be.visible').type(`keterangan salesman ${i}`)
+        cy.get(':nth-child(4) > div > .MuiButton-contained').should('be.visible').and('contain', 'Simpan').click()
+        }});
+
+    //Hapus
+    it('Berhasil menghapus salesman', () => {
       cy.intercept('GET', '**/api/setting-salesman**').as('getSalesman');
       cy.get('[data-cy="submenu-item-salesman-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click();
       cy.wait('@getSalesman').then(() => {
@@ -485,20 +447,92 @@ describe('[PENGATURAN-SALESMAN]', () => {
     });
 
     //Pegination
-
-    it('[PENGATURAN-SALESMAN] -  Harus berhasil mendapatkan data salesman ketika next page', () => {
+    it('Berhasil mendapatkan data salesman ketika next page', () => {
       cy.intercept('GET', '**/api/setting-salesman**').as('getSalesman');
       cy.get('[data-cy="submenu-item-salesman-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click();
-      cy.get('.MuiPagination-ul > :nth-child(4) > .MuiButtonBase-root').click()
+      cy.get('[data-testid="NavigateNextIcon"]').click()
       cy.wait('@getSalesman')
     })
 
-    it('[PENGATURAN-SALESMAN] -  Harus berhasil mendapatkan data salesman ketika next page', () => {
+    it('Berhasil mendapatkan data salesman halaman sebelumnya', () => {
       cy.intercept('GET', '**/api/setting-salesman**').as('getSalesman');
       cy.get('[data-cy="submenu-item-salesman-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click();
-      cy.get('.MuiPagination-ul > :nth-child(4) > .MuiButtonBase-root').click()
-      cy.get('.MuiPagination-ul > :nth-child(1) > .MuiButtonBase-root').click()
+      cy.get('[data-testid="NavigateNextIcon"]').click()
+      cy.get('[data-testid="NavigateBeforeIcon"]').click()
       cy.wait('@getSalesman')
     })
 
+    //Status non Aktif - Aktif (Page 1)
+    it('Berhasil merubah status salesman dari non aktif menjadi aktif, kemudian tampil menjadi opsi di penjualan PG1', () => {
+     //Mengunjungi halaman salesman
+     cy.get('[data-cy="submenu-item-salesman-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click();
+     //Ubah status salesman non aktif menjadi aktif
+     cy.get(':nth-child(1) > :nth-child(3) > .MuiSwitch-root > .MuiButtonBase-root > .PrivateSwitchBase-input').click()
+     cy.get('.MuiAlert-message').should('be.visible').and('contain', 'Berhasil Mengubah Status Salesman.')
+     cy.get(':nth-child(1) > :nth-child(3) > .MuiSwitch-root > .MuiButtonBase-root > .PrivateSwitchBase-input').should('be.checked')
+
+     //Ke halaman penjualan
+     cy.get('[data-testid="drawer-item-sales"]').click()
+     cy.get('.css-aidtzz > .MuiButtonBase-root').should('be.visible').click()
+     cy.get(':nth-child(3) > .MuiGrid2-container > .MuiFormControlLabel-root > .MuiButtonBase-root > .PrivateSwitchBase-input').check()
+     cy.get('#salesman').click()
+     cy.get('ul[role="listbox"] > li').should('contain', 'ucok 13')
+     cy.get('body').click(0, 0)
+    })
+
+    //Status non Aktif - Aktif (Page 2)
+    it('Berhasil merubah status salesman dari non aktif menjadi aktif, kemudian tampil menjadi opsi di penjualan PG2', () => {
+     //Mengunjungi halaman salesman
+     cy.get('[data-cy="submenu-item-salesman-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click();
+      cy.get('[data-testid="NavigateNextIcon"]').click()
+     //Ubah status salesman non aktif menjadi aktif
+     cy.get(':nth-child(1) > :nth-child(3) > .MuiSwitch-root > .MuiButtonBase-root > .PrivateSwitchBase-input').click()
+     cy.get('.MuiAlert-message').should('be.visible').and('contain', 'Berhasil Mengubah Status Salesman.')
+     cy.get(':nth-child(1) > :nth-child(3) > .MuiSwitch-root > .MuiButtonBase-root > .PrivateSwitchBase-input').should('be.checked')
+
+     //Ke halaman penjualan
+     cy.get('[data-testid="drawer-item-sales"]').click()
+     cy.get('.css-aidtzz > .MuiButtonBase-root').should('be.visible').click()
+     cy.get(':nth-child(3) > .MuiGrid2-container > .MuiFormControlLabel-root > .MuiButtonBase-root > .PrivateSwitchBase-input').check()
+     cy.get('#salesman').click()
+     cy.get('ul[role="listbox"] > li').should('contain', 'ucok 2')
+     cy.get('body').click(0, 0)
+    })
+
+    //Status Aktif - non Aktif (Page 1)
+    it.only('Berhasil merubah status salesman dari aktif menjadi non aktif, kemudian tampil menjadi opsi di penjualan PG1', () => {
+     //Mengunjungi halaman salesman
+     cy.get('[data-cy="submenu-item-salesman-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click();
+     //Ubah status salesman non aktif menjadi aktif
+     cy.get(':nth-child(1) > :nth-child(3) > .MuiSwitch-root > .MuiButtonBase-root > .PrivateSwitchBase-input').click()
+     cy.get('.MuiAlert-message').should('be.visible').and('contain', 'Berhasil Mengubah Status Salesman.')
+     cy.get(':nth-child(1) > :nth-child(3) > .MuiSwitch-root > .MuiButtonBase-root > .PrivateSwitchBase-input').should('not.be.checked')
+
+     //Ke halaman penjualan
+     cy.get('[data-testid="drawer-item-sales"]').click()
+     cy.get('.css-aidtzz > .MuiButtonBase-root').should('be.visible').click()
+     cy.get(':nth-child(3) > .MuiGrid2-container > .MuiFormControlLabel-root > .MuiButtonBase-root > .PrivateSwitchBase-input').check()
+     cy.get('#salesman').click()
+     cy.get('ul[role="listbox"] > li').should('not.contain', 'ucok 13')
+     cy.get('body').click(0, 0)
+    })
+
+    //Status Aktif - non Aktif (Page 2)
+    it.only('Berhasil merubah status salesman dari aktif menjadi non aktif, kemudian tampil menjadi opsi di penjualan PG2', () => {
+     //Mengunjungi halaman salesman
+     cy.get('[data-cy="submenu-item-salesman-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click();
+      cy.get('[data-testid="NavigateNextIcon"]').click()
+     //Ubah status salesman non aktif menjadi aktif
+     cy.get(':nth-child(1) > :nth-child(3) > .MuiSwitch-root > .MuiButtonBase-root > .PrivateSwitchBase-input').click()
+     cy.get('.MuiAlert-message').should('be.visible').and('contain', 'Berhasil Mengubah Status Salesman.')
+     cy.get(':nth-child(1) > :nth-child(3) > .MuiSwitch-root > .MuiButtonBase-root > .PrivateSwitchBase-input').should('not.be.checked')
+
+     //Ke halaman penjualan
+     cy.get('[data-testid="drawer-item-sales"]').click()
+     cy.get('.css-aidtzz > .MuiButtonBase-root').should('be.visible').click()
+     cy.get(':nth-child(3) > .MuiGrid2-container > .MuiFormControlLabel-root > .MuiButtonBase-root > .PrivateSwitchBase-input').check()
+     cy.get('#salesman').click()
+     cy.get('ul[role="listbox"] > li').should('not.contain', 'ucok 2')
+     cy.get('body').click(0, 0)
+    })
 });
