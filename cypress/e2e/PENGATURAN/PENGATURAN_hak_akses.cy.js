@@ -251,7 +251,6 @@ describe('[PENGATURAN-PENGGUNA] - Membuka halaman Pengaturan Pengguna dan meliha
     }
   );  
 
-
     it('Melihat informasi detail hak akses', () => {
       cy.get('table tbody tr')
         .contains('td', 'Sales jaga baru')
@@ -278,23 +277,34 @@ describe('[PENGATURAN-PENGGUNA] - Membuka halaman Pengaturan Pengguna dan meliha
         .and('contain.text', 'Role tidak dapat dihapus karena masih digunakan oleh akun lain');
     });
 
-    it.only('Loop semua nama role dengan index', () => {
-      cy.get('.MuiTableBody-root > tr').then(($rows) => {
-        const rowCount = $rows.length;
-        cy.log(`Total data ditemukan: ${rowCount}`);
+    it('Menambahkan atau mengubah Hak akses namun tidak mencentang permission yang tersedia sama sekali', () => {
+      cy.get('[data-testid="add-permission-button"]').should('be.visible').click();
+      cy.get('input[name="name"]').clear().type('Hak akses tanpa permission');
+      cy.get('.MuiGrid2-container > :nth-child(3)').type('Deskripsi test tanpa permission');
+      cy.get('.MuiPaper-elevation0 > .MuiStack-root > .MuiButton-containedPrimary').should('be.disabled');
+      
+    }
+  ); 
 
-        for (let i = 1; i <= rowCount; i++) {
-          cy.get(`.MuiTableBody-root > :nth-child(${i}) > :nth-child(1)`)
-            .invoke('text')
-            .then((text) => {
-              cy.log(`Row ${i} - Nama Role: ${text}`);
-              console.log(`Row ${i} - Nama Role: ${text}`);
-            });
+    it.only('Klik pagination page 2 kalau ada dan aktif', () => {
+      cy.get('body').then(($body) => {
+        const nextBtn = $body.find('[aria-label="Go to next page"]');
+
+        if (nextBtn.length && !nextBtn.is(':disabled')) {
+          cy.get('[aria-label="Go to next page"]', { timeout: 2000 }).click();
+          cy.log('Ke halaman 2');
+          cy.wait(3000);
+
+          cy.get('[aria-label="Go to previous page"]').click();
+          cy.log('Kembali ke halaman 1');
+        } else {
+          cy.log('Pagination ke halaman 2 tidak tersedia atau tombol next disabled');
+          cy.get('.MuiPagination-ul > :nth-child(2) > .MuiButtonBase-root')
+            .click({ force: true }); // klik page 1 biar tetap stay
         }
       });
     });
 
-  
     it('Menangani error server (500) saat menyimpan perubahan data perusahaan', () => {
         // Mock API dengan status 500
         cy.intercept('PUT', '**/api/setting-roles/*', {
