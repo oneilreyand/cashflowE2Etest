@@ -749,47 +749,46 @@ it('Harus berhasil menghapus pajak', () => {
     cy.get('.MuiAlert-message').should('be.visible').and('contain', 'Berhasil Menghapus Data Pajak.')
   })
 
-// //Status non Aktif - Aktif (Pegination 1)
-//   it('Berhasil merubah status pajak dari non aktif menjadi aktif dan tampil menjadi opsi di penjualan, biaya, terima dan kirim uang kas dan bank', () =>{
-//     //mengunjungi halaman pajak
-//     cy.get('[data-cy="submenu-item-tax-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
-//     //Ubah status pajak non aktif menjadi aktif
-//     cy.get(':nth-child(1) > :nth-child(5) > .MuiSwitch-root > .MuiButtonBase-root > .PrivateSwitchBase-input').click()
-//     cy.get('.MuiAlert-message').should('be.visible').and('contain', 'Berhasil Mengubah Status Pajak.')
-//     cy.get(':nth-child(1) > :nth-child(5) > .MuiSwitch-root > .MuiButtonBase-root > .PrivateSwitchBase-input').should('be.checked')
+//Status non Aktif - Aktif (Pegination 1)
+  it.only('Berhasil merubah status pajak dari non aktif menjadi aktif dan tampil menjadi opsi di penjualan, biaya, terima dan kirim uang kas dan bank', () =>{
+    //mengunjungi halaman pajak
+    cy.get('[data-cy="submenu-item-tax-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
+    //Ubah status pajak non aktif menjadi aktif
+    cy.get(':nth-child(1) > :nth-child(5) > .MuiSwitch-root > .MuiButtonBase-root > .PrivateSwitchBase-input').click()
+    cy.get('.MuiAlert-message').should('be.visible').and('contain', 'Berhasil Mengubah Status Pajak.')
+    cy.get(':nth-child(1) > :nth-child(5) > .MuiSwitch-root > .MuiButtonBase-root > .PrivateSwitchBase-input').should('be.checked')
 
-//     //ke halaman penjualan
-//     cy.get('[data-testid="drawer-item-sales"]').click()
-//     cy.get('.css-aidtzz > .MuiButtonBase-root').should('be.visible').click()
-//     cy.scrollIntoView()
-//     cy.get('[data-cy="dropdown-penjualan-tax"]').click()
-//     cy.get('ul[role="listbox"] > li').should('contain', 'PPH 8')
-//     cy.get('body').click(0, 0)
+    // //ke halaman penjualan
+    // cy.get('[data-testid="drawer-item-sales"]').click()
+    // cy.get('.css-aidtzz > .MuiButtonBase-root').should('be.visible').click()
+    // cy.scrollIntoView()
+    // cy.get('[data-cy="dropdown-penjualan-tax"]').click()
+    // cy.get('ul[role="listbox"] > li').should('contain', 'PPH 8')
+    // cy.get('body').click(0, 0)
 
-//     //ke halaman biaya
-//     cy.get('[data-testid="drawer-item-expenses"] > .MuiListItemText-root > .MuiTypography-root').should('be.visible').click()
-//     cy.get('.css-aidtzz > .MuiButtonBase-root').should('be.visible').click()
-//     cy.get('#details\.0\.tax_id').click()
-//     cy.get('ul[role="listbox"] > li').should('contain', 'PPH 8')
-//     cy.get('body').click(0, 0)
+    // //ke halaman biaya
+    // cy.get('[data-testid="drawer-item-expenses"] > .MuiListItemText-root > .MuiTypography-root').should('be.visible').click()
+    // cy.get('.css-aidtzz > .MuiButtonBase-root').should('be.visible').click()
+    // cy.get('#details\.0\.tax_id').click()
+    // cy.get('ul[role="listbox"] > li').should('contain', 'PPH 8')
+    // cy.get('body').click(0, 0)
 
-//     //ke halaman kirim uang kas dan bank
-//     cy.get('[data-testid="drawer-item-cash-bank"]').click()
-//     cy.get('.MuiSelect-select > span').click()
-//     cy.get('ul[role="listbox"] > li').should('contain', 'Kirim Uang').click()
-//     cy.get(':nth-child(2) > .MuiTable-root > .MuiTableBody-root > .MuiTableRow-root > :nth-child(3)').click()
-//     cy.get('ul[role="listbox"] > li').should('contain', 'PPH 8')
-//     cy.get('body').click(0, 0)
+    //ke halaman kirim uang kas dan bank
+    cy.get('[data-testid="drawer-item-cash-bank"]').click()
+    cy.get('.MuiBox-root > .MuiInputBase-root > .MuiSelect-select').should('be.visible').click()
+    cy.get('ul[role="listbox"] > li[role="option"]').contains('Kirim Uang').click()
+    cy.get(':nth-child(2) > .MuiTable-root > .MuiTableBody-root > .MuiTableRow-root > :nth-child(3)').click()
+    cy.get('ul[role="listbox"] > li').should('contain', 'PPH 8')
+    cy.get('body').click(0, 0)
 
-//     //ke halaman terima uang kas dan bank
-//     cy.get('[data-testid="drawer-item-cash-bank"]').click()
-//     cy.get('.MuiSelect-select > span').click()
-//     cy.get('ul[role="listbox"] > li').should('contain', 'Terima Uang').click()
-//     cy.get(':nth-child(2) > .MuiTable-root > .MuiTableBody-root > .MuiTableRow-root > :nth-child(3)').click()
-//     cy.get('ul[role="listbox"] > li').should('contain', 'PPH 8')
-//     cy.get('body').click(0, 0)
-
-//   })
+    //ke halaman terima uang kas dan bank
+    cy.get('.css-1j72te2 > .MuiButtonBase-root').click()
+    cy.get('.MuiBox-root > .MuiInputBase-root > .MuiSelect-select').click()
+    cy.get('ul[role="listbox"] > li[role="option"]').contains('Terima Uang').click()
+    cy.get(':nth-child(2) > .MuiTable-root > .MuiTableBody-root > .MuiTableRow-root > :nth-child(3)').click()
+    cy.get('ul[role="listbox"] > li').should('contain', 'PPH 8')
+    cy.get('body').click(0, 0)
+  })
 
 // //Status non Aktif - Aktif (Pegination 2)
 //   it('Berhasil merubah status pajak dari non aktif menjadi aktif dan tampil menjadi opsi di penjualan, pembelian dan kontak PG2', () =>{})
@@ -843,7 +842,7 @@ it('Berhasil mendapatkan data salesman halaman sebelumnya', () => {
     })
 
 //Status
-  it.only('Harus bisa merubah toogle pemotongan dari non aktif menjadi aktif', () => {
+  it('Harus bisa merubah toogle pemotongan dari non aktif menjadi aktif', () => {
     cy.get('[data-cy="submenu-item-tax-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
 
     cy.get(':nth-child(1) > :nth-child(5) > .MuiSwitch-root > .MuiButtonBase-root > .PrivateSwitchBase-input').scrollIntoView().click()
@@ -851,7 +850,7 @@ it('Berhasil mendapatkan data salesman halaman sebelumnya', () => {
     cy.get('.MuiAlert-message').should('exist').and('contain', 'Berhasil Mengubah Status Pajak.')
   })
 
-  it.only('Harus bisa merubah toogle pemotongan dari aktif menjadi non aktif', () => {
+  it('Harus bisa merubah toogle pemotongan dari aktif menjadi non aktif', () => {
     cy.get('[data-cy="submenu-item-tax-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
 
     cy.get(':nth-child(2) > :nth-child(5) > .MuiSwitch-root > .MuiButtonBase-root > .PrivateSwitchBase-input').scrollIntoView().click()
