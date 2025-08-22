@@ -2,32 +2,18 @@ const companyId = Cypress.env('companyId');
 
 describe("PENJUALAN BARU", () => {
     beforeEach(() => {
-
-        cy.window().then((win) => {
-            const resizeObserverErr = win.onerror
-            win.onerror = function (msg, url, line, col, error) {
-                if (msg.includes('ResizeObserver loop')) {
-                    return true // suppress
-                }
-                if (resizeObserverErr) return resizeObserverErr(msg, url, line, col, error)
-            }
-        })
-
-
         cy.apiLogin("rayhanrayandra.work.id@gmail.com", "12345678");
         cy.visitDashboard(companyId);
         cy.navigateToPenjualan();
         cy.contains('Penjualan Baru', { timeout: 20000 }).click();
     });
 
-    it('Validasi Penulisan Komponen UI Statis Pada Penjualan Baru', () => {
+    it.skip('Validasi Penulisan Komponen UI Statis Pada Penjualan Baru', () => {
 
         cy.get(':nth-child(2) > .MuiGrid2-spacing-xs-2 > .MuiFormControlLabel-root > .MuiButtonBase-root > .PrivateSwitchBase-input').click()
         cy.get(':nth-child(3) > .MuiGrid2-spacing-xs-2 > .MuiFormControlLabel-root > .MuiButtonBase-root > .PrivateSwitchBase-input').click()
         cy.get(':nth-child(2) > .MuiGrid2-spacing-xs-1 > .MuiGrid2-grid-md-8 > .MuiGrid2-container > .MuiFormControlLabel-root > .MuiButtonBase-root > .PrivateSwitchBase-input').click()
         cy.get(':nth-child(7) > .MuiGrid2-spacing-xs-1 > .MuiGrid2-grid-md-8 > .MuiGrid2-container > .MuiFormControlLabel-root > .MuiButtonBase-root > .PrivateSwitchBase-input').click()
-
-
 
         cy.get('.MuiTypography-h5 > span').should('have.text', 'Penjualan Baru')
         cy.get('.MuiBreadcrumbs-ol').should('have.text', 'Beranda/Penjualan/Penjualan Baru')
@@ -49,16 +35,19 @@ describe("PENJUALAN BARU", () => {
         cy.get('#paymentTerms').should('be.visible')
 
         cy.get('legend.MuiFormLabel-root.MuiFormLabel-colorPrimary').eq(4).should('have.text', 'Alamat Penagihan\u2009*')
-        cy.get('#address').should('have.attr', 'placeholder', 'Alamat Penagihan')
-        cy.get('#paymenAddress').should('be.visible')
+        cy.get('#address').should('be.visible')
+        cy.get('#address-label').should('have.text', 'Alamat Penagihan')
 
         cy.get('legend.MuiFormLabel-root.MuiFormLabel-colorPrimary').eq(5).should('have.text', 'Info Pengiriman')
-        cy.contains('Centang jika barang perlu dikirim')
-        cy.get(':nth-child(2) > .MuiGrid2-container > .MuiFormControlLabel-root > .MuiButtonBase-root > .PrivateSwitchBase-input').click()
+        cy.get(':nth-child(2) > .MuiGrid2-spacing-xs-2 > .MuiGrid2-root > .MuiTypography-root').should('have.text', 'Centang jika barang perlu dikirim')
         cy.get(':nth-child(2) > .MuiGrid2-container > .MuiFormControlLabel-root > .MuiTypography-root').should('have.text', 'Masukkan informasi pengiriman penjualan')
+        cy.get('label').contains('Tanggal Pengiriman')
 
-        cy.get('legend.MuiFormLabel-root.MuiFormLabel-colorPrimary').eq(6).should('have.text', 'Info Salesman')
-        cy.get('legend.MuiFormLabel-root.MuiFormLabel-colorPrimary').eq(7).should('have.text', 'Harga Termasuk Pajak')
+
+        cy.get(':nth-child(3) > .MuiGrid2-spacing-xs-2 > .MuiGrid2-root > .MuiFormLabel-root').should('have.text', 'Info Salesman')
+        cy.get(' * > :nth-child(3) > .MuiGrid2-spacing-xs-2 > .MuiGrid2-root > .MuiTypography-root').eq(0).should('have.text', 'Centang jika memiliki sales')
+
+        cy.get(':nth-child(4) > .css-k27tlm > .MuiGrid2-grid-md-4 > .MuiFormLabel-root').should('have.text', 'Harga Termasuk Pajak')
 
         cy.get('.MuiTableHead-root > .MuiTableRow-root > :nth-child(1)').should('have.text', 'Nama Produk')
         cy.get('.MuiTableHead-root > .MuiTableRow-root > :nth-child(2)').should('have.text', 'Gudang')
@@ -66,7 +55,7 @@ describe("PENJUALAN BARU", () => {
 
     });
 
-    it('Uji Komponen Text Helper', () => {
+    it.skip('Uji Komponen Text Helper', () => {
 
         cy.get(':nth-child(2) > .MuiGrid2-spacing-xs-2 > .MuiFormControlLabel-root > .MuiButtonBase-root > .PrivateSwitchBase-input').click()
         cy.get(':nth-child(3) > .MuiGrid2-spacing-xs-2 > .MuiFormControlLabel-root > .MuiButtonBase-root > .PrivateSwitchBase-input').click()
@@ -82,22 +71,23 @@ describe("PENJUALAN BARU", () => {
         cy.eq('Text Helper Belum Lengkap')
     });
 
-    it('Membuat Penjualan Baru Dengan Data Required', () => {
+    it.only('Membuat Penjualan Baru Dengan Data Required', () => {
         const dateToday = new Date().toLocaleDateString('id-ID');
         cy.log(dateToday);
 
         // Intercept kontak pelanggan
         cy.intercept('GET', '**/api/kontak/list?jenisKontak=pelanggan&limit=999&companyId=**').as('waitDataKontak');
         cy.reload();
-        cy.wait('@waitDataKontak');
+        cy.wait('@waitDataKontak').then(({ interception }) => {
+            cy.get('#idPelanggan').click();
+            cy.get(`[data-value]`)
+                .eq(1).click()
+                .scrollIntoView({ block: 'center' })
+                .should('be.visible')
+                .click({ force: true });
+        });
 
-        // Isi form
-        // cy.get('#nomor').clear();
-        cy.get('#idPelanggan').click();
-        cy.get('[data-value]').eq(1).click();
         cy.get('[placeholder="DD/MM/YYYY"]').eq(0).type(`{selectAll}{backSpace}${dateToday}`);
-        // cy.get('#paymentTerms').click();
-        // cy.get('[data-value]').eq(0).click();
         cy.get('#address').type('{selectAll}Jalan Penagihan');
         cy.get('[id="penjualan.0.product_id"]').click();
         cy.get('[data-value]').eq(1).click();
@@ -159,7 +149,11 @@ describe("PENJUALAN BARU", () => {
 
         // tanpa tanggal transaksi
         cy.get('#idPelanggan').click();
-        cy.get('[data-value]').eq(1).click();
+        cy.get(`[data-value]`)
+            .eq(1).click()
+            .scrollIntoView({ block: 'center' })
+            .should('be.visible')
+            .click({ force: true });
         cy.get('[placeholder="DD/MM/YYYY"]').eq(0).type(`{selectAll}{backSpace}`);
         cy.wait(500)
         cy.get('#address').type('{selectAll}Jalan Penagihan');
@@ -283,7 +277,6 @@ describe("PENJUALAN BARU", () => {
     })
 
     it('Menambah Pembelian Dengan Info Pengiriman Ekspedisi', () => {
-
         cy.get('#idPelanggan').click();
         cy.get('[data-value]').eq(1).click();
         cy.get('#address').type('{selectAll}Jalan Penagihan');

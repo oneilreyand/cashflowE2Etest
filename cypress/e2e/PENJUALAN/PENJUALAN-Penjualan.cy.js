@@ -325,7 +325,7 @@ describe("PENJUALAN", () => {
     });
   });
 
-  it.only('TC-0010 Memastikan Perubahan Summary Card Belum Dibayar Dengan Terima Pembayaran Data', () => {
+  it('TC-0010 Memastikan Perubahan Summary Card Belum Dibayar Dengan Terima Pembayaran Data', () => {
     let countAwal;
     let apiAwalBelum;
     let totalDibayar;
@@ -378,7 +378,7 @@ describe("PENJUALAN", () => {
         .should('be.visible') // pastikan visible
         .click({ force: true }); // bypass overlay check kalau masih ketutup
     });
-      
+
     cy.get('#address').clear().type('Jalan Palaraya');
 
     // Pilih produk
@@ -470,140 +470,275 @@ describe("PENJUALAN", () => {
     });
   });
 
+  it('TC-0011 Memastikan Perubahan Summary Card Belum Dibayar Dengan Void Data', () => {
+    let countAwal;
+    let apiAwalBelum;
+    let totalDibayar;
+    let invoiceNomor;
 
-  // it.only('TC-0011 Memastikan Perubahan Summary Card Telat Dibayar Dengan Menambah Data', () => {
-  //   let apiTelatSebelum;
-  //   let totalCountAwal;
-  //   let token;
+    // === PASANG INTERCEPT ===
+    cy.intercept('GET', `**/api/penjualan/overview?companyId=${companyId}`).as('waitDataCard');
+    cy.intercept('GET', `**/api/productList/productWithStock?companyId=${companyId}`).as('productsData');
+    cy.intercept('GET', `**/api/kontak/list?jenisKontak=pelanggan&limit=999&companyId=${companyId}`).as('waitPelanggan');
 
-  //   // Ambil token sekali di awal
-  //   cy.getCookie('token').then((cookie) => {
-  //     token = cookie?.value;
+    cy.reload();
 
-  //     // === Ambil data awal Jatuh Tempo ===
-  //     cy.request({
-  //       method: 'GET',
-  //       url: `https://api-uat-cashbook.assist.id/api/penjualan?keyword=&status=Jatuh+Tempo&startDate=0001-08-01&endDate=2025-08-31&skip=0&limit=9999&companyId=${companyId}`,
-  //       headers: { Authorization: `Bearer ${token}` }
-  //     }).then((resJatuhTempo) => {
-  //       const countJatuhTempo = resJatuhTempo.body.results.length;
+    // === CEK JUMLAH DATA BELUM DIBAYAR DI BE ===
+    cy.getCookie('token').then((cookie) => {
+      const token = cookie?.value;
 
-  //       // === Ambil data Dibayar Sebagian ===
-  //       cy.request({
-  //         method: 'GET',
-  //         url: `https://api-uat-cashbook.assist.id/api/penjualan?keyword=&status=Dibayar+Sebagian&startDate=0001-08-01&endDate=2025-08-31&skip=0&limit=9999&companyId=${companyId}`,
-  //         headers: { Authorization: `Bearer ${token}` }
-  //       }).then((resSebagian) => {
-  //         const resultsSebagian = resSebagian.body.results || [];
+      cy.request({
+        method: 'GET',
+        url: `https://api-uat-cashbook.assist.id/api/penjualan?keyword=&status=Belum%20Dibayar&startDate=0001-08-01&endDate=2025-08-31&skip=0&limit=9999&companyId=${companyId}`,
+        headers: { Authorization: `Bearer ${token}` }
+      }).then((response) => {
+        const results = response.body.results || [];
+        countAwal = results.length;
+        const displayCount = countAwal > 99 ? '99+' : countAwal;
 
-  //         // Filter yang termasuk jatuh tempo
-  //         const sebagianJatuhTempo = resultsSebagian.filter(item => {
-  //           const dueDate = item.tanggal_jatuh_tempo;
-  //           const transactionDate = item.tanggal_transaksi;
-  //           return dueDate < transactionDate; // logika overdue versi kamu
-  //         });
+        cy.log(`Total data awal: ${countAwal}`);
+        cy.get(':nth-child(1) > .MuiPaper-root > .MuiCardContent-root > * > .MuiStack-root > .MuiBadge-root > .MuiBadge-badge')
+          .should('contain', `${displayCount}`);
+      });
+    });
 
-  //         // Log semua untuk pengecekan
-  //         sebagianJatuhTempo.forEach(item => {
-  //           const transactionDate = new Date(item.tanggal_transaksi);
-  //           cy.log(`Due Date: ${item.tanggal_jatuh_tempo} | Trans Date: ${transactionDate.toISOString()}`);
-  //         });
+    // === CEK NOMINAL BELUM DIBAYAR DI SUMMARY CARD ===
+    cy.wait('@waitDataCard').then(({ response }) => {
+      apiAwalBelum = Math.round(response.body.belumDibayar.nominal);
+      const formattedAwal = `Rp\u00A0${new Intl.NumberFormat('id-ID').format(apiAwalBelum)}`;
+      cy.contains(':nth-child(1) .MuiTypography-h5', 'Rp')
+        .should('have.text', formattedAwal);
+    });
 
-  //         // Total keseluruhan
-  //         const totalCountAwal = countJatuhTempo + sebagianJatuhTempo.length;
-  //         console.log(resultsSebagian);
+    // === TAMBAH PENJUALAN BARU ===
+    cy.contains('Penjualan Baru').click();
 
+    // Pilih pelanggan
+    cy.wait('@waitPelanggan').then(({ response }) => {
+      // const pelanggan = response.body.results[0];
+      cy.get('#idPelanggan').click();
+      cy.get(`[data-value]`)
+        .eq(1).click()
+        .scrollIntoView({ block: 'center' })
+        .should('be.visible')
+        .click({ force: true });
+    });
 
-  //         const displayCountAwal = totalCountAwal > 99 ? '99+' : totalCountAwal;
-  //         cy.get(':nth-child(2) > .MuiPaper-root > .MuiCardContent-root > * > .MuiStack-root > .MuiBadge-root > .MuiBadge-badge')
-  //           .should('contain', `${displayCountAwal}`);
-  //       });
-  //     });
-  //   });
+    cy.get('#address').clear().type('Jalan Palaraya');
 
-  //   // Pasang intercept
-  //   cy.intercept('GET', `**/api/penjualan/overview?companyId=${companyId}`).as('waitDataCard');
-  //   cy.intercept('GET', `**/api/productList/productWithStock?companyId=${companyId}`).as('productsData');
-  //   cy.intercept('GET', `**/api/kontak/list?jenisKontak=pelanggan&limit=999&companyId=${companyId}`).as('waitPelanggan');
+    // Pilih produk
+    cy.wait('@productsData').then(({ response }) => {
+      const produk = response.body.results.find(p => p.is_sell);
+      cy.get('[id="penjualan.0.product_id"]').click();
+      cy.get(`[data-value="${produk.id}"]`).click();
+    });
 
-  //   // === Cek nilai awal di summary card ===
-  //   cy.wait('@waitDataCard').then(({ response }) => {
-  //     apiTelatSebelum = Math.round(response.body.telatBayar.nominal);
-  //     const formattedTelatSebelum = `Rp\u00A0${new Intl.NumberFormat('id-ID').format(apiTelatSebelum)}`;
-  //     cy.contains(':nth-child(2) .MuiTypography-h5', 'Rp')
-  //       .should('have.text', formattedTelatSebelum);
-  //   });
+    // Isi harga
+    cy.get('[name="penjualan.0.price"]').clear().type('10000');
 
-  //   // // === Tambah penjualan baru ===
-  //   cy.contains('Penjualan Baru').click();
+    // Ambil total dibayar
+    cy.get(':nth-child(9) > .MuiGrid2-container > :nth-child(2)')
+      .invoke('text')
+      .then((totalText) => {
+        totalDibayar = Number(totalText.replace(/[^0-9]/g, ''));
 
-  //   cy.wait('@waitPelanggan').then(({ response }) => {
-  //     const pelanggan = response.body.results[0];
-  //     cy.get('#idPelanggan').click();
-  //     cy.get(`[data-value="${pelanggan.id}"]`).click();
-  //   });
+        // Intercept data setelah simpan
+        cy.intercept('GET', `**/api/penjualan/overview?companyId=${companyId}`).as('waitDataCard2');
+        cy.intercept('POST', '**/api/penjualan').as('postPenjualan');
 
-  //   cy.get('#address').clear().type('Jalan Palaraya');
-  //   cy.get('[placeholder="DD/MM/YYYY"]').eq(0).clear().type("01010001");
+        // Submit form
+        cy.get('.MuiButton-contained').click();
+        cy.get('[data-testid="alert-dialog-submit-button"]').click();
+      });
 
-  //   cy.wait('@productsData').then(({ response }) => {
-  //     const produk = response.body.results.find(p => p.is_sell);
-  //     cy.get('[id="penjualan.0.product_id"]').click();
-  //     cy.get(`[data-value="${produk.id}"]`).click();
-  //   });
+    // === VALIDASI 1: CEK SUMMARY CARD SETELAH TAMBAH ===
+    cy.wait('@waitDataCard2').then(({ response }) => {
+      const apiAkhirBelum = Math.round(response.body.belumDibayar.nominal);
+      const formattedAkhir = `Rp\u00A0${new Intl.NumberFormat('id-ID').format(apiAkhirBelum)}`;
+      cy.contains(':nth-child(1) .MuiTypography-h5', 'Rp')
+        .should('have.text', formattedAkhir);
+      expect(apiAkhirBelum).to.eq(apiAwalBelum + totalDibayar);
+    });
 
-  //   cy.get('[name="penjualan.0.price"]').clear().type('10000');
+    // === CEK JUMLAH DATA BELUM DIBAYAR SETELAH TAMBAH ===
+    cy.getCookie('token').then((cookie) => {
+      const token = cookie?.value;
+      cy.request({
+        method: 'GET',
+        url: `https://api-uat-cashbook.assist.id/api/penjualan?keyword=&status=Belum%20Dibayar&startDate=0001-08-01&endDate=2025-08-31&skip=0&limit=9999&companyId=${companyId}`,
+        headers: { Authorization: `Bearer ${token}` }
+      }).then((response) => {
+        const results = response.body.results || [];
+        const countAkhir = results.length;
 
-  //   cy.get(':nth-child(9) > .MuiGrid2-container > :nth-child(2)')
-  //     .invoke('text')
-  //     .then((totalText) => {
-  //       const totalDibayar = Number(totalText.replace(/[^0-9]/g, ''));
+        expect(countAkhir).to.eq(countAwal + 1);
+        cy.log(`Data awal: ${countAwal}`);
+        cy.log(`Data akhir: ${countAkhir}`);
+      });
+    });
 
-  //       cy.intercept('GET', `**/api/penjualan/overview?companyId=${companyId}`).as('waitDataCard2');
+    // === AMBIL NOMOR INVOICE DARI RESPONSE PENJUALAN ===
+    cy.wait('@postPenjualan').then(({ response }) => {
+      invoiceNomor = response.body.nomor;
+      cy.log(`Invoice Baru: ${invoiceNomor}`);
 
-  //       cy.get('.MuiButton-contained').click();
-  //       cy.get('[data-testid="alert-dialog-submit-button"]').click();
+      // buka detail invoice & lakukan void
+      cy.contains('td', invoiceNomor).click();
+      cy.get('.MuiBox-root > .MuiInputBase-root > .MuiSelect-select').click();
+      cy.get('[data-value="void"]').click();
 
-  //       cy.wait('@waitDataCard2').then(({ response }) => {
-  //         const apiTelatSesudah = Math.round(response.body.telatBayar.nominal);
-  //         const formattedTelatSesudah = `Rp\u00A0${new Intl.NumberFormat('id-ID').format(apiTelatSesudah)}`;
-  //         cy.contains(':nth-child(2) .MuiTypography-h5', 'Rp')
-  //           .should('have.text', formattedTelatSesudah);
+      cy.intercept('GET', `**/api/penjualan/overview?companyId=${companyId}`).as('waitDataCard3');
 
-  //         expect(apiTelatSesudah).to.eq(apiTelatSebelum + totalDibayar);
-  //       });
+      // submit void
+      cy.get('.MuiButton-contained').click();
+    });
 
-  //       // === Ambil data akhir dan cek badge bertambah ===
-  //       cy.request({
-  //         method: 'GET',
-  //         url: `https://api-uat-cashbook.assist.id/api/penjualan?keyword=&status=Jatuh+Tempo&startDate=0001-08-01&endDate=2025-08-31&skip=0&limit=9999&companyId=${companyId}`,
-  //         headers: { Authorization: `Bearer ${token}` }
-  //       }).then((resJatuhTempo) => {
-  //         const countJatuhTempo = resJatuhTempo.body.results.length;
+    // === VALIDASI 2: CEK SUMMARY CARD SETELAH VOID ===
+    cy.wait('@waitDataCard3').then(({ response }) => {
+      const apiSetelahVoid = Math.round(response.body.belumDibayar.nominal);
+      const formatted = `Rp\u00A0${new Intl.NumberFormat('id-ID').format(apiSetelahVoid)}`;
+      cy.contains(':nth-child(1) .MuiTypography-h5', 'Rp')
+        .should('have.text', formatted);
 
-  //         cy.request({
-  //           method: 'GET',
-  //           url: `https://api-uat-cashbook.assist.id/api/penjualan?keyword=&status=Dibayar+Sebagian&startDate=0001-08-01&endDate=2025-08-31&skip=0&limit=9999&companyId=${companyId}`,
-  //           headers: { Authorization: `Bearer ${token}` }
-  //         }).then((resSebagian) => {
-  //           const resultsSebagian = resSebagian.body.results || [];
-  //           const today = new Date();
+      // nominal harus kembali ke kondisi awal sebelum tambah
+      expect(apiSetelahVoid).to.eq(apiAwalBelum);
+    });
 
-  //           const sebagianJatuhTempo = resultsSebagian.filter(item => {
-  //             const dueDate = new Date(item.jatuhTempo || item.dueDate);
-  //             return dueDate < today;
-  //           });
+    // === CEK JUMLAH DATA BELUM DIBAYAR SETELAH VOID ===
+    cy.getCookie('token').then((cookie) => {
+      const token = cookie?.value;
+      cy.request({
+        method: 'GET',
+        url: `https://api-uat-cashbook.assist.id/api/penjualan?keyword=&status=Belum%20Dibayar&startDate=0001-08-01&endDate=2025-08-31&skip=0&limit=9999&companyId=${companyId}`,
+        headers: { Authorization: `Bearer ${token}` }
+      }).then((response) => {
+        const results = response.body.results || [];
+        const countAkhirVoid = results.length;
 
-  //           const totalCountAkhir = countJatuhTempo + sebagianJatuhTempo.length;
-  //           expect(totalCountAkhir).to.eq(totalCountAwal + 1);
+        // jumlah data kembali ke kondisi awal
+        expect(countAkhirVoid).to.eq(countAwal);
+        cy.log(`Data setelah void: ${countAkhirVoid}`);
+      });
+    });
+  });
 
-  //           const displayCountAkhir = totalCountAkhir > 99 ? '99+' : totalCountAkhir;
-  //           cy.get(':nth-child(2) > .MuiPaper-root > .MuiCardContent-root > * > .MuiStack-root > .MuiBadge-root > .MuiBadge-badge')
-  //             .should('contain', `${displayCountAkhir}`);
-  //         });
-  //       });
-  //     });
-  // });
+  it.only('TC-0011 Memastikan Perubahan Summary Card Telat Dibayar Dengan Menambah Data', () => {  
+    // let apiTelatSebelum;
+    // let totalCountAwal;
+    // let token;
+
+    // Ambil token sekali di awal
+    cy.getCookie('token').then((cookie) => {
+      const token = cookie?.value;
+
+      // === Ambil data awal Jatuh Tempo ===
+      cy.request({
+        method: 'GET',
+        url: `https://api-uat-cashbook.assist.id/api/penjualan?keyword=&status=Jatuh+Tempo&startDate=0001-08-01&endDate=2025-08-31&skip=0&limit=9999&companyId=${companyId}`,
+        headers: { Authorization: `Bearer ${token}` }
+      }).then((resJatuhTempo) => {
+        const results = resJatuhTempo.body.results || [];
+
+        // Ambil tanggal hari ini (normalize ke 00:00 biar pas banding)
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        // Filter hanya data yang jatuh tempo lewat
+        const jatuhTempoLewat = results.filter((item) => {
+          const tglJT = new Date(item.tanggal_jatuh_tempo);
+          tglJT.setHours(0, 0, 0, 0);
+          return tglJT < today;  // hanya yang lebih kecil dari hari ini
+        });
+
+        cy.log(`Total jatuh tempo lewat: ${jatuhTempoLewat.length}`);
+        console.log('Detail jatuh tempo lewat:', jatuhTempoLewat);
+      });
+    });
+
+    
+
+    // // === Cek nilai awal di summary card ===
+    // cy.wait('@waitDataCard').then(({ response }) => {
+    //   apiTelatSebelum = Math.round(response.body.telatBayar.nominal);
+    //   const formattedTelatSebelum = `Rp\u00A0${new Intl.NumberFormat('id-ID').format(apiTelatSebelum)}`;
+    //   cy.contains(':nth-child(2) .MuiTypography-h5', 'Rp')
+    //     .should('have.text', formattedTelatSebelum);
+    // });
+
+    // // // === Tambah penjualan baru ===
+    // cy.contains('Penjualan Baru').click();
+
+    // // Pilih pelanggan
+    // cy.wait('@waitPelanggan').then(({ response }) => {
+    //   cy.get('#idPelanggan').click();
+    //   cy.get(`[data-value]`)
+    //     .eq(1).click()
+    //     .scrollIntoView({ block: 'center' })
+    //     .should('be.visible')
+    //     .click({ force: true });
+    // });
+
+    // cy.get('#address').clear().type('Jalan Palaraya');
+    // cy.get('[placeholder="DD/MM/YYYY"]').eq(0).clear().type("01010001");
+
+    // cy.wait('@productsData').then(({ response }) => {
+    //   const produk = response.body.results.find(p => p.is_sell);
+    //   cy.get('[id="penjualan.0.product_id"]').click();
+    //   cy.get(`[data-value="${produk.id}"]`).click();
+    // });
+
+    // cy.get('[name="penjualan.0.price"]').clear().type('10000');
+
+    // cy.get(':nth-child(9) > .MuiGrid2-container > :nth-child(2)')
+    //   .invoke('text')
+    //   .then((totalText) => {
+    //     const totalDibayar = Number(totalText.replace(/[^0-9]/g, ''));
+
+    //     cy.intercept('GET', `**/api/penjualan/overview?companyId=${companyId}`).as('waitDataCard2');
+
+    //     cy.get('.MuiButton-contained').click();
+    //     cy.get('[data-testid="alert-dialog-submit-button"]').click();
+
+    //     cy.wait('@waitDataCard2').then(({ response }) => {
+    //       const apiTelatSesudah = Math.round(response.body.telatBayar.nominal);
+    //       const formattedTelatSesudah = `Rp\u00A0${new Intl.NumberFormat('id-ID').format(apiTelatSesudah)}`;
+    //       cy.contains(':nth-child(2) .MuiTypography-h5', 'Rp')
+    //         .should('have.text', formattedTelatSesudah);
+
+    //       expect(apiTelatSesudah).to.eq(apiTelatSebelum + totalDibayar);
+    //     });
+
+    //     // === Ambil data akhir dan cek badge bertambah ===
+    //     cy.request({
+    //       method: 'GET',
+    //       url: `https://api-uat-cashbook.assist.id/api/penjualan?keyword=&status=Jatuh+Tempo&startDate=0001-08-01&endDate=2025-08-31&skip=0&limit=9999&companyId=${companyId}`,
+    //       headers: { Authorization: `Bearer ${token}` }
+    //     }).then((resJatuhTempo) => {
+    //       const countJatuhTempo = resJatuhTempo.body.results.length;
+
+    //       cy.request({
+    //         method: 'GET',
+    //         url: `https://api-uat-cashbook.assist.id/api/penjualan?keyword=&status=Dibayar+Sebagian&startDate=0001-08-01&endDate=2025-08-31&skip=0&limit=9999&companyId=${companyId}`,
+    //         headers: { Authorization: `Bearer ${token}` }
+    //       }).then((resSebagian) => {
+    //         const resultsSebagian = resSebagian.body.results || [];
+    //         const today = new Date();
+
+    //         const sebagianJatuhTempo = resultsSebagian.filter(item => {
+    //           const dueDate = new Date(item.jatuhTempo || item.dueDate);
+    //           return dueDate < today;
+    //         });
+
+    //         const totalCountAkhir = countJatuhTempo + sebagianJatuhTempo.length;
+    //         expect(totalCountAkhir).to.eq(totalCountAwal + 1);
+
+    //         const displayCountAkhir = totalCountAkhir > 99 ? '99+' : totalCountAkhir;
+    //         cy.get(':nth-child(2) > .MuiPaper-root > .MuiCardContent-root > * > .MuiStack-root > .MuiBadge-root > .MuiBadge-badge')
+    //           .should('contain', `${displayCountAkhir}`);
+    //       });
+    //     });
+    //   });
+  });
 
   // it.only('TC-0012 Memastikan Perubahan Summary Card Telat Dibayar Dengan Mengurangi Data', () => {
   //   (error)

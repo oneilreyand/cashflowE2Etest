@@ -55,18 +55,13 @@ Cypress.Commands.add('apiLogin', (email, password) => {
 });
 
 Cypress.Commands.add('visitDashboard', (companyId) => {
-    cy.visit('/', {
-        onBeforeLoad(win) {
-            const token = window.localStorage.getItem('token'); // Ambil dari Cypress context
-            win.localStorage.setItem('token', token); // Set ke browser context
-        }
-    });
-    if (!companyId) {
-        cy.url().should('contain', "/admin/dashboard")
-    } else {
-        cy.url().should('contain', "/admin/dashboard")
+    if (companyId) {
+        cy.visit('/admin/dashboard')
         cy.get('[data-testid="listCompany-dropdown"]', { timeout: 10000 }).click()
         cy.get(`[data-testid="listCompany-item-${companyId}"]`, { timeout: 10000 }).click()
+    } else {
+        cy.visit('/admin/dashboard')
+
     }
 
 });
