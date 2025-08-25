@@ -307,24 +307,24 @@ describe('[PENGATURAN-PENGGUNA] - Membuka halaman Pengaturan Pengguna dan meliha
 
     it.only('Menangani error server (500) saat menyimpan perubahan data perusahaan', () => {
       // Mock API dengan status 500
-        cy.intercept('POST | PUT', '**/api/setting-roles/*', {
+        cy.intercept('POST', '**/api/roles', {
             statusCode: 500,
             body: {
                 message: 'Internal Server Error'
             }
         }).as('updateRolesError');
-        
+
         cy.get('[data-cy="submenu-item-permission-setting"] > [data-cy="list-item-button-sub-menu-setting"] > [data-cy="list-item-text-sub-menu-setting"] > .MuiTypography-root').click();
         cy.get('[data-testid="add-permission-button"]').click();
         cy.get('.MuiGrid2-container > :nth-child(1) > .MuiFormControl-root > .MuiInputBase-root').click();
         cy.get('[data-value="88933452-1f62-11f0-8e2c-fbc5d1e74f72"]').click();
         cy.get('input[name="name"]').clear().type('Head of Sales'); 
         cy.get('.MuiGrid2-container > :nth-child(3)').type('Head of Sales');
+        cy.contains('Buat hak akses').click();
 
         cy.wait('@updateRolesError', {timeout: 10000}); 
         cy.get('.MuiAlert-message')
-          .should('be.visible')
-          .and('contain', 'Internal Server Error');
+          .should('have.text', 'Terjadi Kesalahan');
 
       });
 

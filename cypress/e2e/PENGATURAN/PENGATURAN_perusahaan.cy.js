@@ -226,10 +226,10 @@ describe('[PENGATURAN-PERUSAHAAN] - Membuka halaman Pengaturan Perusahaan dan me
 
     it.only('Menangani error server (500) saat menyimpan perubahan data perusahaan', () => {
         // Mock API dengan status 500
-        cy.intercept('PUT', '**/api/companies/*', {
+        cy.intercept('PATCH', '**/api/companies/*', {
             statusCode: 500,
             body: {
-                message: 'Terjadi Kesalahan'
+                message: 'Internal Server Error'
             }
         }).as('updateSettingCompanyError');
         cy.get('[data-cy="company-name-header-setting-company"]').click();
@@ -244,7 +244,7 @@ describe('[PENGATURAN-PERUSAHAAN] - Membuka halaman Pengaturan Perusahaan dan me
         cy.wait('@updateSettingCompanyError', {timeout: 10000}); 
         cy.get('.MuiAlert-message')
             .should('be.visible')
-            .and('contain', 'Terjadi Kesalahan');
+            .and('contain', 'Kesalahan di server');
     });
 });
 

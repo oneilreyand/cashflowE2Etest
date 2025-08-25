@@ -369,10 +369,12 @@ describe('Fitur ini memungkinkan user (admin/staff perusahaan) untuk mengelola d
         .should('be.visible')
         .click();
       cy.get('[data-value="stockOpname"]')
-        .should('exist')       // pastikan elemen ada
-        .should('be.visible')  // pastikan elemen kelihatan
+        .should('exist')      
+        .should('be.visible')  
         .click();
+  });
 
+  it('test login aja', () => {
 
   });
 
