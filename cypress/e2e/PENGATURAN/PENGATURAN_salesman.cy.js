@@ -326,6 +326,24 @@ describe('[PENGATURAN-SALESMAN]', () => {
     cy.get('.MuiAlert-message').should('be.visible').and('contain', 'Tidak ada koneksi internet. Silakan periksa koneksi Anda.');
     })
 
+    it.only('Gagal menyimpan nama dengan nama yang sama (duplikat)', () => {
+      cy.get('[data-cy="submenu-item-salesman-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click();
+      cy.contains('button', 'Tambah Salesman')
+        .should('be.visible')
+        .click();
+      cy.get('input[placeholder="Masukkan Nama Salesman"]')
+        .should('be.visible')
+        .type('ucok 13'); // Nama dengan spasi di depan dan belakang
+      cy.get('input[placeholder="Keterangan"]')
+        .should('be.visible')
+        .type('keterangan salesman 4');
+      cy.get(':nth-child(4) > div > .MuiButton-contained')
+        .should('be.visible')
+        .and('contain', 'Simpan')
+        .click();
+      cy.get('.MuiSnackbar-root > .MuiPaper-root').should('be.visible').and('contain', 'Salesman dengan nama tersebut sudah ada.')
+    })
+
     //Search
     it('Gagal mencari data sales, list daata tidak ada', () => {
       cy.get('[data-cy="submenu-item-salesman-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click();
@@ -447,19 +465,19 @@ describe('[PENGATURAN-SALESMAN]', () => {
     });
 
     //Pegination
-    it('Berhasil mendapatkan data salesman ketika next page', () => {
-      cy.intercept('GET', '**/api/setting-salesman**').as('getSalesman');
+    it.only('Berhasil mendapatkan data salesman ketika next page', () => {
       cy.get('[data-cy="submenu-item-salesman-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click();
       cy.get('[data-testid="NavigateNextIcon"]').click()
-      cy.wait('@getSalesman')
+      cy.get('[style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;"] > .MuiTypography-root')
+      .invoke('text')
+      .should('match', /^Menampilkan 11 - \d+ dari \d+ data\.$/);
     })
 
-    it('Berhasil mendapatkan data salesman halaman sebelumnya', () => {
-      cy.intercept('GET', '**/api/setting-salesman**').as('getSalesman');
+    it.only('Berhasil mendapatkan data salesman halaman sebelumnya', () => {
       cy.get('[data-cy="submenu-item-salesman-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click();
       cy.get('[data-testid="NavigateNextIcon"]').click()
       cy.get('[data-testid="NavigateBeforeIcon"]').click()
-      cy.wait('@getSalesman')
+      cy.get('[style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;"] > .MuiTypography-root').invoke('text').should('match', /^Menampilkan 1 - 10 dari \d+ data\.$/);
     })
 
     //Status non Aktif - Aktif (Page 1)

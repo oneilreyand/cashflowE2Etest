@@ -223,18 +223,18 @@ describe('[PENGATURAN-REFERENSI]', () => {
       ).as('casiSalesman');
     
       // Klik submenu untuk membuka halaman setting salesman
-      cy.get('[data-cy="submenu-item-salesman-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click();
+      cy.get('[data-cy="submenu-item-reference-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
     
       // Verifikasi placeholder input "Cari Salesman"
-      cy.get('input[placeholder="Cari Salesman"]')
+      cy.get('input[placeholder="Cari Referensi"]')
         .should('be.visible') // Pastikan input terlihat
         .invoke('attr', 'placeholder') // Ambil nilai placeholder
         .then((placeholder) => {
-          expect(placeholder).to.eq('Cari Salesman'); // Verifikasi placeholder sesuai
+          expect(placeholder).to.eq('Cari Referensi'); // Verifikasi placeholder sesuai
         });
     
       // Ketikkan teks ke dalam input
-      cy.get('input[placeholder="Cari Salesman"]')
+      cy.get('input[placeholder="Cari Referensi"]')
         .type('metode') // Ketikkan teks 'reyand 1'
         .should('have.value', 'metode'); // Verifikasi nilai input sesuai
     

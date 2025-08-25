@@ -453,15 +453,15 @@ it('Berhasil merubah status termin dari non aktif menjadi aktif, kemudian tampil
       cy.get('ul[role="listbox"] > li').should('contain', 'termin sebulan 5')
       cy.get('body').click(0, 0)
 
-      // // Cek di Biaya
-      // cy.get('[data-testid="drawer-item-expenses"] > .MuiListItemText-root > .MuiTypography-root').should('be.visible').click()
-      // cy.get('.css-aidtzz > .MuiButtonBase-root').should('be.visible').click()
-      // cy.get('#expense_from').should('be.visible').click()
-      // cy.get('ul[role="listbox"] > li').contains('Rekening Bank').should('be.visible').click()
-      // cy.get(':nth-child(6) > .MuiGrid2-root > .MuiSwitch-root > .MuiButtonBase-root > .PrivateSwitchBase-input').click()
-      // cy.get('[data-testid="input-payment_terms"] > .MuiInputBase-root').should('be.visible').click()
-      // cy.get('ul[role="listbox"] > li').should('contain', 'termin sebulan 5')
-      // cy.get('body').click(0, 0)
+      // Cek di Biaya
+      cy.get('[data-testid="drawer-item-expenses"] > .MuiListItemText-root > .MuiTypography-root').should('be.visible').click()
+      cy.get('.css-aidtzz > .MuiButtonBase-root').should('be.visible').click()
+      cy.get('#expense_from').should('be.visible').click()
+      cy.get('ul[role="listbox"] > li').contains('Rekening Bank').should('be.visible').click()
+      cy.get(':nth-child(6) > .MuiGrid2-root > .MuiSwitch-root > .MuiButtonBase-root > .PrivateSwitchBase-input').click()
+      cy.get('[data-testid="input-payment_terms"] > .MuiInputBase-root').should('be.visible').click()
+      cy.get('ul[role="listbox"] > li').should('contain', 'termin sebulan 5')
+      cy.get('body').click(0, 0)
 })
 
 // Status Aktif - non Aktif (Pegination 1)

@@ -134,7 +134,7 @@ describe('TEST CASE PENGATURAN EKSPEDISI', () => {
 
     it('Nama ekspedisi berhasil di Trim (spasi depan dan belakang)', () => {
       //Intercept the API request
-      cy.intercept('POST', 'https://api-uat-cashbook.assist.id/api/setting-expedition', (req) => {
+      cy.intercept('POST', '**/api/setting-expedition*', (req) => {
       }).as('postExpedition'); // Alias untuk memantau request
 
       cy.get('[data-cy="submenu-item-expedition-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click();
@@ -154,6 +154,27 @@ describe('TEST CASE PENGATURAN EKSPEDISI', () => {
         expect(interception.request.body.expedition_desc).to.equal('Cabang Medan');
       });
      })
+
+    // it('Spam hit tambah ekspedisi', () => {
+    //    cy.get('[data-cy="submenu-item-expedition-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click();
+    //    cy.get('.MuiStack-root > .MuiButtonBase-root').click()
+    //    cy.get('[name="expedition_name"]')
+    //   .should('be.visible')
+    //   .type('   Pos 10  ')
+    //   cy.get('[name="expedition_desc"]')
+    //   .should('be.visible')
+    //   .type('Cabang Medan')
+
+    //   // Mock API untuk menangkap permintaan
+    //   cy.intercept('PUT', '**/api/setting-expedition*', {
+    //     statusCode: 200,
+    //     body: { message: 'Success' },
+    //   }).as('updateSettings');
+    //   // Simulasi spam dengan klik tombol "Simpan" sebanyak 10 kali
+    //   for (let i = 0; i < 10; i++) {
+    //     cy.get(':nth-child(4) > div > .MuiButton-contained').should('be.visible').click()
+    //   }
+    // })
 
      //Create new data failed
     it('Gagal menambahkan data ekspekssisi, field nama ekspedisi tidak di isi', () => {
@@ -213,10 +234,14 @@ describe('TEST CASE PENGATURAN EKSPEDISI', () => {
         }
       ).as('postSalesmanError');
 
-      cy.get('[data-cy="submenu-item-expedition-setting"] > [data-cy="list-item-button-sub-menu-setting"]').should('be.visible').click();
+      cy.get('[data-cy="submenu-item-expedition-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click();
       cy.get('.MuiStack-root > .MuiButtonBase-root').should('be.visible').click()
-      cy.get('[name="expedition_name"').should('be.visible').type('JNT Pos')
-      cy.get('[name="expedition_desc"').should('be.visible').type('JNT Pos')
+      cy.get('[name="expedition_name"]')
+      .should('be.visible')
+      .type('   Pos 10  ')
+      cy.get('[name="expedition_desc"]')
+      .should('be.visible')
+      .type('Cabang Medan')
       cy.get(':nth-child(4) > div > .MuiButton-contained').should('be.visible').click()
 
       cy.wait('@postSalesmanError').then((interception) => {
@@ -249,6 +274,47 @@ describe('TEST CASE PENGATURAN EKSPEDISI', () => {
     cy.get('.MuiAlert-message').should('be.visible').and('contain', 'Tidak ada koneksi internet. Silakan periksa koneksi Anda.');
     })
 
+    it('Data Gagal tersimpan spam hit simpan ketika error', () => {
+      // Stub API simpan agar pertama2 error
+      cy.intercept('POST', '**/api/setting-expedition*', {
+      statusCode: 500,
+      body: { message: 'Server error' }
+      }).as('saveError');
+
+      cy.get('[data-cy="submenu-item-expedition-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click();
+      cy.get('.MuiStack-root > .MuiButtonBase-root').should('be.visible').click()
+      cy.get('[name="expedition_name"]')
+      .should('be.visible')
+      .type('   Pos 18  ')
+      cy.get('[name="expedition_desc"]')
+      .should('be.visible')
+      .type('Cabang Medan')
+
+  // Klik simpan berkali-kali (3x) -> tetap error
+    for (let i = 0; i < 3; i++) {
+      cy.get(':nth-child(4) > div > .MuiButton-contained').click();
+      cy.wait('@saveError');
+    }
+    })
+
+    it('Gagal menyimpan data spam hit error', () => {
+      cy.get('[data-cy="submenu-item-expedition-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click();
+      cy.should("not.contain", "Spam Klik Termin")
+    })
+
+    it('Gagal menyimpan nama dengan nama yang sama (duplikat)', () => {
+       cy.get('[data-cy="submenu-item-expedition-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click();
+       cy.get('.MuiStack-root > .MuiButtonBase-root').should('be.visible').click()
+      cy.get('[name="expedition_name"]')
+      .should('be.visible')
+      .type('   Pos 10  ')
+      cy.get('[name="expedition_desc"]')
+      .should('be.visible')
+      .type('Cabang Medan')
+      cy.get(':nth-child(4) > div > .MuiButton-contained').should('be.visible').click()
+      cy.get('.MuiTableBody-root > :nth-child(1) > :nth-child(1)').should('be.visible').and('contain', 'Nama Ekspedisi sudah ada')
+    })
+
     //Looping
     it('Berhasil menambahkan data ekspedisi sebanyak 15 kali', () => {
 
@@ -266,8 +332,8 @@ describe('TEST CASE PENGATURAN EKSPEDISI', () => {
     // Fitur Search
     it('Berhasil mencari data ekspedisi dengan data yang valid (Nama ekspedisi lengkap)', () => {
       cy.get('[data-cy="submenu-item-expedition-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click();
-      cy.get('.css-egm0ks > .MuiStack-root > .MuiFormControl-root > .MuiInputBase-root').should('be.visible').type('JNT 15')
-      cy.get('.MuiTableBody-root > :nth-child(1) > :nth-child(1)').contains('JNT 15')
+      cy.get('.css-egm0ks > .MuiStack-root > .MuiFormControl-root > .MuiInputBase-root').should('be.visible').type('Amazon 0')
+      cy.get('.MuiTableBody-root > :nth-child(1) > :nth-child(1)').contains('Amazon 0')
       })
 
     it('Berhasil mencari nama ekpedisi dengan sebagian keyword', () => {
@@ -278,8 +344,8 @@ describe('TEST CASE PENGATURAN EKSPEDISI', () => {
 
     it('Berhasil mencari nama ekspedisi dengan huruf kecil-besar(campur)', () => {
       cy.get('[data-cy="submenu-item-expedition-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click();
-      cy.get('.css-egm0ks > .MuiStack-root > .MuiFormControl-root > .MuiInputBase-root').should('be.visible').type('jNT 15')
-      cy.get('.MuiTableBody-root > :nth-child(1) > :nth-child(1)').contains('JNT 15')
+      cy.get('.css-egm0ks > .MuiStack-root > .MuiFormControl-root > .MuiInputBase-root').should('be.visible').type('AMaZoN 6')
+      cy.get('.MuiTableBody-root > :nth-child(1) > :nth-child(1)').contains('Amazon 6')
     })
 
     it('Tidak ada data saat mencari nama ekspedisi yg tidak valid', () => {
@@ -290,7 +356,7 @@ describe('TEST CASE PENGATURAN EKSPEDISI', () => {
 
 
      //Aksi
-    it('Berhasli menghapus data ekspekssisi', () => {
+    it('Berhasli menghapus data ekspedisi', () => {
       cy.get('[data-cy="submenu-item-expedition-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click();
       cy.get('.MuiTableBody-root > :nth-child(1) > :nth-child(4) > .MuiButtonBase-root').click()
       cy.get('[data-testid="alert-dialog-submit-button"]').click()
@@ -315,18 +381,18 @@ describe('TEST CASE PENGATURAN EKSPEDISI', () => {
 
      //pegination
     it('Bisa menampilkan data ekspedisi, ketika menekan tombol next', () => {
-      cy.intercept('GET', '**/api/setting-expedition*').as('getSalesman');
       cy.get('[data-cy="submenu-item-expedition-setting"] >[data-cy="list-item-button-sub-menu-setting"]').click();
       cy.get('[data-testid="NavigateNextIcon"]').click()
-      cy.wait('@getSalesman')
+      cy.get('[style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;"] > .MuiTypography-root')
+      .invoke('text')
+      .should('match', /^Menampilkan 11 - \d+ dari \d+ data\.$/);
     })
 
     it('Bisa menampilkan data ekspedisi, ketika menekan tombol sebelumnya', () => {
-      cy.intercept('GET', '**/api/setting-expedition*').as('getSalesman');
       cy.get('[data-cy="submenu-item-expedition-setting"] >[data-cy="list-item-button-sub-menu-setting"]').click();
       cy.get('[data-testid="NavigateNextIcon"]').click()
       cy.get('[data-testid="NavigateBeforeIcon"]').click()
-      cy.wait('@getSalesman')
+      cy.get('[style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;"] > .MuiTypography-root').invoke('text').should('match', /^Menampilkan 1 - 10 dari \d+ data\.$/);
     })
     
     //Status non Aktif - Aktif (Page 1)
@@ -367,7 +433,7 @@ describe('TEST CASE PENGATURAN EKSPEDISI', () => {
     })
 
     //Status Aktif - non Aktif (Page 1)
-    it.only('Berhasil merubah status ekspedisi dari aktif menjadi non aktif, kemudian tampil menjadi opsi di penjualan PG1', () => {
+    it('Berhasil merubah status ekspedisi dari aktif menjadi non aktif, kemudian tampil menjadi opsi di penjualan PG1', () => {
      //Mengunjungi halaman salesman
      cy.get('[data-cy="submenu-item-expedition-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click();
      //Ubah status salesman non aktif menjadi aktif
