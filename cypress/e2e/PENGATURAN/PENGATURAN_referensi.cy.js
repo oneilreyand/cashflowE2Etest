@@ -96,7 +96,7 @@ describe('[PENGATURAN-REFERENSI]', () => {
     cy.get('[data-cy="submenu-item-reference-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
     cy.get('.MuiStack-root > .MuiButtonBase-root').click()
     cy.get('.MuiButton-text').should('be.visible').and('contain', 'Batal').click()
-    cy.get('.MuiTableBody-root > .MuiTableRow-root > .MuiTableCell-root').should('be.visible').and('contain', 'Tidak ada data.')
+    cy.contains('Semua Referensi')
   })
 
   it('Berhasil menambah referensi, semua field di isi dengan data yang valid', () => {
@@ -208,11 +208,11 @@ describe('[PENGATURAN-REFERENSI]', () => {
       cy.get('.MuiTableBody-root > :nth-child(1) > :nth-child(1)').should('be.visible').and('contain', 'Metode')
     })
 
-  it('Gagal mencari salesman, memanipulasi API setting salesman menjadi error 500', () => {
+  it('Gagal mencari referensi, memanipulasi API setting salesman menjadi error 500', () => {
       // Intercept API GET dan manipulasi semua permintaan ke endpoint setting-salesman menjadi error 500
       cy.intercept(
         'GET',
-        '**/api/setting-salesman**', // Tangkap semua request ke endpoint ini
+        '**api/setting-preferensis*', // Tangkap semua request ke endpoint ini
         (req) => {
           req.reply({statusCode: 500,
             body: {

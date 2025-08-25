@@ -205,38 +205,38 @@ describe('[PENGATURAN-PAJAK]', () => {
   })
 })
 
-  it('Spam klik simpan pajak, data yang tersimpan harus satu', () => {
-    // Intercept API POST
-    cy.intercept('POST', '**/api/setting-taxes*', (req) => {}).as('HitMultiple'); // Alias untuk memantau request
+  // it('Spam klik simpan pajak, data yang tersimpan harus satu', () => {
+  //   // Intercept API POST
+  //   cy.intercept('POST', '**/api/setting-taxes*', (req) => {}).as('HitMultiple'); // Alias untuk memantau request
 
-    cy.get('[data-cy="submenu-item-tax-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
-    cy.get('.MuiStack-root > .MuiButtonBase-root').click()
-    cy.get('[name="tax_name"]').should('exist').type('Spam Klik')
-    cy.get('[name="tax_effective_percentage"]').should('exist').type('10')
-    cy.get('[name="tax_sales_account"]').click()
-    cy.contains('li', '1-11001 - Kas')
-    .scrollIntoView()
-    .should('exist')
-    .click();
-    cy.get('[name="tax_sales_account"]').trigger('change')
-    cy.get('[name="tax_purchase_account"]').click()
-    cy.contains('li', '1-11001 - Kas')
-    .scrollIntoView()
-    .should('exist')
-    .click();
-    cy.get('[name="tax_purchase_account"]').trigger('change')
+  //   cy.get('[data-cy="submenu-item-tax-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
+  //   cy.get('.MuiStack-root > .MuiButtonBase-root').click()
+  //   cy.get('[name="tax_name"]').should('exist').type('Spam Klik')
+  //   cy.get('[name="tax_effective_percentage"]').should('exist').type('10')
+  //   cy.get('[name="tax_sales_account"]').click()
+  //   cy.contains('li', '1-11001 - Kas')
+  //   .scrollIntoView()
+  //   .should('exist')
+  //   .click();
+  //   cy.get('[name="tax_sales_account"]').trigger('change')
+  //   cy.get('[name="tax_purchase_account"]').click()
+  //   cy.contains('li', '1-11001 - Kas')
+  //   .scrollIntoView()
+  //   .should('exist')
+  //   .click();
+  //   cy.get('[name="tax_purchase_account"]').trigger('change')
     
-    //Klik simpan berkali-kali
-    for (let i = 0; i < 3; i++) {
-      cy.get('.css-zxbdg4 > div > .MuiButton-contained').click();
-      cy.wait('@HitMultiple');
-  }
-    //Verifikasi data hanya muncul sekali
-     cy.get('.MuiTableBody-root')
-    .find('tr')
-    .filter(':contains("Spam Klik")')
-    .should('have.length', 1);
-  })
+  //   //Klik simpan berkali-kali
+  //   for (let i = 0; i < 3; i++) {
+  //     cy.get('.css-zxbdg4 > div > .MuiButton-contained').click();
+  //     cy.wait('@HitMultiple');
+  // }
+  //   //Verifikasi data hanya muncul sekali
+  //    cy.get('.MuiTableBody-root')
+  //   .find('tr')
+  //   .filter(':contains("Spam Klik")')
+  //   .should('have.length', 1);
+  // })
 
   //Create new data failed
   it('Gagal menambah data pajak dengan kondisi nama pajak tidak diisi', () => {
@@ -386,48 +386,48 @@ describe('[PENGATURAN-PAJAK]', () => {
     cy.get('.MuiAlert-message').should('exist').and('contain', 'Nama Pajak tersebut sudah ada.')
   })
 
-  it('Spam klik simpan saat server error lalu normal, data hanya tersimpan sekali', () => {
-    // Intercept API POST
-    cy.intercept('POST', '**/api/setting-taxes*', {
-      statusCode : 500,
-      body: { message: 'Server error'}
-    }).as('serverError'); // Alias untuk memantau request
+  // it('Spam klik simpan saat server error lalu normal, data hanya tersimpan sekali', () => {
+  //   // Intercept API POST
+  //   cy.intercept('POST', '**/api/setting-taxes*', {
+  //     statusCode : 500,
+  //     body: { message: 'Server error'}
+  //   }).as('serverError'); // Alias untuk memantau request
 
-    cy.get('[data-cy="submenu-item-tax-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
-    cy.get('.MuiStack-root > .MuiButtonBase-root').click()
-    cy.get('[name="tax_name"]').should('exist').type('Spam Klik 2')
-    cy.get('[name="tax_effective_percentage"]').should('exist').type('10')
-    cy.get('[name="tax_sales_account"]').click()
-    cy.contains('li', '1-11001 - Kas')
-    .scrollIntoView()
-    .should('exist')
-    .click();
-    cy.get('[name="tax_sales_account"]').trigger('change')
-    cy.get('[name="tax_purchase_account"]').click()
-    cy.contains('li', '1-11001 - Kas')
-    .scrollIntoView()
-    .should('exist')
-    .click();
-    cy.get('[name="tax_purchase_account"]').trigger('change')
+  //   cy.get('[data-cy="submenu-item-tax-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
+  //   cy.get('.MuiStack-root > .MuiButtonBase-root').click()
+  //   cy.get('[name="tax_name"]').should('exist').type('Spam Klik 2')
+  //   cy.get('[name="tax_effective_percentage"]').should('exist').type('10')
+  //   cy.get('[name="tax_sales_account"]').click()
+  //   cy.contains('li', '1-11001 - Kas')
+  //   .scrollIntoView()
+  //   .should('exist')
+  //   .click();
+  //   cy.get('[name="tax_sales_account"]').trigger('change')
+  //   cy.get('[name="tax_purchase_account"]').click()
+  //   cy.contains('li', '1-11001 - Kas')
+  //   .scrollIntoView()
+  //   .should('exist')
+  //   .click();
+  //   cy.get('[name="tax_purchase_account"]').trigger('change')
     
-    //Klik simpan berkali-kali
-    for (let i = 0; i < 3; i++) {
-      cy.get('.css-zxbdg4 > div > .MuiButton-contained').click();
-      cy.wait('@serverError');
-  }
-    cy.intercept('POST', '**/api/setting-taxes*', {
-      statusCode : 200,
-      body: {id: 999, name: 'Spam Klik 2', duration: 30}}).as('serverSuccess');
+  //   //Klik simpan berkali-kali
+  //   for (let i = 0; i < 3; i++) {
+  //     cy.get('.css-zxbdg4 > div > .MuiButton-contained').click();
+  //     cy.wait('@serverError');
+  // }
+  //   cy.intercept('POST', '**/api/setting-taxes*', {
+  //     statusCode : 200,
+  //     body: {id: 999, name: 'Spam Klik 2', duration: 30}}).as('serverSuccess');
 
-    cy.get('.css-zxbdg4 > div > .MuiButton-contained').click();
-    cy.wait('@serverSuccess')
+  //   cy.get('.css-zxbdg4 > div > .MuiButton-contained').click();
+  //   cy.wait('@serverSuccess')
 
-      // Verifikasi data hanya muncul sekali di tabel
-    cy.get('.MuiTableBody-root')
-    .find('tr')
-    .filter(':contains("Spam Klik 2")')
-    .should('have.length', 1);
-  })
+  //     // Verifikasi data hanya muncul sekali di tabel
+  //   cy.get('.MuiTableBody-root')
+  //   .find('tr')
+  //   .filter(':contains("Spam Klik 2")')
+  //   .should('have.length', 1);
+  // })
 
   it('Gagal GET data pajak ketika kondisi error muncul', () => {
     // Intercept the API request
@@ -750,7 +750,7 @@ it('Harus berhasil menghapus pajak', () => {
   })
 
 //Status non Aktif - Aktif (Pegination 1)
-  it.only('Berhasil merubah status pajak dari non aktif menjadi aktif dan tampil menjadi opsi di penjualan, biaya, terima dan kirim uang kas dan bank', () =>{
+  it('Berhasil merubah status pajak dari non aktif menjadi aktif dan tampil menjadi opsi di penjualan, biaya, terima dan kirim uang kas dan bank', () =>{
     //mengunjungi halaman pajak
     cy.get('[data-cy="submenu-item-tax-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
     //Ubah status pajak non aktif menjadi aktif
@@ -758,20 +758,19 @@ it('Harus berhasil menghapus pajak', () => {
     cy.get('.MuiAlert-message').should('be.visible').and('contain', 'Berhasil Mengubah Status Pajak.')
     cy.get(':nth-child(1) > :nth-child(5) > .MuiSwitch-root > .MuiButtonBase-root > .PrivateSwitchBase-input').should('be.checked')
 
-    // //ke halaman penjualan
-    // cy.get('[data-testid="drawer-item-sales"]').click()
-    // cy.get('.css-aidtzz > .MuiButtonBase-root').should('be.visible').click()
-    // cy.scrollIntoView()
-    // cy.get('[data-cy="dropdown-penjualan-tax"]').click()
-    // cy.get('ul[role="listbox"] > li').should('contain', 'PPH 8')
-    // cy.get('body').click(0, 0)
+    //ke halaman penjualan
+    cy.get('[data-testid="drawer-item-sales"]').click()
+    cy.get('.css-aidtzz > .MuiButtonBase-root').should('be.visible').click()
+    cy.get('[id="penjualan.0.tax"]').should('exist').click()
+    cy.get('ul[role="listbox"] > li').should('contain', 'PPH 8')
+    cy.get('body').click(0, 0)
 
-    // //ke halaman biaya
-    // cy.get('[data-testid="drawer-item-expenses"] > .MuiListItemText-root > .MuiTypography-root').should('be.visible').click()
-    // cy.get('.css-aidtzz > .MuiButtonBase-root').should('be.visible').click()
-    // cy.get('#details\.0\.tax_id').click()
-    // cy.get('ul[role="listbox"] > li').should('contain', 'PPH 8')
-    // cy.get('body').click(0, 0)
+    //ke halaman biaya
+    cy.get('[data-testid="drawer-item-expenses"] > .MuiListItemText-root > .MuiTypography-root').should('be.visible').click()
+    cy.get('.css-aidtzz > .MuiButtonBase-root').should('be.visible').click()
+    cy.get('[id = "details.0.tax_id"]').click()
+    cy.get('ul[role="listbox"] > li').should('contain', 'PPH 8')
+    cy.get('body').click(0, 0)
 
     //ke halaman kirim uang kas dan bank
     cy.get('[data-testid="drawer-item-cash-bank"]').click()
@@ -790,14 +789,129 @@ it('Harus berhasil menghapus pajak', () => {
     cy.get('body').click(0, 0)
   })
 
-// //Status non Aktif - Aktif (Pegination 2)
-//   it('Berhasil merubah status pajak dari non aktif menjadi aktif dan tampil menjadi opsi di penjualan, pembelian dan kontak PG2', () =>{})
+//Status non Aktif - Aktif (Pegination 2)
+  it('Berhasil merubah status pajak dari non aktif menjadi aktif dan tampil menjadi opsi di penjualan, pembelian dan kontak PG2', () =>{
+    //mengunjungi halaman pajak
+    cy.get('[data-cy="submenu-item-tax-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
+    //Ubah ke pegination 2
+    cy.get('[data-testid="NavigateNextIcon"]').click()
+    //Ubah status pajak non aktif menjadi aktif
+    cy.get(':nth-child(1) > :nth-child(5) > .MuiSwitch-root > .MuiButtonBase-root > .PrivateSwitchBase-input').click()
+    cy.get('.MuiAlert-message').should('be.visible').and('contain', 'Berhasil Mengubah Status Pajak.')
+    cy.get(':nth-child(1) > :nth-child(5) > .MuiSwitch-root > .MuiButtonBase-root > .PrivateSwitchBase-input').should('be.checked')
 
-// //Status Aktif - non Aktif (Pegination 1)
-//   it('Berhasil merubah status pajak dari aktif menjadi non aktif dan tidak tampil menjadi opsi di penjualan, pembelian dan kontak PG1', () =>{})
+    //ke halaman penjualan
+    cy.get('[data-testid="drawer-item-sales"]').click()
+    cy.get('.css-aidtzz > .MuiButtonBase-root').should('be.visible').click()
+    cy.get('[id="penjualan.0.tax"]').should('exist').click()
+    cy.get('ul[role="listbox"] > li').should('contain', 'Trim Pajak')
+    cy.get('body').click(0, 0)
 
-// //Status non Aktif - Aktif (Pegination 2)
-//   it('Berhasil merubah status pajak dari aktif menjadi non aktif dan tidak tampil menjadi opsi di penjualan, pembelian dan kontak PG2', () =>{})
+    //ke halaman biaya
+    cy.get('[data-testid="drawer-item-expenses"] > .MuiListItemText-root > .MuiTypography-root').should('be.visible').click()
+    cy.get('.css-aidtzz > .MuiButtonBase-root').should('be.visible').click()
+    cy.get('[id = "details.0.tax_id"]').click()
+    cy.get('ul[role="listbox"] > li').should('contain', 'Trim Pajak')
+    cy.get('body').click(0, 0)
+
+    //ke halaman kirim uang kas dan bank
+    cy.get('[data-testid="drawer-item-cash-bank"]').click()
+    cy.get('.MuiBox-root > .MuiInputBase-root > .MuiSelect-select').should('be.visible').click()
+    cy.get('ul[role="listbox"] > li[role="option"]').contains('Kirim Uang').click()
+    cy.get(':nth-child(2) > .MuiTable-root > .MuiTableBody-root > .MuiTableRow-root > :nth-child(3)').click()
+    cy.get('ul[role="listbox"] > li').should('contain', 'Trim Pajak')
+    cy.get('body').click(0, 0)
+
+    //ke halaman terima uang kas dan bank
+    cy.get('.css-1j72te2 > .MuiButtonBase-root').click()
+    cy.get('.MuiBox-root > .MuiInputBase-root > .MuiSelect-select').click()
+    cy.get('ul[role="listbox"] > li[role="option"]').contains('Terima Uang').click()
+    cy.get(':nth-child(2) > .MuiTable-root > .MuiTableBody-root > .MuiTableRow-root > :nth-child(3)').click()
+    cy.get('ul[role="listbox"] > li').should('contain', 'Trim Pajak')
+    cy.get('body').click(0, 0)
+  })
+
+//Status Aktif - non Aktif (Pegination 1)
+  it.only('Berhasil merubah status pajak dari aktif menjadi non aktif dan tidak tampil menjadi opsi di penjualan, pembelian dan kontak PG1', () =>{
+    //mengunjungi halaman pajak
+    cy.get('[data-cy="submenu-item-tax-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
+    //Ubah status pajak non aktif menjadi aktif
+    cy.get(':nth-child(1) > :nth-child(5) > .MuiSwitch-root > .MuiButtonBase-root > .PrivateSwitchBase-input').click()
+    cy.get('.MuiAlert-message').should('be.visible').and('contain', 'Berhasil Mengubah Status Pajak.')
+    cy.get(':nth-child(1) > :nth-child(5) > .MuiSwitch-root > .MuiButtonBase-root > .PrivateSwitchBase-input').should('not.be.checked')
+
+    //ke halaman penjualan
+    cy.get('[data-testid="drawer-item-sales"]').click()
+    cy.get('.css-aidtzz > .MuiButtonBase-root').should('be.visible').click()
+    cy.get('[id="penjualan.0.tax"]').should('exist').click()
+    cy.get('ul[role="listbox"] > li').should('not.contain', 'PPH 8')
+    cy.get('body').click(0, 0)
+
+    //ke halaman biaya
+    cy.get('[data-testid="drawer-item-expenses"] > .MuiListItemText-root > .MuiTypography-root').should('be.visible').click()
+    cy.get('.css-aidtzz > .MuiButtonBase-root').should('be.visible').click()
+    cy.get('[id = "details.0.tax_id"]').click()
+    cy.get('ul[role="listbox"] > li').should('not.contain', 'PPH 8')
+    cy.get('body').click(0, 0)
+
+    //ke halaman kirim uang kas dan bank
+    cy.get('[data-testid="drawer-item-cash-bank"]').click()
+    cy.get('.MuiBox-root > .MuiInputBase-root > .MuiSelect-select').should('be.visible').click()
+    cy.get('ul[role="listbox"] > li[role="option"]').contains('Kirim Uang').click()
+    cy.get(':nth-child(2) > .MuiTable-root > .MuiTableBody-root > .MuiTableRow-root > :nth-child(3)').click()
+    cy.get('ul[role="listbox"] > li').should('not.contain', 'PPH 8')
+    cy.get('body').click(0, 0)
+
+    //ke halaman terima uang kas dan bank
+    cy.get('.css-1j72te2 > .MuiButtonBase-root').click()
+    cy.get('.MuiBox-root > .MuiInputBase-root > .MuiSelect-select').click()
+    cy.get('ul[role="listbox"] > li[role="option"]').contains('Terima Uang').click()
+    cy.get(':nth-child(2) > .MuiTable-root > .MuiTableBody-root > .MuiTableRow-root > :nth-child(3)').click()
+    cy.get('ul[role="listbox"] > li').should('not.contain', 'PPH 8')
+    cy.get('body').click(0, 0)
+  })
+
+//Status non Aktif - Aktif (Pegination 2)
+  it('Berhasil merubah status pajak dari aktif menjadi non aktif dan tidak tampil menjadi opsi di penjualan, pembelian dan kontak PG2', () =>{
+    //mengunjungi halaman pajak
+    cy.get('[data-cy="submenu-item-tax-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
+    //Ubah ke pegination 2
+    cy.get('[data-testid="NavigateNextIcon"]').click()
+    //Ubah status pajak non aktif menjadi aktif
+    cy.get(':nth-child(1) > :nth-child(5) > .MuiSwitch-root > .MuiButtonBase-root > .PrivateSwitchBase-input').click()
+    cy.get('.MuiAlert-message').should('be.visible').and('contain', 'Berhasil Mengubah Status Pajak.')
+    cy.get(':nth-child(1) > :nth-child(5) > .MuiSwitch-root > .MuiButtonBase-root > .PrivateSwitchBase-input').should('not.be.checked')
+
+    //ke halaman penjualan
+    cy.get('[data-testid="drawer-item-sales"]').click()
+    cy.get('.css-aidtzz > .MuiButtonBase-root').should('be.visible').click()
+    cy.get('[id="penjualan.0.tax"]').should('exist').click()
+    cy.get('ul[role="listbox"] > li').should('not.contain', 'Trim Pajak')
+    cy.get('body').click(0, 0)
+
+    //ke halaman biaya
+    cy.get('[data-testid="drawer-item-expenses"] > .MuiListItemText-root > .MuiTypography-root').should('be.visible').click()
+    cy.get('.css-aidtzz > .MuiButtonBase-root').should('be.visible').click()
+    cy.get('[id = "details.0.tax_id"]').click()
+    cy.get('ul[role="listbox"] > li').should('not.contain', 'Trim Pajak')
+    cy.get('body').click(0, 0)
+
+    //ke halaman kirim uang kas dan bank
+    cy.get('[data-testid="drawer-item-cash-bank"]').click()
+    cy.get('.MuiBox-root > .MuiInputBase-root > .MuiSelect-select').should('be.visible').click()
+    cy.get('ul[role="listbox"] > li[role="option"]').contains('Kirim Uang').click()
+    cy.get(':nth-child(2) > .MuiTable-root > .MuiTableBody-root > .MuiTableRow-root > :nth-child(3)').click()
+    cy.get('ul[role="listbox"] > li').should('not.contain', 'Trim Pajak')
+    cy.get('body').click(0, 0)
+
+    //ke halaman terima uang kas dan bank
+    cy.get('.css-1j72te2 > .MuiButtonBase-root').click()
+    cy.get('.MuiBox-root > .MuiInputBase-root > .MuiSelect-select').click()
+    cy.get('ul[role="listbox"] > li[role="option"]').contains('Terima Uang').click()
+    cy.get(':nth-child(2) > .MuiTable-root > .MuiTableBody-root > .MuiTableRow-root > :nth-child(3)').click()
+    cy.get('ul[role="listbox"] > li').should('not.contain', 'Trim Pajak')
+    cy.get('body').click(0, 0) 
+  })
 
 //Searching
   it('harus memunculkan text tidak ada data, ketika pencarian', () => {

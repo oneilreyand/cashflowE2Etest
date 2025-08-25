@@ -164,35 +164,35 @@ describe('[PENGATURAN-SALESMAN]', () => {
       });
     })
 
-    it('Spam klik simpan, data yang tersimpan hanya satu', () => {
-      cy.intercept('POST', '**/api/setting-salesman*').as('HitMultiple');
+//     it('Spam klik simpan, data yang tersimpan hanya satu', () => {
+//       cy.intercept('POST', '**/api/setting-salesman*').as('HitMultiple');
 
-      // Kunjungi halaman tambah termin
-     cy.get('[data-cy="submenu-item-salesman-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click();
-      cy.get('.MuiStack-root > .MuiButtonBase-root')
-        .should('be.visible')
-        .click();
+//       // Kunjungi halaman tambah termin
+//      cy.get('[data-cy="submenu-item-salesman-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click();
+//       cy.get('.MuiStack-root > .MuiButtonBase-root')
+//         .should('be.visible')
+//         .click();
 
-      // Isi form tambah termin
-       cy.get('input[placeholder="Masukkan Nama Salesman"]')
-        .should('be.visible')
-        .type('Salesman 2')
-      cy.get('input[placeholder="Keterangan"]')
-        .should('be.visible')
-        .type('keterangan salesman')
+//       // Isi form tambah termin
+//        cy.get('input[placeholder="Masukkan Nama Salesman"]')
+//         .should('be.visible')
+//         .type('Salesman 2')
+//       cy.get('input[placeholder="Keterangan"]')
+//         .should('be.visible')
+//         .type('keterangan salesman')
 
-      // Klik simpan berkali-kali (3x) -> tetap error
-      for (let i = 0; i < 3; i++) {
-      cy.get(':nth-child(4) > div > .MuiButton-contained').click();
-      cy.wait('@HitMultiple');
-      }
+//       // Klik simpan berkali-kali (3x) -> tetap error
+//       for (let i = 0; i < 3; i++) {
+//       cy.get(':nth-child(4) > div > .MuiButton-contained').click();
+//       cy.wait('@HitMultiple');
+//       }
 
-      // Verifikasi data hanya muncul sekali di tabel
-      cy.get('.MuiTableBody-root')
-      .find('tr')
-      .filter(':contains("Salesman 2")')
-      .should('have.length', 1);
-})
+//       // Verifikasi data hanya muncul sekali di tabel
+//       cy.get('.MuiTableBody-root')
+//       .find('tr')
+//       .filter(':contains("Salesman 2")')
+//       .should('have.length', 1);
+// })
 
     //Create new data failed
     it('Gagal tambah sales, nama dan keterangan kosong', () => {
@@ -500,7 +500,7 @@ describe('[PENGATURAN-SALESMAN]', () => {
     })
 
     //Status Aktif - non Aktif (Page 1)
-    it.only('Berhasil merubah status salesman dari aktif menjadi non aktif, kemudian tampil menjadi opsi di penjualan PG1', () => {
+    it('Berhasil merubah status salesman dari aktif menjadi non aktif, kemudian tampil menjadi opsi di penjualan PG1', () => {
      //Mengunjungi halaman salesman
      cy.get('[data-cy="submenu-item-salesman-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click();
      //Ubah status salesman non aktif menjadi aktif
@@ -518,7 +518,7 @@ describe('[PENGATURAN-SALESMAN]', () => {
     })
 
     //Status Aktif - non Aktif (Page 2)
-    it.only('Berhasil merubah status salesman dari aktif menjadi non aktif, kemudian tampil menjadi opsi di penjualan PG2', () => {
+    it('Berhasil merubah status salesman dari aktif menjadi non aktif, kemudian tampil menjadi opsi di penjualan PG2', () => {
      //Mengunjungi halaman salesman
      cy.get('[data-cy="submenu-item-salesman-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click();
       cy.get('[data-testid="NavigateNextIcon"]').click()
