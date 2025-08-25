@@ -189,6 +189,45 @@ it('harus bisa menambah data satuan dengan semua data di isi sebanyak 15 kali', 
         .contains('Jenis Satuan harus diisi');  
 
     });
+
+    it('Menangani kondisi offline saat menyimpan perubahan data perusahaan', () => {
+      cy.intercept('PUT', '**/api/setting-satuan/*').as('updateSatuan');
+
+      cy.get('[data-cy="submenu-item-unit-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
+      cy.get('.MuiStack-root > [data-cy="add-unit-button-settings-unit"]').should('be.visible').click()
+      cy.get('[name="unitType"]').type('satuan test')
+      cy.get('[name="unitDesc"]').type('satuan test')
+      cy.get('[data-cy="button-save-new-data-unit-settings-unit"]').click()
+      cy.window().then((win) => {
+        win.dispatchEvent(new win.Event('offline'));
+      });
+      cy.get('.MuiAlert-message', { timeout: 10000 })
+        .should('be.visible')
+        .and('contain', 'Aplikasi sedang offline. Beberapa fitur mungkin tidak tersedia. Silakan periksa koneksi internet Anda.');
+    });
+
+
+    it.only('Menangani error server (500) saat menyimpan perubahan akun', () => {
+      // Sesuaikan method POST / PUT sesuai dengan yang muncul di network tab
+      cy.intercept('POST', '**/api/setting-satuan**', {
+        statusCode: 500,
+        body: { 
+          message: 'Internal Server Error' 
+        }
+      }).as('updateSatuanError');
+
+      cy.get('[data-cy="submenu-item-unit-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click();
+      cy.get('.MuiStack-root > [data-cy="add-unit-button-settings-unit"]').should('be.visible').click();
+      cy.get('[name="unitType"]').type('satua baru');
+      cy.get('[name="unitDesc"]').type('satuan test');
+      cy.get('[data-cy="button-save-new-data-unit-settings-unit"]').click();
+
+      cy.wait('@updateSatuanError', {timeout: 10000}); 
+      cy.get('.MuiAlert-message')
+        .should('be.visible')
+        .and('contain', 'Internal Server Error');
+    });
+
 });
 
 

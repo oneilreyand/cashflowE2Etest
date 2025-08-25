@@ -239,18 +239,30 @@ describe('[PENGATURAN-PENGGUNA] - Membuka halaman Pengaturan Pengguna dan meliha
 
     });
 
-    it('Menangani error server (500) saat menyimpan perubahan data perusahaan', () => {
-        // Mock API dengan status 500
-        cy.intercept('PUT', '**/api/setting-user/*', {
+    it.only('Menangani error server (500) saat menyimpan perubahan data perusahaan', () => {
+      // Mock API dengan status 500
+        cy.intercept('POST', '**/api/setting-user/*', {
             statusCode: 500,
             body: {
-                message: 'Terjadi kesalahan pada server'
+                message: 'Terjadi kesalahan'
             }
-        }).as('updateSettingCompanyError');
-        cy.get('[data-cy="company-name-header-setting-user"]').click();
-        cy.get('[data-cy="button-edit-data-setting-user"]').click();
-
+        }).as('updateSettingUserError');
         // Isi data minimal
+        cy.get('[data-testid="add-user-button"]').should('be.visible').click();
+        cy.get('input[name="name"]').type('Nanda Fitra'); 
+        cy.get('input[name="email"]').type('fitrananda@gmail.com)');  
+        cy.get('[data-testid="user-role-select"]').click();
+        cy.get('ul[role="listbox"]', { timeout: 10000 }).should('be.visible');
+        cy.get('[data-testid="role-option-5982b710-4b24-11f0-ac71-5396266a671d"]').should('be.visible').click();
+
+        cy.wait('@updateSettingUserError', {timeout: 10000}); 
+        cy.get('.MuiAlert-message')
+          .should('be.visible')
+          .and('contain', 'Internal Server Error');
+        });
+
+      it('Menangani kondisi offline saat menyimpan perubahan data perusahaan', () => {
+      cy.intercept('PUT', '**/api/setting-user/*').as('updateUser');
         cy.get('[data-testid="add-user-button"]').should('be.visible').click();
         cy.get('input[name="name"]').type('Nanda Fitra'); 
         cy.get('input[name="email"]').type('fitrananda@gmail.com)');  

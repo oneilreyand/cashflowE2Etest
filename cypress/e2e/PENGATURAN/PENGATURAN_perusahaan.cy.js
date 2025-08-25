@@ -79,7 +79,7 @@ describe('[PENGATURAN-PERUSAHAAN] - Membuka halaman Pengaturan Perusahaan dan me
         cy.get('[data-cy="button-save-setting-edit-company"]').click();
     
     }); 
-    it.only('Input nomor telepon kantor dengan data yang tidak valid', () => {
+    it('Input nomor telepon kantor dengan data yang tidak valid', () => {
         cy.get('[data-cy="company-name-header-setting-company"]').click();
         cy.get('[data-cy="button-edit-data-setting-company"]').click();
         cy.get('input[name="officePhoneNumber"]').clear().type('082268');
@@ -206,18 +206,9 @@ describe('[PENGATURAN-PERUSAHAAN] - Membuka halaman Pengaturan Perusahaan dan me
         .and('contain', 'Nama Perusahaan');
     });
 
-    it('Menangani error server (500) saat menyimpan perubahan data perusahaan', () => {
-        // Mock API dengan status 500
-        cy.intercept('PUT', '**/api/setting-company/*', {
-            statusCode: 500,
-            body: {
-                message: 'Terjadi kesalahan pada server'
-            }
-        }).as('updateSettingCompanyError');
-        cy.get('[data-cy="company-name-header-setting-company"]').click();
-        cy.get('[data-cy="button-edit-data-setting-company"]').click();
-
-        // Isi data minimal
+    it('Menangani kondisi offline saat menyimpan perubahan data perusahaan', () => {
+      cy.intercept('PUT', '**/api/setting-accounts/*').as('updateAccounts');
+// Isi data minimal
         cy.get('input[name="companyName"]').clear().type('Perusahaan Error Test');
         cy.get('input[name="officePhoneNumber"]').clear().type('082268694838');
         cy.get('input[name="officeEmail"]').clear().type('error@test.com');
@@ -230,6 +221,32 @@ describe('[PENGATURAN-PERUSAHAAN] - Membuka halaman Pengaturan Perusahaan dan me
         cy.get('.MuiAlert-message', { timeout: 10000 })
             .should('be.visible')
             .and('contain', 'Aplikasi sedang offline. Beberapa fitur mungkin tidak tersedia. Silakan periksa koneksi internet Anda.');
-        });
 
+    });
+
+    it.only('Menangani error server (500) saat menyimpan perubahan data perusahaan', () => {
+        // Mock API dengan status 500
+        cy.intercept('PUT', '**/api/companies/*', {
+            statusCode: 500,
+            body: {
+                message: 'Terjadi Kesalahan'
+            }
+        }).as('updateSettingCompanyError');
+        cy.get('[data-cy="company-name-header-setting-company"]').click();
+        cy.get('[data-cy="button-edit-data-setting-company"]').click();
+
+        // Isi data minimal
+        cy.get('input[name="companyName"]').clear().type('Perusahaan Error Test');
+        cy.get('input[name="officePhoneNumber"]').clear().type('082268694838');
+        cy.get('input[name="officeEmail"]').clear().type('error@test.com');
+        cy.get('[data-cy="button-save-setting-edit-company"]').click();
+
+        cy.wait('@updateSettingCompanyError', {timeout: 10000}); 
+        cy.get('.MuiAlert-message')
+            .should('be.visible')
+            .and('contain', 'Terjadi Kesalahan');
+    });
 });
+
+
+

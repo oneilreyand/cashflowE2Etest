@@ -807,35 +807,42 @@ describe('[PENGATURAN-AKUN]', () => {
       }
     });
 
-        it.only('Menangani error server (500) saat menyimpan perubahan data perusahaan', () => {
-        // Mock API dengan status 500
-        cy.intercept('PUT', '**/api/setting-company/*', {
-            statusCode: 500,
-            body: {
-                message: 'Terjadi kesalahan pada server'
-            }
-        }).as('updateSettingAccountError');
+    it('Menangani kondisi offline saat menyimpan perubahan data perusahaan', () => {
+      cy.intercept('PUT', '**/api/setting-accounts/*').as('updateAccounts');
+      cy.get('[data-cy="submenu-item-account-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click();
+      cy.get('[name="sales_income"]').click();
+      cy.contains('li', '4-00001 - Pendapatan').click();
+      cy.get('[name="sales_income"]').trigger('change');
+      cy.window().then((win) => {
+        win.dispatchEvent(new win.Event('offline'));
+      });
+      cy.get('[style="display: flex; justify-content: flex-end; margin: 20px 0px;"] > .MuiButtonBase-root').click();
+      cy.get('.MuiAlert-message', { timeout: 10000 })
+        .should('be.visible')
+        .and('contain', 'Aplikasi sedang offline. Beberapa fitur mungkin tidak tersedia. Silakan periksa koneksi internet Anda.');
+    });
 
-        cy.intercept('PUT', '**/api/setting-accounts/*').as('updateSettingAccount');
-      
-        cy.get('[data-cy="submenu-item-account-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
-        // Pendapatan penjualan
-        cy.get('[name="sales_income"]').click()
-        cy.contains('li', '4-00001 - Pendapatan', { timeout: 10000 })
-        .scrollIntoView()
-        .should('exist')
-        .click();
-        cy.get('[name="sales_income"]').trigger('change');
 
-        cy.window().then((win) => {
-            win.dispatchEvent(new win.Event('offline'));
-        });
-
-        cy.get('[style="display: flex; justify-content: flex-end; margin: 20px 0px;"] > .MuiButtonBase-root').click();
-
-        cy.get('.MuiAlert-message', { timeout: 10000 })
-            .should('be.visible')
-            .and('contain', 'Aplikasi sedang offline. Beberapa fitur mungkin tidak tersedia. Silakan periksa koneksi internet Anda.');
-        });
+    it.only('Menangani error server (500) saat menyimpan perubahan akun', () => {
+      cy.intercept('**/api/**', (req) => {
+        console.log('API dipanggil:', req.method, req.url);
+      });
+      cy.intercept('PUT', '**/api/setting-accounts/*', {
+        statusCode: 500,
+        body: { message: 'Terjadi kesalahan' }
+      }).as('updateAccountsError');
+      cy.get('[data-cy="submenu-item-account-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click();
+      cy.get('[name="sales_income"]').click();
+      cy.contains('li', '4-00001 - Pendapatan').click();
+      cy.get('[name="sales_income"]').trigger('change');
+      cy.get('[style="display: flex; justify-content: flex-end; margin: 20px 0px;"] > .MuiButtonBase-root').click();
+      cy.wait('@updateAccountsError').then((interception) => {
+        expect(interception.response.statusCode).to.eq(500);
+        expect(interception.response.body.message).to.eq('Terjadi kesalahan');
+      });
+      cy.get('.MuiAlert-message', { timeout: 10000 })
+        .should('be.visible')
+        .and('contain', 'Terjadi kesalahan');
+    });
 
 });

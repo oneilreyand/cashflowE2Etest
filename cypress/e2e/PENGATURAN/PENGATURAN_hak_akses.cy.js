@@ -286,7 +286,7 @@ describe('[PENGATURAN-PENGGUNA] - Membuka halaman Pengaturan Pengguna dan meliha
     }
   ); 
 
-    it.only('Klik pagination page 2 kalau ada dan aktif', () => {
+    it('Klik pagination page 2 kalau ada dan aktif', () => {
       cy.get('body').then(($body) => {
         const nextBtn = $body.find('[aria-label="Go to next page"]');
 
@@ -305,14 +305,15 @@ describe('[PENGATURAN-PENGGUNA] - Membuka halaman Pengaturan Pengguna dan meliha
       });
     });
 
-    it('Menangani error server (500) saat menyimpan perubahan data perusahaan', () => {
-        // Mock API dengan status 500
-        cy.intercept('PUT', '**/api/setting-roles/*', {
+    it.only('Menangani error server (500) saat menyimpan perubahan data perusahaan', () => {
+      // Mock API dengan status 500
+        cy.intercept('POST | PUT', '**/api/setting-roles/*', {
             statusCode: 500,
             body: {
-                message: 'Terjadi kesalahan pada server'
+                message: 'Internal Server Error'
             }
-        }).as('updateSettingRolesError');
+        }).as('updateRolesError');
+        
         cy.get('[data-cy="submenu-item-permission-setting"] > [data-cy="list-item-button-sub-menu-setting"] > [data-cy="list-item-text-sub-menu-setting"] > .MuiTypography-root').click();
         cy.get('[data-testid="add-permission-button"]').click();
         cy.get('.MuiGrid2-container > :nth-child(1) > .MuiFormControl-root > .MuiInputBase-root').click();
@@ -320,18 +321,29 @@ describe('[PENGATURAN-PENGGUNA] - Membuka halaman Pengaturan Pengguna dan meliha
         cy.get('input[name="name"]').clear().type('Head of Sales'); 
         cy.get('.MuiGrid2-container > :nth-child(3)').type('Head of Sales');
 
-        // Simulasi network offline sebelum klik simpan
-        cy.window().then((win) => {
-            win.dispatchEvent(new win.Event('offline'));
-        });
-        cy.get('.MuiPaper-elevation0 > .MuiStack-root > .MuiButton-containedPrimary').click();
+        cy.wait('@updateRolesError', {timeout: 10000}); 
+        cy.get('.MuiAlert-message')
+          .should('be.visible')
+          .and('contain', 'Internal Server Error');
+
+      });
+
+    it('Menangani kondisi offline saat menyimpan perubahan data perusahaan', () => {
+      cy.intercept('PUT', '**/api/setting-roles/*').as('updateRoles');
+        cy.get('[data-cy="submenu-item-permission-setting"] > [data-cy="list-item-button-sub-menu-setting"] > [data-cy="list-item-text-sub-menu-setting"] > .MuiTypography-root').click();
+        cy.get('[data-testid="add-permission-button"]').click();
+        cy.get('.MuiGrid2-container > :nth-child(1) > .MuiFormControl-root > .MuiInputBase-root').click();
+        cy.get('[data-value="88933452-1f62-11f0-8e2c-fbc5d1e74f72"]').click();
+        cy.get('input[name="name"]').clear().type('Head of Sales'); 
+        cy.get('.MuiGrid2-container > :nth-child(3)').type('Head of Sales');
+      cy.window().then((win) => {
+        win.dispatchEvent(new win.Event('offline'));
+      });
+       cy.get('.MuiPaper-elevation0 > .MuiStack-root > .MuiButton-containedPrimary').click();
         cy.get('.MuiAlert-message', { timeout: 10000 })
             .should('be.visible')
             .and('contain', 'Tidak dapat menyimpan data, silakan periksa koneksi internet Anda.');
         });
 
-
   });
 
-
-  
