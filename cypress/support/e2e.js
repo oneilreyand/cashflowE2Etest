@@ -19,12 +19,8 @@ import "@cypress/code-coverage/support";
 import 'cypress-mochawesome-reporter/register';
 import 'wick-a11y';
 import 'cypress-diff';
+import 'cypress-file-upload';
 
-Cypress.on('uncaught:exception', (err) => {
-  if (err.message.includes('ResizeObserver loop')) {
-    return false
-  }
-})
 
 
 // Alternatively you can use CommonJS syntax:

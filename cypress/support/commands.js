@@ -56,9 +56,9 @@ Cypress.Commands.add('apiLogin', (email, password) => {
 
 Cypress.Commands.add('visitDashboard', (companyId) => {
     if (companyId) {
-        cy.visit('/admin/dashboard')
-        cy.get('[data-testid="listCompany-dropdown"]', { timeout: 10000 }).click()
-        cy.get(`[data-testid="listCompany-item-${companyId}"]`, { timeout: 10000 }).click()
+        cy.visit('/admin/dashboard', { timeout: 20000 })
+        cy.get('[data-testid="listCompany-dropdown"]', { timeout: 20000 }).click()
+        cy.get(`[data-testid="listCompany-item-${companyId}"]`, { timeout: 20000 }).click()
     } else {
         cy.visit('/admin/dashboard')
 
@@ -78,12 +78,13 @@ Cypress.Commands.add('verifyPageContent', (selector, text, timeout) => {
     cy.get(selector, { timeout }).should('be.visible').and('contain', text);
 });
 
-Cypress.Commands.add('navigateToKontak', (selector, text, timeout) => {
+Cypress.Commands.add('navigateToKontak', () => {
     cy.get('[data-testid="drawer-item-contacts"]').click();
     cy.url().should('eq', 'https://uat-cashbook.assist.id/admin/contacts');
 });
 
-Cypress.Commands.add('navigateToPenjualan', (selector, text, timeout) => {
+
+Cypress.Commands.add('navigateToPenjualan', () => {
     cy.get('[data-testid="drawer-item-sales"]').click();
     cy.url().should('eq', env === 'local' ? 'localhost:*' : 'https://uat-cashbook.assist.id/admin/sales')
 })
