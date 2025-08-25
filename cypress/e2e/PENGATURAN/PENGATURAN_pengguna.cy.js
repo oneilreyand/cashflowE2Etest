@@ -19,7 +19,7 @@ describe('[PENGATURAN-PENGGUNA] - Membuka halaman Pengaturan Pengguna dan meliha
     it('Menambah Pengguna Baru', () => {
       cy.get('[data-testid="add-user-button"]').should('be.visible').click();
       cy.get('input[name="name"]').type('Nanda Fitra');
-      cy.get('input[name="email"]').type('nandaf@gmail.com');
+      cy.get('input[name="email"]').type('nandafitra4@gmail.com');
       cy.get('[data-testid="user-role-select"]').click();
       cy.get('ul[role="listbox"]', { timeout: 10000 }).should('be.visible');
       cy.get('[data-testid="role-option-5982b710-4b24-11f0-ac71-5396266a671d"]').should('be.visible').click();
@@ -54,11 +54,12 @@ describe('[PENGATURAN-PENGGUNA] - Membuka halaman Pengaturan Pengguna dan meliha
         cy.get('input[name="name"]')
           .type(longName)
 
-        cy.get('input[name="email"]').type('nandafi@gmail.com');
+        cy.get('input[name="email"]').type('nandafitra2@gmail.com');
         cy.get('[data-testid="user-role-select"]').click();
         cy.get('ul[role="listbox"]', { timeout: 10000 }).should('be.visible');
         cy.get('[data-testid="role-option-5982b710-4b24-11f0-ac71-5396266a671d"]').should('be.visible').click();
         cy.get('[data-testid="submit-user-button"]').click();
+        cy.log('Hanya 50 character saja yang bisa diinput, sisanya langsung terpotong');
 
    });
 
@@ -128,7 +129,7 @@ describe('[PENGATURAN-PENGGUNA] - Membuka halaman Pengaturan Pengguna dan meliha
     it('Menambahkan pengguna baru dengan data pengguna yang sudah dihapus sebelumnya', () => {
       cy.get('[data-testid="add-user-button"]').should('be.visible').click();
       cy.get('input[name="name"]').type('Fajar');
-      cy.get('input[name="email"]').type('fajarmuhamadd@gmail.com');
+      cy.get('input[name="email"]').type('fajarmuhamaddd@gmail.com');
       cy.get('[data-testid="user-role-select"]').click();
       cy.get('ul[role="listbox"]', { timeout: 10000 }).should('be.visible');
       cy.get('[data-testid="role-option-6186af42-4a6e-11f0-97e5-496865600ce7"]').should('be.visible').click();
@@ -143,7 +144,7 @@ describe('[PENGATURAN-PENGGUNA] - Membuka halaman Pengaturan Pengguna dan meliha
       cy.get('[data-testid="alert-dialog-submit-button"]').click();
       cy.get('[data-testid="add-user-button"]').should('be.visible').click();
       cy.get('input[name="name"]').type('Fajar');
-      cy.get('input[name="email"]').type('fajarmuhamadd@gmail.com');
+      cy.get('input[name="email"]').type('fajarmuhamaddd@gmail.com');
       cy.get('[data-testid="user-role-select"]').click();
       cy.get('ul[role="listbox"]', { timeout: 10000 }).should('be.visible');
       cy.get('[data-testid="role-option-6186af42-4a6e-11f0-97e5-496865600ce7"]').should('be.visible').click();
@@ -179,12 +180,12 @@ describe('[PENGATURAN-PENGGUNA] - Membuka halaman Pengaturan Pengguna dan meliha
     });
 
     it('Edit Data dan Hak Akses dari daftar Pengguna dengan menekan icon pena pada baris yang sesuai', () => {
-      cy.get('table tbody tr').contains('td', 'testing')
+      cy.get('table tbody tr').contains('td', 'Finance')
         .parents('tr')
         .find('[aria-label="Edit Pengguna"]')
         .click();
       cy.get('input[name="name"]').clear().type('Fina Finance');
-      cy.get('input[name="email"]').clear().type('whispering-ferret-827@akunlama.com');
+      cy.get('input[name="email"]').clear().type('info.finance@gmail.com');
       cy.get('[data-testid="user-role-select"]').click();
       cy.get('ul[role="listbox"]', { timeout: 10000 }).should('be.visible');
       cy.get('[data-testid="role-option-6186af42-4a6e-11f0-97e5-496865600ce7"]').should('be.visible').click();
