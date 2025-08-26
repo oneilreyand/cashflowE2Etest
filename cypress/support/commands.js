@@ -64,7 +64,7 @@ Cypress.Commands.add('visitDashboard', (companyId) => {
         }
     });
     cy.get('[data-testid="listCompany-dropdown"]').click()
-    cy.get(`[data-testid="listCompany-item-${companyId}"]`).click()
+    cy.get(`[data-testid="listCompany-item-${companyId}"]`,{timeout: 200000}).click()
 });
 
 Cypress.Commands.add('verifyVisibility', (selector, text = '', timeout = 10000) => {

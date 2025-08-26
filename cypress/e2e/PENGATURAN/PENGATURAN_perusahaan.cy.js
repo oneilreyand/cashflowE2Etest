@@ -12,6 +12,9 @@ describe('[PENGATURAN-PERUSAHAAN] - Membuka halaman Pengaturan Perusahaan dan me
   
     it('Chek kesesuainan halaman Pengaturan Perusahaan dengan design yang ada', () => {
         cy.get('[data-cy="submenu-item-company-setting"] > [data-cy="list-item-button-sub-menu-setting"]').click()
+        cy.get('.MuiTypography-h5')
+            .should('be.visible')
+            .and('contain', 'Pengaturan Perusahaan');
         cy.get('[data-cy="company-name-header-setting-company"]')
             .should('be.visible')
             .and('contain', 'Nama Perusahaan');
@@ -47,15 +50,16 @@ describe('[PENGATURAN-PERUSAHAAN] - Membuka halaman Pengaturan Perusahaan dan me
             .and('contain', 'NPWP');
     });
 
-    it('Edit data perusahaan', () => {
+    it('Hapus semua data kecuali field yang require', () => {
         cy.get('[data-cy="company-name-header-setting-company"]').click();
         cy.get('[data-cy="button-edit-data-setting-company"]').click();
-        cy.get('input[name="companyName"]').clear().type('Perusahaan Baru');
-        cy.get('input[name="officePhoneNumber"]').clear().type('082268694838');
-        cy.get('input[name="officeEmail"]').clear().type('erniyulianti333@gmail.com');
-        cy.get('input[name="officeAddress"]').clear().type('Jl. Baru No. 123');
-        cy.get('input[name="billingAddress"]').clear().type('Jl. Soekarno. 123');
-        cy.get('input[name="shippingAddress"]').clear().type('Jl. Sudirman No. 123');
+        cy.get('input[name="companyName"]');
+        cy.get('input[name="officePhoneNumber"]');
+        cy.get('input[name="officeEmail"]');
+        cy.get('input[name="officeAddress"]').clear();
+        cy.get('input[name="billingAddress"]').clear();
+        cy.get('input[name="shippingAddress"]').clear();
+        cy.get('[data-cy="button-save-setting-edit-company"]').click();
     });
 
     it('Uji validasi saat field wajib dibiarkan kosong', () => {
@@ -74,11 +78,12 @@ describe('[PENGATURAN-PERUSAHAAN] - Membuka halaman Pengaturan Perusahaan dan me
         cy.get('[data-cy="company-name-header-setting-company"]').click();
         cy.get('[data-cy="button-edit-data-setting-company"]').click();
         cy.get('input[name="companyName"]').clear().type('        Perusahaan Baru');
-        cy.get('input[name="officePhoneNumber"]').clear().type(' 082268694838');
+        cy.get('input[name="officePhoneNumber"]').clear().type('   082268694838');
         cy.get('input[name="officeEmail"]').clear().type(' Erni@gmail.com');
         cy.get('[data-cy="button-save-setting-edit-company"]').click();
     
     }); 
+
     it('Input nomor telepon kantor dengan data yang tidak valid', () => {
         cy.get('[data-cy="company-name-header-setting-company"]').click();
         cy.get('[data-cy="button-edit-data-setting-company"]').click();
@@ -99,6 +104,30 @@ describe('[PENGATURAN-PERUSAHAAN] - Membuka halaman Pengaturan Perusahaan dan me
         cy.get('.MuiFormHelperText-root')
             .invoke('text')
             .should('match', /Invalid email/g);
+    });
+
+    it('Menghapus logo yang sudah tersimpan', () => {
+        cy.get('[data-cy="company-logo-header-setting-company"]').click();
+        cy.get('[data-cy="button-edit-data-setting-company"]').click();
+        cy.get('[aria-label="delete file"]').click;
+        cy.get('[data-cy="button-save-setting-edit-company"]').click();
+    });
+
+    it('Ganti logo dengan data baru yang valid', () => {
+        cy.get('[data-cy="company-logo-header-setting-company"]').click();
+        cy.get('[data-cy="button-edit-data-setting-company"]').click();
+        cy.get('[aria-label="change file"]').click();
+        const fileName = 'logo2.jpg'; // Ganti dengan nama file yang sesuai
+        cy.fixture(fileName).then(fileContent => {
+            cy.get('[data-cy="dropzone-logoCompany-setting-edit-company"] input[type="file"]').attachFile({
+                fileContent,
+                fileName,
+                mimeType: 'image/.png/.jpg/.jpeg'
+            });
+        });
+        cy.get('[data-cy="button-save-setting-edit-company"]').click({timeout:20000});
+        cy.get('.MuiSnackbar-root > .MuiPaper-root',{ timeout: 100000 })
+          .contains('Data perusahaan berhasil disimpan');
     });
 
     it('Mengunggah file gambar untuk logo dengan format dan ukuran yang valid', () => {
@@ -151,7 +180,6 @@ describe('[PENGATURAN-PERUSAHAAN] - Membuka halaman Pengaturan Perusahaan dan me
     });       
 
     it('Memilih data dari dropdown sesuai kebutuhan pengguna',() => {
-        cy.intercept('PUT', '**/api/setting-company/*').as('updateSettingCompany');
         cy.get('[data-cy="company-logo-header-setting-company"]').click();
         cy.get('[data-cy="button-edit-data-setting-company"]').click();
 
@@ -161,11 +189,6 @@ describe('[PENGATURAN-PERUSAHAAN] - Membuka halaman Pengaturan Perusahaan dan me
         .scrollIntoView()
         .should('exist')
         .click();
-
-        // Pilih province
-        cy.get('[name="province"]').closest('.MuiInputBase-root').click();
-        cy.get('ul[role="listbox"]', { timeout: 10000 }).should('be.visible');
-        cy.get('[data-cy="menuitem-RIAU-setting-edit-company"]').should('be.visible').click();
 
         //pilih city
         cy.get('[name="city"]').closest('.MuiInputBase-root').click();
@@ -186,13 +209,34 @@ describe('[PENGATURAN-PERUSAHAAN] - Membuka halaman Pengaturan Perusahaan dan me
         cy.get('[name="companySize"]').closest('.MuiInputBase-root').click();
         cy.get('ul[role="listbox"]', { timeout: 10000 }).should('be.visible');
         cy.get('[data-cy="menuitem-10 - 50 Karyawan-setting-edit-company"]').should('be.visible').click();
+
+        //billingprovince
+        cy.get('[name="billingProvince"]').closest('.MuiInputBase-root').click();
+        cy.get('ul[role="listbox"]', { timeout: 10000 }).should('be.visible').scrollIntoView();
+        cy.get('[data-cy="menuitem-RIAU-setting-edit-company"]').should('be.visible').click()
+
+        //billingCity
+        cy.get('[name="billingCity"]').closest('.MuiInputBase-root').click();
+        cy.get('ul[role="listbox"]', { timeout: 10000 }).should('be.visible');
+        cy.get('[data-cy="menuitem-PEKANBARU-setting-edit-company"]').should('be.visible').click();
+
+        //shippingProvince
+        cy.get('[name="shippingProvince"]').closest('.MuiInputBase-root').click();
+        cy.get('ul[role="listbox"]', { timeout: 10000 }).should('be.visible').scrollIntoView();
+        cy.get('[data-cy="menuitem-RIAU-setting-edit-company"]').should('be.visible').click()
+            .should('exist')
+            .click();
+
+        //shippingCity
+        cy.get('[name="shippingCity"]').closest('.MuiInputBase-root').click();
+        cy.get('ul[role="listbox"]', { timeout: 10000 }).should('be.visible');
+        cy.get('[data-cy="menuitem-PEKANBARU-setting-edit-company"]').should('be.visible').click();
         
         // Simpan perubahan
         cy.get('[data-cy="button-save-setting-edit-company"]').click();
     });
 
     it('Membatalkan perubahan data',() => {
-        cy.intercept('PUT', '**/api/setting-company/*').as('updateSettingCompany');
         cy.get('[data-cy="company-name-header-setting-company"]').click();
         cy.get('[data-cy="button-edit-data-setting-company"]').click();
         cy.get('input[name="companyName"]').clear().type('Perusahaan');
@@ -206,12 +250,80 @@ describe('[PENGATURAN-PERUSAHAAN] - Membuka halaman Pengaturan Perusahaan dan me
         .and('contain', 'Nama Perusahaan');
     });
 
-    it('Menangani kondisi offline saat menyimpan perubahan data perusahaan', () => {
-      cy.intercept('PUT', '**/api/setting-accounts/*').as('updateAccounts');
-// Isi data minimal
-        cy.get('input[name="companyName"]').clear().type('Perusahaan Error Test');
+    it('Edit data perusahaan dengan data yang valid', () => {
+        cy.get('[data-cy="company-name-header-setting-company"]').click();
+        cy.get('[data-cy="button-edit-data-setting-company"]').click();
+        cy.get('input[name="companyName"]').clear().type('Perusahaan Baru');
         cy.get('input[name="officePhoneNumber"]').clear().type('082268694838');
-        cy.get('input[name="officeEmail"]').clear().type('error@test.com');
+        cy.get('input[name="officeEmail"]').clear().type('erniyulianti333@gmail.com');
+        cy.get('input[name="officeAddress"]').clear().type('Jl. Baru No. 123');
+        cy.get('input[name="billingAddress"]').clear().type('Jl. Soekarno. 123');
+        cy.get('input[name="shippingAddress"]').clear().type('Jl. Sudirman No. 123');
+        cy.get('input[name="npwp"]').clear().type(1234567898623)
+        cy.get('[data-cy="button-save-setting-edit-company"]').click();
+    });
+
+    it.only('Validasi data yang tersimpan sesuai input terakhir', () => {
+        cy.get('[data-cy="company-name-header-setting-company"]')
+
+        const expectedData = {
+            companyName: 'Perusahaan Baru',
+            officePhoneNumber: '082268694838',
+            officeEmail: 'erniyulianti333@gmail.com',
+            officeAddress: 'Jl. Baru No. 123, PEKANBARU, RIAU',
+            billingAddress: 'Jl. Soekarno. 123, PEKANBARU, RIAU',
+            billingAddress: 'Jl. Soekarno. 123, PEKANBARU, RIAU',
+            shippingAddress: 'Jl. Sudirman No. 123, PEKANBARU, RIAU',
+            industry: 'Health Care',
+            ukuranPerusahaan: '10 - 50 Karyawan',
+            npwp: '1234567898623'
+        };
+        cy.get('[data-cy="company-name-setting-company"]')
+            .should('be.visible')
+            .and('contain', expectedData.companyName);
+
+        cy.get('[data-cy="office-phone-number-setting-company"]')
+            .should('be.visible')
+            .and('contain', expectedData.officePhoneNumber);
+
+        cy.get('[data-cy="office-email-setting-company"]')
+            .should('be.visible')
+            .and('contain', expectedData.officeEmail);
+
+        cy.get('[data-cy="office-address-setting-company"]')
+            .should('be.visible')
+            .and('contain', expectedData.officeAddress);
+
+        cy.get('[data-cy="billing-address-setting-company"]')
+            .should('be.visible')
+            .and('contain', expectedData.billingAddress);
+
+        cy.get('[data-cy="industry-setting-company"]')
+            .should('be.visible')
+            .and('contain', expectedData.industry);
+
+        cy.get('[data-cy="shipping-address-setting-company"]')
+            .should('be.visible')
+            .and('contain', expectedData.shippingAddress);
+
+        cy.get('[data-cy="company-size-setting-company"]')
+            .should('be.visible')
+            .and('contain', expectedData.ukuranPerusahaan);
+
+        cy.get('[data-cy="npwp-setting-company"]')
+            .should('be.visible')
+            .and('contain', expectedData.npwp);
+
+        cy.get('[data-cy="company-logo-setting-company"]')
+            .should('be.visible');
+    });
+
+    it('Menangani kondisi offline saat menyimpan perubahan data perusahaan', () => {
+      cy.intercept('PATCH', '**/api/companies/*').as('updateAccounts');
+        // Isi data minimal
+        cy.get('[data-cy="company-name-header-setting-company"]').click();
+        cy.get('[data-cy="button-edit-data-setting-company"]').click();
+        cy.get('input[name="officePhoneNumber"]').clear().type('082268694838');
 
         // Simulasi network offline sebelum klik simpan
         cy.window().then((win) => {
@@ -221,10 +333,9 @@ describe('[PENGATURAN-PERUSAHAAN] - Membuka halaman Pengaturan Perusahaan dan me
         cy.get('.MuiAlert-message', { timeout: 10000 })
             .should('be.visible')
             .and('contain', 'Aplikasi sedang offline. Beberapa fitur mungkin tidak tersedia. Silakan periksa koneksi internet Anda.');
-
     });
 
-    it.only('Menangani error server (500) saat menyimpan perubahan data perusahaan', () => {
+    it('Menangani error server (500) saat menyimpan perubahan data perusahaan', () => {
         // Mock API dengan status 500
         cy.intercept('PATCH', '**/api/companies/*', {
             statusCode: 500,
@@ -236,7 +347,6 @@ describe('[PENGATURAN-PERUSAHAAN] - Membuka halaman Pengaturan Perusahaan dan me
         cy.get('[data-cy="button-edit-data-setting-company"]').click();
 
         // Isi data minimal
-        cy.get('input[name="companyName"]').clear().type('Perusahaan Error Test');
         cy.get('input[name="officePhoneNumber"]').clear().type('082268694838');
         cy.get('input[name="officeEmail"]').clear().type('error@test.com');
         cy.get('[data-cy="button-save-setting-edit-company"]').click();
