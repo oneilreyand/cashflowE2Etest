@@ -1,5 +1,6 @@
-const companyId = "65800b00-79e4-11f0-af51-11d9de5623a9";
-const jumlahKontakPerTipe = 20; // atur jumlah kontak per tipe di sini
+const companyId = "ab78f6b2-afdd-11f0-9aae-9bbc0c8b2cba";
+
+const jumlahKontakPerTipe = 10; // atur jumlah kontak per tipe di sini
 const tipeKontakList = ["pelanggan", "suplier", "karyawan", "lainnya"];
 
 function capitalizeEachWord(str) {

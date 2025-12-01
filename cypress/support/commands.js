@@ -51,6 +51,8 @@ Cypress.Commands.add('apiLogin', (email, password) => {
         // Simpan token di cookie dan localStorage sesuai kebutuhan aplikasi
         cy.setCookie('token', token);
         window.localStorage.setItem('token', token); // Simpan juga di localStorage
+        window.sessionStorage.setItem('token', token); // Simpan juga di sessionStorage
+
     });
 });
 
@@ -83,8 +85,3 @@ Cypress.Commands.add('navigateToKontak', () => {
     cy.url().should('eq', 'https://uat-cashbook.assist.id/admin/contacts');
 });
 
-
-Cypress.Commands.add('navigateToPenjualan', () => {
-    cy.get('[data-testid="drawer-item-sales"]').click();
-    cy.url().should('eq', env === 'local' ? 'localhost:*' : 'https://uat-cashbook.assist.id/admin/sales')
-})

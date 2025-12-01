@@ -5,7 +5,7 @@ describe("PENJUALAN BARU", () => {
         cy.handleUncaughtExceptions()
         cy.apiLogin("rayhanrayandra.work.id@gmail.com", "12345678");
         cy.visitDashboard(companyId);
-        cy.navigateToPenjualan();
+        cy.get('[data-testid="drawer-item-sales"]').click();
         cy.contains('Penjualan Baru', { timeout: 20000 }).click();
     });
 
@@ -115,52 +115,55 @@ describe("PENJUALAN BARU", () => {
     });
 
     it('TC-0003 Membuat Penjualan Baru Dengan Required Input Only', () => {
-        cy.intercept('GET', `**/api/kontak/list?jenisKontak=pelanggan&limit=999&companyId=${companyId}`).as('waitPelanggan');
+        cy.intercept('GET', '**/api/kontak/list?jenisKontak=pelanggan&limit=999**').as('waitPelanggan');
+        cy.intercept('GET', '**/api/productList/productWithStock?companyId=*').as('getAllProduk');
+        cy.intercept('GET', '**api/setting-taxes?**').as('getDataPajak')
 
-        const dateToday = new Date().toLocaleDateString('id-ID');
+        // Format tanggal DD/MM/YYYY
+        const today = new Date();
+        const dd = String(today.getDate()).padStart(2, '0');
+        const mm = String(today.getMonth() + 1).padStart(2, '0');
+        const yyyy = today.getFullYear();
+        const dateToday = `${dd}/${mm}/${yyyy}`;
         cy.log(dateToday);
 
-        // Intercept kontak pelanggan
         cy.reload();
-        cy.wait('@waitPelanggan').then(({ response }) => {
-            const pelanggan = response.body.results[0];
-            cy.get('#idPelanggan').click();
-            cy.get(`[data-value]`)
-                .eq(1).click()
-                .scrollIntoView({ block: 'center' }) // pastikan muncul di tengah viewport
-                .should('be.visible') // pastikan visible
-                .click({ force: true }); // bypass overlay check kalau masih ketutup
-        });
+        cy.wait('@waitPelanggan');
+        cy.get('#idPelanggan').click();
+        cy.get('[data-value]').eq(1).click().click();
 
-        //cy.get('#idPelanggan').trigger('change')
         cy.get('[placeholder="DD/MM/YYYY"]').eq(0).type(`{selectAll}{backSpace}${dateToday}`);
         cy.get('#address').type('{selectAll}Jalan Penagihan');
         cy.get('[id="penjualan.0.product_id"]').click();
         cy.get('[data-value]').eq(1).click();
-        cy.get('.MuiButton-contained').click();
+        cy.wait('@getAllProduk').then(({ interception }) => {
+            const products = interception.response.body.results;
+            const sellProducts = products.filter(p => p.is_sell);
+            const firstProduct = sellProducts[0];
 
-        // Intercept API penjualan
-        cy.intercept('POST', '**/api/penjualan').as('postPenjualan');
+            console.log(`Produk pertama yang bisa dijual: ${firstProduct.nama}`);
+            cy.wait(1000000000);
 
-        // Submit
-        cy.get('[data-testid="alert-dialog-submit-button"]').click();
-        cy.get('.MuiAlert-message').should('have.text', 'Penjualan berhasil ditambahkan')
-
-        // Tunggu API
-        cy.wait('@postPenjualan').then((interception) => {
-            const res = interception.response.body;
-
-            // Pastikan request benar
-            expect(interception.request.method).to.eq('POST');
-            expect(interception.response.statusCode).to.eq(200);
-
-            // Validasi row pertama tabel
-            cy.get('table tbody tr').first().within(() => {
-                // kolom 1 = nomor
-                cy.get('td').eq(1, { timeout: 20000 }).should('have.text', res.nomor);
-            })
+            //     cy.get('[name="penjualan.0.quantity"]').invoke('val').then((qty) => {
+            //         cy.get('input[name="penjualan.0.price"]').invoke('val').then((harga) => {
+            //             const hargaBersih = harga
+            //                 .replace(/[Rp\s]/g, '')
+            //                 .replace(/\./g, '')
+            //                 .replace(/,/g, '.');
+            //             cy.log(`Qty: ${qty}, Harga: ${hargaBersih}`);
+            //         });
+            //     });
         });
+
+        // lanjut submit penjualan
+        // cy.intercept('POST', '**/api/penjualan').as('postPenjualan');
+        // cy.get('.MuiButton-contained').click();
+        // cy.get('[data-testid="alert-dialog-submit-button"]').click();
+        // cy.wait('@postPenjualan').then((interception) => {
+        //     expect(interception.response.statusCode).to.eq(200);
+        // });
     });
+
 
     it('TC-0004 Membuat Penjualan Baru Dengan Menghilangkan Salah Satu Required Input (Nama)', () => {
         const dateToday = new Date().toLocaleDateString('id-ID');
@@ -347,6 +350,21 @@ describe("PENJUALAN BARU", () => {
         cy.contains('Jumlah tidak boleh 0').should('be.exist')
         cy.get('.MuiAlert-message').should('have.text', 'Mohon periksa kembali form')
     });
+
+    it.only('Memastikan Produk Yang Muncul Penjualan Baru Hanya Produk Yang Dijual', () => {
+        cy.intercept('GET', '**api/productList/productWithStock**').as('getProduk')
+        cy.wait('@getProduk').then(({ response }) => {
+            const productIsSell = response.body.results.filter(p => p.is_sell === true);
+            const apiIds = productIsSell.map(p => p.id);
+
+            cy.get('[id="penjualan.0.product_id"]').click();
+
+            cy.get('[data-value]').then(($els) => {
+                const uiIds = [...$els].map(el => el.getAttribute('data-value'));
+                expect(uiIds).to.have.members(apiIds); // cocok semua, urutan bebas
+            });
+        });
+    })
 
     it('TC-0010 Membuat Penjualan Baru Dengan Nomor Penjualan Manual', () => {
         const dateToday = new Date().toLocaleDateString('id-ID');

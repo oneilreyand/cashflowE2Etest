@@ -1,11 +1,11 @@
 const companyId = Cypress.env('companyId');
 
-describe("Detail Penjualan", () => {
+describe("DETAIL PENJUALAN", () => {
     beforeEach(() => {
         cy.handleUncaughtExceptions()
         cy.apiLogin("rayhanrayandra.work.id@gmail.com", "12345678");
         cy.visitDashboard(companyId);
-        cy.navigateToPenjualan();
+        cy.get('[data-testid="drawer-item-sales"]').click();
         cy.contains('Penjualan Baru', { timeout: 20000 }).click();
     });
 
